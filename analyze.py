@@ -11,6 +11,7 @@ baseline_name = "j16SerH"
 #all_order = ["j16P_n2", "j16P_n1", "j16P_n4", "j13P_n4", "j13P_n1", "j13P_n2", "j13CMS", "j16Ser", "j16Z", "j16G1", "j13Ser", "j16ShenH", "j16SerH", "j16ZH", "j16G1H", "j16PH_n1", "j16PH_n2", "j16PH_n4"]
 all_order = ["j16SerH", "j13P_n4", "j13P_n1", "j13P_n2", "j13CMS", "j13Ser", "j16ShenH", "j16ZH", "j16G1H", "j16PH_n1", "j16PH_n2", "j16PH_n4"]
 order = []
+baseline_priority = ["Ser", "CMS", "P"]
 bms = list()
 
 plt.rcParams.update({'font.size': 18})
@@ -135,6 +136,7 @@ def analyze_data(sample, data, baseline, baseline_name, benchmark_name):
             STR_STD_MEAN: std / mean,
             STR_PERF: 1 - mean.divide(baseline[0][STR_MEAN].values[0])  # 1- row$mean/baseline
                 })
+        #print("result", result)
         results_points = results_points.join(d, how="outer")
         results_aggregated = results_aggregated.append(result)
     results_aggregated = results_aggregated.sort_values(by=[STR_PERF])
@@ -162,8 +164,9 @@ def analyze_baseline(sample, data, baseline, benchmark_name):
 
     return result_aggregated, d
 
-def normalized_data(df):
+def normalized_data(df, baseline_name):
     result = [0.0]
+    print("baseline_name", baseline_name)
     b = float(df.loc[df[STR_TYPE] == baseline_name][STR_MEAN].values[0])
     for o in order:
         if o == baseline_name:
@@ -171,7 +174,7 @@ def normalized_data(df):
         result.append(100.0 * (float(df.loc[df[STR_TYPE] == o][STR_MEAN].values[0])/b - 1))
     return result
 
-def store_result(sample, result, res_folder, benchmark_name):
+def store_result(sample, result, res_folder, benchmark_name, baseline_name):
     result_aggregated, result_points = result
 
     result_dir = os.path.join("processed_results", res_folder, benchmark_name)
@@ -203,8 +206,8 @@ def store_result(sample, result, res_folder, benchmark_name):
     figure.savefig(os.path.join(result_dir, "errorbar_"+sample +".svg"), format="svg")
     figure.savefig(os.path.join(result_dir, "errorbar_"+sample +".eps"), format="eps")
     plt.close(figure)
-
-    n = normalized_data(result_aggregated)
+    print("res_agg = ", result_aggregated)
+    n = normalized_data(result_aggregated, baseline_name)
     x = np.arange(len(order))
     width = 0.2
     fig, ax = plt.subplots()
@@ -303,16 +306,38 @@ def main():
                         #print(benchmarks_conf[benchmark_name])'''
 
     for (benchmark_name, allconf_runs) in benchmarks_conf.items():
-        if (benchmark_name == "h2_large_t4"):
+        if (benchmark_name == "fop_default"):
             dict_for_benchmark = {}
-            local_order = [] 
+            local_order = []
+            local_baseline_name = ""
             #print("allconf_runs = ", allconf_runs)
+            flag = 0
+            for baseline_substring in baseline_priority:
+                for conf_runs in allconf_runs:
+                    print("base_p = ", baseline_substring)
+                    for conf in conf_runs:
+                        print("conf = ", conf)
+                        if (baseline_substring not in conf): 
+                            continue
+                        else:
+                            local_baseline_name = conf
+                            flag = 1
+                            break
+                    if (flag == 1):
+                        break
+                if (flag == 1):
+                    break
+            if (local_baseline_name == ""):
+                local_baseline_name = conf_runs[0]
+            baseline_name = local_baseline_name
+            print("baseline = ", baseline_name)
             for conf_runs in allconf_runs:
                 #print("conf_runs = ", conf_runs)
                 #for o in all_order:
                 #    if(conf_runs.get(o)):
                 #        #print(conf_runs[o])
                 #        order.append(o)
+                #Figure out our baseline
                 for conf in conf_runs:
                     if (conf != baseline_name):
                         local_order.append(conf)
@@ -324,12 +349,15 @@ def main():
             print(order)
             measurement = ["energy_pack", "energy_dram", "energy_cpu", "perf", "av_power_cpu", "av_power_dram", "av_power_pack"]
             #measurement = ["av_power_dram"]
-            #measurement = ["perf"]
+            #measurement = ["energy_pack"]
             for m in measurement:
+                print(m)
+                print(dict_for_benchmark[baseline_name])
                 if dict_for_benchmark.get(baseline_name) and has_contents(dict_for_benchmark[baseline_name], m):
                        baseline = analyze_baseline(m, dict_for_benchmark[baseline_name], baseline_name, benchmark_name)
                        result = analyze_data(m, dict_for_benchmark, baseline, baseline_name, benchmark_name)
-                       store_result(m, result, res_folder, benchmark_name)
+                       print("baseline_name = ", baseline_name)
+                       store_result(m, result, res_folder, benchmark_name, baseline_name)
             order.clear()
 
     '''measurement = ["energy_pack", "energy_dram", "energy_cpu"]
