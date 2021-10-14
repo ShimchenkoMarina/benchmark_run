@@ -1,7 +1,7 @@
 #!/bin/bash
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMMIT="results"
-SOCKETS=2
+SOCKETS=1
 
 for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
     echo $dir
@@ -23,9 +23,9 @@ for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
         continue
     fi
     mkdir -p ${raw_dir}/energy_dram
-    mkdir -p ${raw_dir}/av_power_dram
-    mkdir -p ${raw_dir}/av_power_cpu
-    mkdir -p ${raw_dir}/av_power_pack
+    mkdir -p ${raw_dir}/watts_dram
+    mkdir -p ${raw_dir}/watts_cpu
+    mkdir -p ${raw_dir}/watts_pack
     mkdir -p ${raw_dir}/energy_cpu
     mkdir -p ${raw_dir}/energy_pack
     mkdir -p ${raw_dir}/GC_cycles
@@ -38,16 +38,16 @@ for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
         python3 ${__dir}/process_file.py ${input_dir} ${raw_dir} ${i}.txt
         rm -f ${raw_dir}/energy/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "Power consumption of dram s${soc}" | cut -d ' ' -f 6 >> ${raw_dir}/energy_dram/${i}.txt
-        cat ${raw_dir}/${i}.txt | grep "Power consumption of dram s${soc}" | cut -d ' ' -f 6 >> ${raw_dir}/av_power_dram/${i}.txt
+        cat ${raw_dir}/${i}.txt | grep "Power consumption of dram s${soc}" | cut -d ' ' -f 6 >> ${raw_dir}/watts_dram/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "Power consumption of cpu s${soc}" | cut -d ' ' -f 6 >> ${raw_dir}/energy_cpu/${i}.txt
-        cat ${raw_dir}/${i}.txt | grep "Power consumption of cpu s${soc}" | cut -d ' ' -f 6 >> ${raw_dir}/av_power_cpu/${i}.txt
+        cat ${raw_dir}/${i}.txt | grep "Power consumption of cpu s${soc}" | cut -d ' ' -f 6 >> ${raw_dir}/watts_cpu/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "Power consumption of package s${soc}" | cut -d ' ' -f 6 >> ${raw_dir}/energy_pack/${i}.txt
-        cat ${raw_dir}/${i}.txt | grep "Power consumption of package s${soc}" | cut -d ' ' -f 6 >> ${raw_dir}/av_power_pack/${i}.txt
+        cat ${raw_dir}/${i}.txt | grep "Power consumption of package s${soc}" | cut -d ' ' -f 6 >> ${raw_dir}/watts_pack/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "GC(" | cut -d ' ' -f 2| cut -d '(' -f 2| cut -d ')' -f 1 >> ${raw_dir}/GC_cycles/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "Execution time" | cut -d ' ' -f 3 >> ${raw_dir}/perf/${i}.txt
-        cat ${raw_dir}/${i}.txt | grep "Execution time" | cut -d ' ' -f 3 >> ${raw_dir}/av_power_cpu/${i}.txt
-        cat ${raw_dir}/${i}.txt | grep "Execution time" | cut -d ' ' -f 3 >> ${raw_dir}/av_power_dram/${i}.txt
-        cat ${raw_dir}/${i}.txt | grep "Execution time" | cut -d ' ' -f 3 >> ${raw_dir}/av_power_pack/${i}.txt
+        cat ${raw_dir}/${i}.txt | grep "Execution time" | cut -d ' ' -f 3 >> ${raw_dir}/watts_cpu/${i}.txt
+        cat ${raw_dir}/${i}.txt | grep "Execution time" | cut -d ' ' -f 3 >> ${raw_dir}/watts_dram/${i}.txt
+        cat ${raw_dir}/${i}.txt | grep "Execution time" | cut -d ' ' -f 3 >> ${raw_dir}/watts_pack/${i}.txt
     done
     done
 done

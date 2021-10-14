@@ -64,7 +64,7 @@ def analyze_file(input_dir, output_dir, file_num):
             if (len(exec_time_list) > 0):
                 writer.write(str(avg(exec_time_list)) + '\n')
 
-    with open(os.path.join(input_dir, "av_power_cpu", file_num), 'r') as reader:
+    with open(os.path.join(input_dir, "watts_cpu", file_num), 'r') as reader:
         energy_time_cpu_list = list()
         av_power_cpu_list = list()
         number_of_runs = 0
@@ -79,12 +79,12 @@ def analyze_file(input_dir, output_dir, file_num):
             number_of_runs = int(number_of_runs / 2)
             for x in range(number_of_runs - 1):
                 if (energy_time_cpu_list[x] > 0):
-                    av_power_cpu_list.append(energy_time_cpu_list[x]/energy_time_cpu_list[number_of_runs - 1 + x])
-        with open(os.path.join(output_dir, "av_power_cpu.txt"), "a") as writer:
+                    av_power_cpu_list.append(energy_time_cpu_list[x]/energy_time_cpu_list[number_of_runs - 1 + x] * 1000)
+        with open(os.path.join(output_dir, "watts_cpu.txt"), "a") as writer:
             if (len(av_power_cpu_list) > 0):
                 writer.write(str(avg(av_power_cpu_list)) + '\n')
     
-    with open(os.path.join(input_dir, "av_power_dram", file_num), 'r') as reader:
+    with open(os.path.join(input_dir, "watts_dram", file_num), 'r') as reader:
         energy_time_dram_list = list()
         av_power_dram_list = list()
         number_of_runs = 0
@@ -99,12 +99,12 @@ def analyze_file(input_dir, output_dir, file_num):
             number_of_runs = int(number_of_runs / 2)
             for x in range(number_of_runs - 1):
                 if (energy_time_dram_list[x] > 0):
-                    av_power_dram_list.append(energy_time_dram_list[x]/energy_time_dram_list[number_of_runs - 1 + x])
-        with open(os.path.join(output_dir, "av_power_dram.txt"), "a") as writer:
+                    av_power_dram_list.append(energy_time_dram_list[x]/energy_time_dram_list[number_of_runs - 1 + x] * 1000)
+        with open(os.path.join(output_dir, "watts_dram.txt"), "a") as writer:
             if (len(av_power_dram_list) > 0):
                 writer.write(str(avg(av_power_dram_list)) + '\n')
     
-    with open(os.path.join(input_dir, "av_power_pack", file_num), 'r') as reader:
+    with open(os.path.join(input_dir, "watts_pack", file_num), 'r') as reader:
         energy_time_pack_list = list()
         av_power_pack_list = list()
         number_of_runs = 0
@@ -119,8 +119,8 @@ def analyze_file(input_dir, output_dir, file_num):
             number_of_runs = int(number_of_runs / 2)
             for x in range(number_of_runs - 1):
                 if (energy_time_pack_list[x] > 0):
-                    av_power_pack_list.append(energy_time_pack_list[x]/energy_time_pack_list[number_of_runs - 1 + x])
-        with open(os.path.join(output_dir, "av_power_pack.txt"), "a") as writer:
+                    av_power_pack_list.append(energy_time_pack_list[x]/energy_time_pack_list[number_of_runs - 1 + x] * 1000)
+        with open(os.path.join(output_dir, "watts_pack.txt"), "a") as writer:
             if (len(av_power_pack_list) > 0):
                 writer.write(str(avg(av_power_pack_list)) + '\n')
     
