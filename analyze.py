@@ -4,6 +4,7 @@ from utils.UniqueRuns import UniqueRuns
 import pathlib
 import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.ticker as plticker
 
 #baseline_name = "G1"
 #order = ["G1", "PGC", "SGC", "ZGC", "HCSGC", "m1"]
@@ -11,10 +12,10 @@ baseline_name = "j16SerH"
 #all_order = ["j16P_n2", "j16P_n1", "j16P_n4", "j13P_n4", "j13P_n1", "j13P_n2", "j13CMS", "j16Ser", "j16Z", "j16G1", "j13Ser", "j16ShenH", "j16SerH", "j16ZH", "j16G1H", "j16PH_n1", "j16PH_n2", "j16PH_n4"]
 all_order = ["j16SerH", "j13P_n4", "j13P_n1", "j13P_n2", "j13CMS", "j13Ser", "j16ShenH", "j16ZH", "j16G1H", "j16PH_n1", "j16PH_n2", "j16PH_n4"]
 order = []
-baseline_priority = ["Ser", "CMS", "P"]
+baseline_priority = ["Ser", "CMS", "P", "Z"]
 bms = list()
 
-plt.rcParams.update({'font.size': 18})
+plt.rcParams.update({'font.size': 14})
 
 pd.options.display.width = 0
 STR_TYPE = "Type"
@@ -33,11 +34,13 @@ df_style = """
     font-family: Arial;
     border-collapse: collapse;
     border: 1px solid silver;
+    #width: 100%;
 
 }
 
 .mystyle td, th {
     padding: 5px;
+    width: 100px;
 }
 
 .mystyle tr:nth-child(even) {
@@ -66,11 +69,11 @@ def HTML_template(table, css, title, gc_tag):
 <a href="table.tex">Latex code for table</a><br/><br/>
 """ + table + """
 <br />
-<a href="boxplot_"""+ gc_tag + """.eps"><img src="boxplot_"""+ gc_tag + """.svg" height="40%" /></a>
-<a href="errorbar_"""+ gc_tag +""".eps"><img src="errorbar_"""+ gc_tag +""".svg" height="40%" /></a>
+<a href="errorbar_"""+ gc_tag +""".eps"><img src="errorbar_"""+ gc_tag +""".svg" height="80%" width="80%"/></a>
 </body>
 </html>
     """
+#<a href="boxplot_"""+ gc_tag + """.eps"><img src="boxplot_"""+ gc_tag + """.svg" height="40%" /></a>
 
 def bootstrapped_ci(df_input):
     columns = [STR_CI_LOWER, STR_CI_UPPER]
@@ -88,7 +91,7 @@ def bootstrapped_ci(df_input):
         df_result.loc[columnName] = (ci_upper - ci_lower)/2
         df_result_sep.loc[columnName] = [ci_lower, ci_upper]
 
-    print(df_result.loc[:,["yerr"]])
+    #print(df_result.loc[:,["yerr"]])
     #print(df_result_sep[STR_CI_LOWER])
     #print(df_result_sep[STR_CI_UPPER])
     df_result = pd.to_numeric(df_result["yerr"], errors="raise", downcast="float")
@@ -124,7 +127,6 @@ def analyze_data(sample, data, baseline, baseline_name, benchmark_name):
     for (configuration, data) in extract_ordered_data(data):
         if configuration == baseline_name:
             continue
-        print("configuration " + configuration)
         d = read_data(sample, data, configuration, benchmark_name)
         std = d.std()
         mean = d.mean()
@@ -176,13 +178,31 @@ def normalized_data(df, baseline_name):
 
 def store_result(sample, result, res_folder, benchmark_name, baseline_name):
     result_aggregated, result_points = result
+    '''print(order)
+    #manipulating order
+    main_el = order[0]
+    print(main_el)
+    new_order = []
+    new_order.append(order[0])
+    for el in order[1:len(order)]:
+        print(el[0:4])
+        if el[0:4] != main_el[0:4]:
+            main_el = el
+            new_order.append(el)
+        if el[0:4] == main_el[0:4]:
+            el = el[4:len(el)]
+            new_order.append(el)
+    print(new_order)
+    order = new_order
+    print(order)'''
+
 
     result_dir = os.path.join("processed_results", res_folder, benchmark_name)
     pathlib.Path(result_dir).mkdir(parents=True, exist_ok=True)
 
     df_error, df_result_sep = bootstrapped_ci(result_points)
+    #print(df_result_sep)
     merged = pd.merge(result_aggregated, df_result_sep, how='outer', left_on=["Type"], right_index=True)
-
     result_aggregated = merged
     format_columns(result_aggregated)
     result_aggregated.rename(index=lambda s: benchmark_name, inplace=True)
@@ -191,25 +211,26 @@ def store_result(sample, result, res_folder, benchmark_name, baseline_name):
     plt.ylabel('')
     #result_points.boxplot() IF USING THIS VERIFY CORECTNESS!
     plt.xticks(rotation='vertical')
-    plt.subplots_adjust(bottom=0.31)
+    plt.margins(0.5)
+    plt.subplots_adjust(bottom=0.4)
     figure.savefig(os.path.join(result_dir, "boxplot_"+sample +".svg"), format="svg")
     figure.savefig(os.path.join(result_dir, "boxplot_"+sample +".eps"), format="eps")
     plt.close(figure)
 
     figure = plt.figure()
     plt.ylabel('')
-    plt.errorbar(result_points.mean().index, result_points.mean(),
-                     yerr=df_error, marker='x', linestyle='', capsize=12, markersize="12"   )
+    #plt.errorbar(result_points.mean().index, result_points.mean(), yerr=df_error, marker='x', linestyle='', capsize=8, markersize="8"   )
+    plt.errorbar(result_points.mean().index, result_points.mean(), marker='^', linestyle='', capsize=8, markersize="8"   )
 
-    plt.xticks(rotation='vertical')
-    plt.subplots_adjust(bottom=0.31)
+    plt.xticks(range(0, len(order) + 1, 1), rotation='vertical')
+    plt.subplots_adjust(bottom=0.4)
     figure.savefig(os.path.join(result_dir, "errorbar_"+sample +".svg"), format="svg")
     figure.savefig(os.path.join(result_dir, "errorbar_"+sample +".eps"), format="eps")
     plt.close(figure)
-    print("res_agg = ", result_aggregated)
+    #print("res_agg = ", result_aggregated)
     n = normalized_data(result_aggregated, baseline_name)
     x = np.arange(len(order))
-    width = 0.2
+    width =0.7
     fig, ax = plt.subplots()
     plt.axhline(0, color='k')
 
@@ -219,11 +240,12 @@ def store_result(sample, result, res_folder, benchmark_name, baseline_name):
             col.append('blue')
         elif val >= 0:
             col.append('#5f81c1')
-
     ax.bar(x + width/2, n, width, color = col)
     ax.set_ylabel('')
     ax.set_title('')
     ax.set_xticks(x)
+    plt.setp(ax.xaxis.get_majorticklabels(), rotation=90)
+    #print(ax.get_xticks())
     ax.set_xticklabels(order)
 #    ax.legend()
     fig.savefig(os.path.join(result_dir, "norm_mean_"+sample +".svg"), format="svg")
@@ -306,7 +328,8 @@ def main():
                         #print(benchmarks_conf[benchmark_name])'''
 
     for (benchmark_name, allconf_runs) in benchmarks_conf.items():
-        if (benchmark_name == "fop_default"):
+        #print("benchmark name = ", benchmark_name)
+        if (benchmark_name == "h2_small_t4"):
             dict_for_benchmark = {}
             local_order = []
             local_baseline_name = ""
@@ -314,9 +337,10 @@ def main():
             flag = 0
             for baseline_substring in baseline_priority:
                 for conf_runs in allconf_runs:
-                    print("base_p = ", baseline_substring)
+                    #print("conf_runs = ", conf_runs)
+                    #print("base_p = ", baseline_substring)
                     for conf in conf_runs:
-                        print("conf = ", conf)
+                        #print("conf = ", conf)
                         if (baseline_substring not in conf): 
                             continue
                         else:
@@ -327,8 +351,24 @@ def main():
                         break
                 if (flag == 1):
                     break
-            if (local_baseline_name == ""):
-                local_baseline_name = conf_runs[0]
+            
+            '''for baseline_substring in baseline_priority:
+                for conf_runs in allconf_runs:
+                    print("conf_runs = ", conf_runs)
+                    #print("base_p = ", baseline_substring)
+                    #for conf in conf_runs:
+                    #print("conf = ", conf)
+                    if (baseline_substring not in conf_runs): 
+                        continue
+                    else:
+                        local_baseline_name = conf_runs
+                        flag = 1
+                        break
+                if (flag == 1):
+                    break'''
+
+            '''if (local_baseline_name == ""):
+                local_baseline_name = conf_runs[0]'''
             baseline_name = local_baseline_name
             print("baseline = ", baseline_name)
             for conf_runs in allconf_runs:
@@ -339,24 +379,45 @@ def main():
                 #        order.append(o)
                 #Figure out our baseline
                 for conf in conf_runs:
+                    print("conf = ", conf)
                     if (conf != baseline_name):
                         local_order.append(conf)
                     append_value(dict_for_benchmark, conf, conf_runs[conf])
+            '''for conf_runs in allconf_runs:
+                #print("conf_runs = ", conf_runs)
+                #for o in all_order:
+                #    if(conf_runs.get(o)):
+                #        #print(conf_runs[o])
+                #        order.append(o)
+                #Figure out our baseline
+                #for conf in conf_runs:
+                #print("conf = ", conf)
+                if (conf_runs != baseline_name):
+                        local_order.append(conf_runs)
+                append_value(dict_for_benchmark, conf_runs, allconf_runs[conf_runs])'''
             order.append(baseline_name)
-            local_order = sorted(local_order)
+            #if there are other versions with the same java version and GC
+            #add them after baseline
+            new_local_order = []
+            for el in local_order:
+                if el[0:3] == baseline_name[0:3]:
+                    order.append(el)
+                else: 
+                    new_local_order.append(el)
+            local_order = sorted(new_local_order)
             for el in local_order:
                 order.append(el)
-            print(order)
-            measurement = ["energy_pack", "energy_dram", "energy_cpu", "perf", "av_power_cpu", "av_power_dram", "av_power_pack"]
-            #measurement = ["av_power_dram"]
-            #measurement = ["energy_pack"]
+            print("order = ", order)
+            measurement = ["energy_pack", "energy_dram", "energy_cpu", "perf", "watts_cpu", "watts_dram", "watts_pack"]
+            #measurement = ["watts_dram"]
+            #measurement = ["energy_pack", "energy_dram", "energy_cpu"]
             for m in measurement:
-                print(m)
-                print(dict_for_benchmark[baseline_name])
+                #print(m)
+                #print(dict_for_benchmark[baseline_name])
                 if dict_for_benchmark.get(baseline_name) and has_contents(dict_for_benchmark[baseline_name], m):
                        baseline = analyze_baseline(m, dict_for_benchmark[baseline_name], baseline_name, benchmark_name)
                        result = analyze_data(m, dict_for_benchmark, baseline, baseline_name, benchmark_name)
-                       print("baseline_name = ", baseline_name)
+                       #print("baseline_name = ", baseline_name)
                        store_result(m, result, res_folder, benchmark_name, baseline_name)
             order.clear()
 

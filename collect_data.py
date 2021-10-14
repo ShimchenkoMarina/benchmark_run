@@ -6,41 +6,63 @@ from os import listdir
 import platform
 from timeit import default_timer as timer
 
-PASSES = 5
+#Parameters for running
+PASSES = 1 
 HEAP_RUNS = 1
-MACHINE_NAME = "x86"
-COMMIT_ID = "1"
-CLASSPATH_jRAPL="/home/marina/workspace/2021NewProject/OpenJDK/jRAPL"
-CLASSPATH_jRAPL_java14="/home/marina/workspace/2021NewProject/OpenJDK/jRAPL_java14"
-CLASSPATH_jRAPL_java13="/home/marina/workspace/2021NewProject/OpenJDK/jRAPL_java13"
-CLASSPATH_DACAPO="/home/marina/workspace/2021NewProject/OpenJDK/Dacapo_jar:/home/marina/workspace/2021NewProject/OpenJDK/Dacapo_jar/harness:~/workspace/2021NewProject/OpenJDK/Dacapo_jar/dacapo-9.12-MR1-bach.jar"
-#EnergyCheckUtils="EnergyCheckUtils"
-#ENERGY_SRC="/home/marina/workspace/2021NewProject/OpenJDK/jRAPL/EnergyCheckUtils.java"
-#PERF_SRC="/home/marina/workspace/2021NewProject/OpenJDK/jRAPL/PerfCheckUtils.java"
-DACAPO="/home/marina/workspace/2021NewProject/OpenJDK/Dacapo_jar/dacapo-9.12-MR1-bach.jar"
 
-#M1_MAX_OBJECT_SIZE_EXEC = "/usr/bin/time --verbose /home/jonas/jdk/m1_max_object_size/build/linux-x86_64-server-release/jdk/bin/java -Xms4g -Xmx4g -Xlog:gc"
-#GC = { "m1_max_object_size_256kB": "-XX:+UseZGC -XX:+UsePartialEvacuation -XX:+UseLazyRelocate"}
+#Path variables
+CLASSPATH_jRAPL="/scratch/Project/jRAPL"
+CLASSPATH_jRAPL_java13="/scratch/Project/jRAPL_13"
+CLASSPATH_DACAPO="/scratch/Project/Dacapo_jar:/scratch/Project/Dacapo_jar/harness:/scratch/Project/Dacapo_jar/dacapo-9.12-MR1-bach.jar"
+CLASSPATH_DACAPO_NEW="/scratch/Project/dacapo-evaluation-git+309e1fa.jar"
+CLASSPATH_HAZELCAST="/scratch/Project/jet-gc-benchmark/target/hazelcast-jet-4.2.jar:/scratch/Project/jet-gc-benchmark/target/jet-gc-benchmark-1.0-SNAPSHOT-jar-with-dependencies.jar:/scratch/Project/jRAPL_jar/build/Energy.jar:/scratch/Project/jet-gc-benchmark/target/classes/"
+FLAGS_HAZELCAST="--add-modules java.se --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.management/sun.management=ALL-UNNAMED"
+
+#Java versions
 JAVA16 = "java -Xlog:gc "
-JAVA16_HOT = "/usr/lib/jvm/adoptopenjdk-16-hotspot-amd64/bin/java -Xlog:gc* "
-#JAVA16 = "java "
-#JAVAC16 ="javac "
-JAVA14 = "/usr/lib/jvm/jdk-14.0.2/bin/java -Xlog:gc "
-JAVA13 = "/usr/lib/jvm/jdk-13/bin/java -Xlog:gc "
-#JAVA14 = "/usr/lib/jvm/jdk-14.0.2/bin/java "
-#JAVAC14="/usr/lib/jvm/jdk-14.0.2/bin/javac "
+JAVA16_HOT = "/scratch/jdk-16/bin/java -Xlog:gc* "
+JAVA15M1 = "/scratch/Project/openjdk-m1/build/linux-x86_64-server-release/images/jdk/bin/java -Xlog:gc* "
+JAVA13 = "/scratch/jdk-13/bin/java -Xlog:gc "
+
+#Specify here which bm+java you want to run
+Which_BM = {
+        #"DaCapo_j16", 
+        #"DaCapo_j15M1", 
+        #"DaCapo_j13", 
+        #"DaCapo21_j16", 
+        #"DaCapo21_j15M1", 
+        #"DaCapo21_j13",
+        #"HazelCast_j16",
+        #"HazelCast_j15M1",
+        "HazelCast_j13",
+} 
+
+#Specify GCs for each java version
 GC13 = { "j13CMS": "-XX:+UseConcMarkSweepGC",
-	 "j13Ser": "-XX:+UseSerialGC",
-	 "j13P": "-XX:+UseParallelGC",
+	 #"j13Ser": "-XX:+UseSerialGC",
+	 #"j13P": "-XX:+UseParallelGC",
 }
+
+GCHCast16 = { 
+	 'j16Z': '-XX:+UseZGC' ,
+         #'j16Shen': "-XX:+UseShenandoahGC",
+	 #'j16G1': '-XX:+UseG1GC',
+}
+
+GC15M1 = { 
+	 'j16Z': '-XX:+UseZGC' 
+}
+
+GCHCast13 = { 
+        "j13CMS": "-XX:+UseConcMarkSweepGC",
+	#"j13Z": "-XX:+UnlockExperimentalVMOptions -XX:+UseZGC" ,
+}
+
 GC16 = { #'j16Ser': '-XX:+UseSerialGC',
 	 #'j16P': '-XX:+UseParallelGC',
-	 #'j16G1': '-XX:+UseG1GC',
-	 'j16G15l': '-XX:+UseG1GC -XX:MaxGCPauseMillis=5',
+	 'j16G1': '-XX:+UseG1GC',
 	 #'j16Z': '-XX:+UseZGC' ,
-	 #'j16ZUnCom': '-XX:+UseZGC -XX:-ZUncommit' ,
-         #'j16Shen': "-XX:+UseShenandoahGC"
-         #'j16ShenOpps': "-XX:+UseShenandoahGC -XX:+UseCompressedOops"
+         #'j16Shen': "-XX:+UseShenandoahGC",
 }
 
 NUM_THREADS= {
@@ -48,52 +70,90 @@ NUM_THREADS= {
 	 'n2' : '-XX:ParallelGCThreads=2',
 	 'n4' : '-XX:ParallelGCThreads=4'
 }
-BM16 = {
+
+#Specify bms
+BM_DaCapo = {
       #"EnergyCheckUtils":              	EnergyCheckUtils,
-      #"h2_small_t4":             	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness h2 -size small -n 25 -t 4 -c MyCallback",
-      #"h2_large_t4":             	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness h2 -size large -n 15 -t 4 -c MyCallback",
+      #"h2_small_t4":             	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness h2 -size small -n 50 -t 4 -c MyCallback",
+      #"h2_large_t4":             	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness h2 -size large -n 30 -t 4 -c MyCallback",
       #"h2_huge_t4":              	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness h2 -size huge -n 10 -t 4 -c MyCallback",
       #"tradesoap_huge_n25":     	"-cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness tradebeans -size huge -n 1 -t 4 -c MyCallback" concurrency bug -- skip
       #"tradebeans_huge_t4":      	"-cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness tradebeans -size huge -n 25 -t 4 -c MyCallback",
-      #"avrora_large":            	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness avrora -size large -n 7 -c MyCallback",
-      #"fop_default":             	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness fop -n 30 -c MyCallback",
-      #"jython_large":            	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness jython -size large -n 10 -c MyCallback",
-      #"luindex_default":         	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness luindex -n 15 -c MyCallback",
-      #"lusearch_large":          	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness lusearch -size large -n 10 -c MyCallback",
-      #"pmd_large":               	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness pmd -size large -n 15 -c MyCallback",
-      #"sunflow_large":           	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness sunflow -size large -n 10 -c MyCallback",
-      #"xalan_large":             	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness xalan -size large -n 10 -c MyCallback"
+      "avrora_large":            	" avrora -size large -n 1 -c ",#17
+      #"fop_default":             	" fop -n 1 -c ",#50
+      #"jython_large":            	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness jython -size large -n 20 -c MyCallback",
+      #"luindex_default":         	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness luindex -n 30 -c MyCallback",
+      #"lusearch_large":          	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness lusearch -size large -n 20 -c MyCallback",
+      #"pmd_large":               	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness pmd -size large -n 30 -c MyCallback",
+      #"sunflow_large":           	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness sunflow -size large -n 20 -c MyCallback",
+      #"xalan_large":             	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness xalan -size large -n 20 -c MyCallback"
 
 }
-BM13 = {
+BM_Hazelcast = {
+      "hazelcast":             	" org.example.StreamingRound3 [10k, 20k, 40k ... 100k]"
+      #"hazelcast":             	" " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST + " org.example.StreamingRound3 [10k, 20k, 40k ... 100k]"
+      }
+BM_DaCapo2021 = {
+      #"zxing_def":             	" -jar " + CLASSPATH_DACAPO_NEW + " zxing",
+      #"tradesoap_small":             	" -jar " + CLASSPATH_DACAPO_NEW + " tradesoap -size small",#only young
+      #"tradesoap_large":             	" -jar " + CLASSPATH_DACAPO_NEW + " tradesoap -size large",#only young
+      #"tradesoap_huge":             	" -jar " + CLASSPATH_DACAPO_NEW + " tradesoap -size huge",#only young
+      #"tradesoap_def":             	" -jar " + CLASSPATH_DACAPO_NEW + " tradesoap",#only young generation
+      #"tomcat_small":             	" -jar " + CLASSPATH_DACAPO_NEW + " tomcat -size small",#fails with validation
+      #"tomcat_large":             	" -jar " + CLASSPATH_DACAPO_NEW + " tomcat -size large",#fails with validation
+      #"tomcat_def":             	" -jar " + CLASSPATH_DACAPO_NEW + " tomcat",#fails with validations
+      #"kafka_def":             	" -jar " + CLASSPATH_DACAPO_NEW + " kafka",#broken, does not run
+      #"graphchi_large":             	" -jar " + CLASSPATH_DACAPO_NEW + " graphchi -size large",#big data needed
+      #"graphchi_huge":             	" -jar " + CLASSPATH_DACAPO_NEW + " graphchi -size huge",#big data needed
+      #"graphchi_def":             	" -jar " + CLASSPATH_DACAPO_NEW + " graphchi",#is it latency oriented?
+      "jme_def":             	" jme",#For some reason there is System.gc calls inside of this bm
+      #"h2o_def":             	" -jar " + CLASSPATH_DACAPO_NEW + " h2o",#latest java 11 supported
+      #"biojava_def":             	" -jar " + CLASSPATH_DACAPO_NEW + " biojava",#only young
+      #"h2_small":             	" -jar " + CLASSPATH_DACAPO_NEW + " h2 -size small -t 4",
+      #"h2_large":             	" -jar " + CLASSPATH_DACAPO_NEW + " h2 -size large -t 4",
+      #"h2_huge":             	" -jar " + CLASSPATH_DACAPO_NEW + " h2 -size huge -t 4",
+      #"h2_def":             	" -jar " + CLASSPATH_DACAPO_NEW + " h2 -t 4",
+      }
+
+BM_DaCapo_java13 = {
       #"EnergyCheckUtils":              	EnergyCheckUtils,
-      "h2_small_t4":             	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness h2 -size small -n 25 -t 4 -c MyCallback_java13",
-      #"h2_large_t4":             	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness h2 -size large -n 15 -t 4 -c MyCallback_java13",
+      #"h2_large_t4":             	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness h2 -size large -n 30 -t 4 -c MyCallback_java13",
+      #"avrora_large":            	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness avrora -size large -n 17 -c MyCallback_java13",
+      #"h2_small_t4":             	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness h2 -size small -n 50 -t 4 -c MyCallback_java13",
       #"h2_huge_t4":              	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness h2 -size huge -n 8 -t 4 -c MyCallback_java13",
       #"tradesoap_huge_n25":     	"-cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness tradebeans -size huge -n 1 -t 4 -c MyCallback" concurrency bug -- skip
       #"tradebeans_huge_t4":      	"-cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness tradebeans -size huge -n 25 -t 4 -c MyCallback",
-      #"avrora_large":            	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness avrora -size large -n 7 -c MyCallback_java13",
-      #"fop_default":             	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness fop -n 25 -c MyCallback_java13",
-      #"jython_large":            	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness jython -size large -n 10 -c MyCallback_java13",
-      #"luindex_default":         	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness luindex -n 15 -c MyCallback_java13",
-      #"lusearch_large":          	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness lusearch -size large -n 10 -c MyCallback_java13",
-      #"pmd_large":               	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness pmd -size large -n 15 -c MyCallback_java13",
-      #"sunflow_large":           	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness sunflow -size large -n 10 -c MyCallback_java13",
-      #"xalan_large":             	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness xalan -size large -n 10 -c MyCallback_java13" 
+      #"fop_default":             	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness fop -n 1 -c MyCallback_java13",#50
+      #"jython_large":            	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness jython -size large -n 20 -c MyCallback_java13",
+      #"luindex_default":         	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness luindex -n 30 -c MyCallback_java13",
+      #"lusearch_large":          	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness lusearch -size large -n 20 -c MyCallback_java13",
+      #"pmd_large":               	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness pmd -size large -n 30 -c MyCallback_java13",
+      #"sunflow_large":           	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness sunflow -size large -n 20 -c MyCallback_java13",
+      #"xalan_large":             	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness xalan -size large -n 20 -c MyCallback_java13" 
 }
 
+#The maximum heap size for each application is set to 3X of its respective minimum heap size 
 HEAP_SIZES = {
-	"h2_small_t4": "510m", 
-	"h2_large_t4": "1g", 
-	"h2_huge_t4": "4g", 
-	"avrora_large": "20g", 
+	"h2_small_t4": "210m",
+	"h2_large_t4": "750m", 
+	"h2_huge_t4": "2g", 
+	"avrora_large": "27m",
 	"fop_default": "75m", 
 	"jython_large": "75m", 
 	"luindex_default": "21m", 
 	"lusearch_large": "21m", 
 	"pmd_large": "150m", 
 	"sunflow_large": "60m", 
-	"xalan_large": "35m" 
+	"xalan_large": "35m", 
+	"jme_def": "10m",
+	"zxing_def": "10m",
+	"tradesoap_small": "21m",
+	"tradesoap_large": "27m", 
+	"tradesoap_huge": "27m", 
+	"tradesoap_def": "27m", 
+	"graphchi_def": "700m", 
+	"biojava_def": "525m", 
+	"hazelcast": "4g" 
 }
 
 def get_next_result_name(path):
@@ -113,6 +173,8 @@ def collect_data(binary, result_path):
     writeFile.close()
     return result_file
 
+#We need to decide which space between heap sizes we want. In theory we want to have 
+#twice less GC cycles with the next heap size. 
 def heap_size_array(BM_tag):
     start_HS = 1
     start_Value = "m"
@@ -121,88 +183,88 @@ def heap_size_array(BM_tag):
     space = 0 
     HS = {}
     for (HS_tag, HS_conf) in HEAP_SIZES.items():
-        print (HS_conf)
+        #print (HS_conf)
         if (HS_tag == BM_tag):
             start_HS = int(''.join(filter(str.isdigit, HS_conf)))
             if ("m" not in HS_conf):
                  start_Value = "g"
     if (start_HS < 100 and start_Value == "m"):
-        space = 10
+        space = 25
     if (start_HS > 100 and start_Value == "m"):
-        space = 50
+        space = 100
     if (start_Value == "g"):
         space = 1
     for i in range (0, HEAP_RUNS):
         conf = param_max + str(start_HS + space*i) + start_Value + param_min + str(start_HS+ space*i) + start_Value
         tag = str(start_HS + space*i) + start_Value
         HS[tag] = conf
-    print(HS)
+    #print(HS)
     return HS
+
+def execute_bm(BM_tag, BM_conf, GC, JAVA, Callback, CLASSPATH):
+    #print("Benchmarking " + BM_tag)
+    for i in range(0, PASSES):
+        for (GC_tag, GC_conf) in GC.items():
+            #print(GC[GC_tag])
+            if (GC_conf == '-XX:+UseParallelGC'):
+                for (THR_tag, THR_conf) in NUM_THREADS.items():
+                    HS = heap_size_array(BM_tag)
+                    for (HS_tag, HS_conf) in HS.items():
+                        start = timer()
+                        result_path = os.path.join(os.getcwd(), "results", BM_tag, GC_tag + HS_tag, THR_tag)
+                        os.system("sudo mkdir -p " + result_path)
+                        os.system("sudo chmod 777 " + result_path)
+                        binary_hot = " ".join(["sudo numactl --cpunodebind=0 --membind=0", JAVA, HS_conf, GC_conf, THR_conf, CLASSPATH, BM_conf, Callback])
+                        print(binary_hot)
+                        collect_data(binary_hot, result_path)
+                        end = timer()
+                        minutes = round((end - start) / 60.0, 3)
+                        #print("Pass " + str(i) + " took " + str(minutes) + " minutes")
+            else: 
+                HS = heap_size_array(BM_tag)
+                for (HS_tag, HS_conf) in HS.items():
+                    start = timer()
+                    result_path = os.path.join(os.getcwd(), "results_t", BM_tag, GC_tag + HS_tag)
+                    os.system("sudo mkdir -p " + result_path)
+                    os.system("sudo chmod 777 " + result_path)
+                    binary_hot = " ".join(["sudo numactl --cpunodebind=0 --membind=0 ", JAVA, HS_conf, GC_conf, CLASSPATH, BM_conf, Callback])
+                    print(binary_hot)
+                    collect_data(binary_hot, result_path)
+                    end = timer()
+                    minutes = round((end - start) / 60.0, 3)
+                    #print("Pass " + str(i) + " took " + str(minutes) + " minutes")        
+
 
 def main():
     print("Starting to collect data with " + str(PASSES) + " passes")
+    for BM in Which_BM:
+        print(BM)
+        if BM == "DaCapo_j16": 
+            for (BM_tag, BM_conf) in BM_DaCapo.items():
+                execute_bm(BM_tag, BM_conf, GC16, JAVA16_HOT, "MyCallback", "-XX:+DisableExplicitGC -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness")
+        elif BM == "DaCapo_j13":
+            for (BM_tag, BM_conf) in BM_DaCapo.items():
+                execute_bm(BM_tag, BM_conf, GC13, JAVA13, "MyCallback_java13", " -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness")
+        elif BM == "DaCapo_j15M1":
+            for (BM_tag, BM_conf) in BM_DaCapo.items():
+                print("DC java15")
+        elif BM == "DaCapo21_j16":
+            for (BM_tag, BM_conf) in BM_DaCapo2021.items():
+                execute_bm(BM_tag, BM_conf, GC16, JAVA16_HOT, "", " -jar " + CLASSPATH_DACAPO_NEW)
+        elif BM == "DaCapo21_j15M1":
+            for (BM_tag, BM_conf) in BM_DaCapo2021.items():
+                execute_bm(BM_tag, BM_conf, GC15M1, JAVA15M1, "", " -jar " + CLASSPATH_DACAPO_NEW)
+        elif BM == "DaCapo21_j13":
+            for (BM_tag, BM_conf) in BM_DaCapo2021.items():
+                execute_bm(BM_tag, BM_conf, GC13, JAVA13, "", " -jar " + CLASSPATH_DACAPO_NEW)
+        elif BM ==  "HazelCast_j16":    
+            for (BM_tag, BM_conf) in BM_Hazelcast.items():
+                execute_bm(BM_tag, BM_conf, GCHCast16, JAVA16_HOT, "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
+        elif BM ==  "HazelCast_j15M1":    
+            for (BM_tag, BM_conf) in BM_Hazelcast.items():
+                execute_bm(BM_tag, BM_conf, GC15M1, JAVA15M1, "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
+        elif BM ==  "HazelCast_j13":    
+            for (BM_tag, BM_conf) in BM_Hazelcast.items():
+                execute_bm(BM_tag, BM_conf, GCHCast13, JAVA13, "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
 
-    for (BM_tag, BM_conf) in BM16.items():
-        print("Benchmarking " + BM_tag)
-        for i in range(0, PASSES):
-            for (GC_tag, GC_conf) in GC16.items():
-                print(GC16[GC_tag])
-                if (GC_conf == '-XX:+UseParallelGC'):
-                    for (THR_tag, THR_conf) in NUM_THREADS.items():
-                        HS = heap_size_array(BM_tag)
-                        for (HS_tag, HS_conf) in HS.items():
-                            start = timer()
-                            binary_hot = " ".join(["sudo", JAVA16_HOT, HS_conf, GC_conf, THR_conf, BM_conf])
-                            print(binary_hot)
-                            result_path_hot = os.path.join(os.getcwd(), "results", BM_tag, GC_tag + HS_tag, THR_tag)
-                            collect_data(binary_hot, result_path_hot)
-                            end = timer()
-                            minutes = round((end - start) / 60.0, 3)
-                            print("Pass " + str(i) + " took " + str(minutes) + " minutes")
-                else: 
-                    HS = heap_size_array(BM_tag)
-                    for (HS_tag, HS_conf) in HS.items():
-                        start = timer()
-                        binary_hot = " ".join(["sudo", JAVA16_HOT, HS_conf, GC_conf, BM_conf])
-                        print(binary_hot)
-                        result_path_hot = os.path.join(os.getcwd(), "results", BM_tag, GC_tag + HS_tag)
-                        collect_data(binary_hot, result_path_hot)
-                        end = timer()
-                        minutes = round((end - start) / 60.0, 3)
-                        print("Pass " + str(i) + " took " + str(minutes) + " minutes")
-            
-            #binary = " ".join([JAVAC14, PERF_SRC])
-            #print(binary)
-            #binary = " ".join([JAVAC14, ENERGY_SRC])
-            #print(binary)'''
-    for (BM_tag, BM_conf) in BM13.items():
-        print("Benchmarking " + BM_tag)
-        for i in range(0, PASSES):
-            for (GC_tag, GC_conf) in GC13.items():
-                print(GC_conf)
-                if (GC_conf == '-XX:+UseParallelGC'):
-                    for (THR_tag, THR_conf) in NUM_THREADS.items():
-                        HS = heap_size_array(BM_tag)
-                        for (HS_tag, HS_conf) in HS.items():
-                            start = timer()
-                            binary = " ".join(["sudo", JAVA13, HS_conf, GC_conf, THR_conf, BM_conf])
-                            print(binary)
-                            result_path = os.path.join(os.getcwd(), "results", BM_tag, GC_tag + HS_tag, THR_tag)
-                            collect_data(binary, result_path)
-                            end = timer()
-                            minutes = round((end - start) / 60.0, 3)
-                            print("Pass " + str(i) + " took " + str(minutes) + " minutes")
-                else:
-                    HS = heap_size_array(BM_tag)
-                    for (HS_tag, HS_conf) in HS.items():
-                        start = timer()
-                        binary = " ".join(["sudo", JAVA13, HS_conf, GC_conf, BM_conf])
-                        print(binary)
-                        result_path = os.path.join(os.getcwd(), "results", BM_tag, GC_tag+ HS_tag)
-                        collect_data(binary, result_path)
-                        end = timer()
-                        minutes = round((end - start) / 60.0, 3)
-                        print("Pass " + str(i) + " took " + str(minutes) + " minutes")
-
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__": main()
