@@ -73,20 +73,19 @@ NUM_THREADS= {
 
 #Specify bms
 BM_DaCapo = {
-      #"EnergyCheckUtils":              	EnergyCheckUtils,
-      #"h2_small_t4":             	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness h2 -size small -n 50 -t 4 -c MyCallback",
-      #"h2_large_t4":             	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness h2 -size large -n 30 -t 4 -c MyCallback",
-      #"h2_huge_t4":              	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness h2 -size huge -n 10 -t 4 -c MyCallback",
-      #"tradesoap_huge_n25":     	"-cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness tradebeans -size huge -n 1 -t 4 -c MyCallback" concurrency bug -- skip
-      #"tradebeans_huge_t4":      	"-cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness tradebeans -size huge -n 25 -t 4 -c MyCallback",
-      "avrora_large":            	" avrora -size large -n 1 -c ",#17
-      #"fop_default":             	" fop -n 1 -c ",#50
-      #"jython_large":            	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness jython -size large -n 20 -c MyCallback",
-      #"luindex_default":         	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness luindex -n 30 -c MyCallback",
-      #"lusearch_large":          	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness lusearch -size large -n 20 -c MyCallback",
-      #"pmd_large":               	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness pmd -size large -n 30 -c MyCallback",
-      #"sunflow_large":           	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness sunflow -size large -n 20 -c MyCallback",
-      #"xalan_large":             	" -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness xalan -size large -n 20 -c MyCallback"
+      #"h2_small_t4":             	" h2 -size small -n 50 -t 4 -c ",
+      #"h2_large_t4":             	" h2 -size large -n 30 -t 4 -c ",
+      #"h2_huge_t4":              	" h2 -size huge -n 10 -t 4 -c ",
+      #"tradesoap_huge_n25":     	"-cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness tradebeans -size huge -n 1 -t 4 -c " concurrency bug -- skip
+      #"tradebeans_huge_t4":      	"-cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness tradebeans -size huge -n 25 -t 4 -c ",
+      "avrora_large":            	" avrora -size large -n 17 -c ",
+      #"fop_default":             	" fop -n 50 -c ",
+      #"jython_large":            	" jython -size large -n 20 -c ",
+      #"luindex_default":         	" luindex -n 30 -c ",
+      #"lusearch_large":          	" lusearch -size large -n 20 -c ",
+      #"pmd_large":               	" pmd -size large -n 30 -c ",
+      #"sunflow_large":           	" sunflow -size large -n 20 -c ",
+      #"xalan_large":             	" xalan -size large -n 20 -c "
 
 }
 BM_Hazelcast = {
@@ -94,43 +93,26 @@ BM_Hazelcast = {
       #"hazelcast":             	" " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST + " org.example.StreamingRound3 [10k, 20k, 40k ... 100k]"
       }
 BM_DaCapo2021 = {
-      #"zxing_def":             	" -jar " + CLASSPATH_DACAPO_NEW + " zxing",
-      #"tradesoap_small":             	" -jar " + CLASSPATH_DACAPO_NEW + " tradesoap -size small",#only young
-      #"tradesoap_large":             	" -jar " + CLASSPATH_DACAPO_NEW + " tradesoap -size large",#only young
-      #"tradesoap_huge":             	" -jar " + CLASSPATH_DACAPO_NEW + " tradesoap -size huge",#only young
-      #"tradesoap_def":             	" -jar " + CLASSPATH_DACAPO_NEW + " tradesoap",#only young generation
-      #"tomcat_small":             	" -jar " + CLASSPATH_DACAPO_NEW + " tomcat -size small",#fails with validation
-      #"tomcat_large":             	" -jar " + CLASSPATH_DACAPO_NEW + " tomcat -size large",#fails with validation
-      #"tomcat_def":             	" -jar " + CLASSPATH_DACAPO_NEW + " tomcat",#fails with validations
-      #"kafka_def":             	" -jar " + CLASSPATH_DACAPO_NEW + " kafka",#broken, does not run
-      #"graphchi_large":             	" -jar " + CLASSPATH_DACAPO_NEW + " graphchi -size large",#big data needed
-      #"graphchi_huge":             	" -jar " + CLASSPATH_DACAPO_NEW + " graphchi -size huge",#big data needed
-      #"graphchi_def":             	" -jar " + CLASSPATH_DACAPO_NEW + " graphchi",#is it latency oriented?
-      "jme_def":             	" jme",#For some reason there is System.gc calls inside of this bm
-      #"h2o_def":             	" -jar " + CLASSPATH_DACAPO_NEW + " h2o",#latest java 11 supported
-      #"biojava_def":             	" -jar " + CLASSPATH_DACAPO_NEW + " biojava",#only young
-      #"h2_small":             	" -jar " + CLASSPATH_DACAPO_NEW + " h2 -size small -t 4",
-      #"h2_large":             	" -jar " + CLASSPATH_DACAPO_NEW + " h2 -size large -t 4",
-      #"h2_huge":             	" -jar " + CLASSPATH_DACAPO_NEW + " h2 -size huge -t 4",
-      #"h2_def":             	" -jar " + CLASSPATH_DACAPO_NEW + " h2 -t 4",
+      #"zxing_def":             	" zxing",
+      #"tradesoap_small":             	" tradesoap -size small",#only young
+      #"tradesoap_large":             	" tradesoap -size large",#only young
+      #"tradesoap_huge":             	" tradesoap -size huge",#only young
+      #"tradesoap_def":             	" tradesoap",#only young generation
+      #"tomcat_small":             	" tomcat -size small",#fails with validation
+      #"tomcat_large":             	" tomcat -size large",#fails with validation
+      #"tomcat_def":             	" tomcat",#fails with validations
+      #"kafka_def":             	" kafka",#broken, does not run
+      #"graphchi_large":             	" graphchi -size large",#big data needed
+      #"graphchi_huge":             	" graphchi -size huge",#big data needed
+      #"graphchi_def":             	" graphchi",#is it latency oriented?
+      "jme_def":             	        " jme",#For some reason there is System.gc calls inside of this bm
+      #"h2o_def":             	        " h2o",#latest java 11 supported
+      #"biojava_def":                   " biojava",#only young
+      #"h2_small":             	        " h2 -size small -t 4",
+      #"h2_large":             	        " h2 -size large -t 4",
+      #"h2_huge":                       " h2 -size huge -t 4",
+      #"h2_def":             	        " h2 -t 4",
       }
-
-BM_DaCapo_java13 = {
-      #"EnergyCheckUtils":              	EnergyCheckUtils,
-      #"h2_large_t4":             	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness h2 -size large -n 30 -t 4 -c MyCallback_java13",
-      #"avrora_large":            	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness avrora -size large -n 17 -c MyCallback_java13",
-      #"h2_small_t4":             	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness h2 -size small -n 50 -t 4 -c MyCallback_java13",
-      #"h2_huge_t4":              	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness h2 -size huge -n 8 -t 4 -c MyCallback_java13",
-      #"tradesoap_huge_n25":     	"-cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness tradebeans -size huge -n 1 -t 4 -c MyCallback" concurrency bug -- skip
-      #"tradebeans_huge_t4":      	"-cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness tradebeans -size huge -n 25 -t 4 -c MyCallback",
-      #"fop_default":             	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness fop -n 1 -c MyCallback_java13",#50
-      #"jython_large":            	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness jython -size large -n 20 -c MyCallback_java13",
-      #"luindex_default":         	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness luindex -n 30 -c MyCallback_java13",
-      #"lusearch_large":          	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness lusearch -size large -n 20 -c MyCallback_java13",
-      #"pmd_large":               	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness pmd -size large -n 30 -c MyCallback_java13",
-      #"sunflow_large":           	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness sunflow -size large -n 20 -c MyCallback_java13",
-      #"xalan_large":             	" -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness xalan -size large -n 20 -c MyCallback_java13" 
-}
 
 #The maximum heap size for each application is set to 3X of its respective minimum heap size 
 HEAP_SIZES = {
