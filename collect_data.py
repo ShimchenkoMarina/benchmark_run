@@ -26,15 +26,15 @@ JAVA13 = "/scratch/jdk-13/bin/java -Xlog:gc "
 
 #Specify here which bm+java you want to run
 Which_BM = {
-        #"DaCapo_j16", 
+        "DaCapo_j16", 
         #"DaCapo_j15M1", 
         #"DaCapo_j13", 
-        #"DaCapo21_j16", 
+        "DaCapo21_j16", 
         #"DaCapo21_j15M1", 
         #"DaCapo21_j13",
         #"HazelCast_j16",
         #"HazelCast_j15M1",
-        "HazelCast_j13",
+        #"HazelCast_j13",
 } 
 
 #Specify GCs for each java version
@@ -206,7 +206,7 @@ def execute_bm(BM_tag, BM_conf, GC, JAVA, Callback, CLASSPATH):
                 HS = heap_size_array(BM_tag)
                 for (HS_tag, HS_conf) in HS.items():
                     start = timer()
-                    result_path = os.path.join(os.getcwd(), "results_t", BM_tag, GC_tag + HS_tag)
+                    result_path = os.path.join(os.getcwd(), "results", BM_tag, GC_tag + HS_tag)
                     os.system("sudo mkdir -p " + result_path)
                     os.system("sudo chmod 777 " + result_path)
                     binary_hot = " ".join(["sudo numactl --cpunodebind=0 --membind=0 ", JAVA, HS_conf, GC_conf, CLASSPATH, BM_conf, Callback])
