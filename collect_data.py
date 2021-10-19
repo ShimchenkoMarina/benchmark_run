@@ -7,31 +7,34 @@ import platform
 from timeit import default_timer as timer
 
 #Parameters for running
-PASSES = 1 
-HEAP_RUNS = 1
+PASSES = 3 
+HEAP_RUNS = 3
 
 #Path variables
 CLASSPATH_jRAPL="/scratch/Project/jRAPL"
 CLASSPATH_jRAPL_java13="/scratch/Project/jRAPL_13"
 CLASSPATH_DACAPO="/scratch/Project/Dacapo_jar:/scratch/Project/Dacapo_jar/harness:/scratch/Project/Dacapo_jar/dacapo-9.12-MR1-bach.jar"
-CLASSPATH_DACAPO_NEW="/scratch/Project/dacapo-evaluation-git+309e1fa.jar"
+CLASSPATH_DACAPO_NEW_java16="/scratch/Project/DaCapo2021_java16.jar"
+CLASSPATH_DACAPO_NEW_java15="/scratch/Project/DaCapo2021_java15.jar"
+CLASSPATH_DACAPO_NEW_java13="/scratch/Project/DaCapo2021_java13.jar"
 CLASSPATH_HAZELCAST="/scratch/Project/jet-gc-benchmark/target/hazelcast-jet-4.2.jar:/scratch/Project/jet-gc-benchmark/target/jet-gc-benchmark-1.0-SNAPSHOT-jar-with-dependencies.jar:/scratch/Project/jRAPL_jar/build/Energy.jar:/scratch/Project/jet-gc-benchmark/target/classes/"
 FLAGS_HAZELCAST="--add-modules java.se --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.management/sun.management=ALL-UNNAMED"
 
 #Java versions
-JAVA16 = "java -Xlog:gc "
-JAVA16_HOT = "/scratch/jdk-16/bin/java -Xlog:gc* "
-JAVA15M1 = "/scratch/Project/openjdk-m1/build/linux-x86_64-server-release/images/jdk/bin/java -Xlog:gc* "
-JAVA13 = "/scratch/jdk-13/bin/java -Xlog:gc "
+JAVA16 = "java "
+JAVA16_HOT = "/scratch/jdk-16/bin/java "
+JAVA15M1 = "/scratch/Project/openjdk-m1/build/linux-x86_64-server-release/images/jdk/bin/java "
+JAVA13 = "/scratch/jdk-13/bin/java "
+JAVA_LOG = " -Xlog:gc* "
 
 #Specify here which bm+java you want to run
 Which_BM = {
-        "DaCapo_j16", 
-        #"DaCapo_j15M1", 
-        #"DaCapo_j13", 
         "DaCapo21_j16", 
-        #"DaCapo21_j15M1", 
-        #"DaCapo21_j13",
+        "DaCapo21_j15M1", 
+        "DaCapo21_j13",
+        "DaCapo_j16", 
+        "DaCapo_j15M1", 
+        "DaCapo_j13", 
         #"HazelCast_j16",
         #"HazelCast_j15M1",
         #"HazelCast_j13",
@@ -39,14 +42,14 @@ Which_BM = {
 
 #Specify GCs for each java version
 GC13 = { "j13CMS": "-XX:+UseConcMarkSweepGC",
-	 #"j13Ser": "-XX:+UseSerialGC",
-	 #"j13P": "-XX:+UseParallelGC",
+	 "j13Ser": "-XX:+UseSerialGC",
+	 "j13P": "-XX:+UseParallelGC",
 }
 
 GCHCast16 = { 
 	 'j16Z': '-XX:+UseZGC' ,
-         #'j16Shen': "-XX:+UseShenandoahGC",
-	 #'j16G1': '-XX:+UseG1GC',
+         'j16Shen': "-XX:+UseShenandoahGC",
+	 'j16G1': '-XX:+UseG1GC',
 }
 
 GC15M1 = { 
@@ -55,14 +58,14 @@ GC15M1 = {
 
 GCHCast13 = { 
         "j13CMS": "-XX:+UseConcMarkSweepGC",
-	#"j13Z": "-XX:+UnlockExperimentalVMOptions -XX:+UseZGC" ,
+	"j13Z": "-XX:+UnlockExperimentalVMOptions -XX:+UseZGC" ,
 }
 
-GC16 = { #'j16Ser': '-XX:+UseSerialGC',
-	 #'j16P': '-XX:+UseParallelGC',
+GC16 = { 'j16Ser': '-XX:+UseSerialGC',
+	 'j16P': '-XX:+UseParallelGC',
 	 'j16G1': '-XX:+UseG1GC',
-	 #'j16Z': '-XX:+UseZGC' ,
-         #'j16Shen': "-XX:+UseShenandoahGC",
+	 'j16Z': '-XX:+UseZGC' ,
+         'j16Shen': "-XX:+UseShenandoahGC",
 }
 
 NUM_THREADS= {
@@ -73,19 +76,19 @@ NUM_THREADS= {
 
 #Specify bms
 BM_DaCapo = {
-      #"h2_small_t4":             	" h2 -size small -n 50 -t 4 -c ",
-      #"h2_large_t4":             	" h2 -size large -n 30 -t 4 -c ",
+      "h2_small_t4":             	" h2 -size small -n 50 -t 4 -c ",
+      "h2_large_t4":             	" h2 -size large -n 30 -t 4 -c ",
       #"h2_huge_t4":              	" h2 -size huge -n 10 -t 4 -c ",
       #"tradesoap_huge_n25":     	"-cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness tradebeans -size huge -n 1 -t 4 -c " concurrency bug -- skip
       #"tradebeans_huge_t4":      	"-cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness tradebeans -size huge -n 25 -t 4 -c ",
       "avrora_large":            	" avrora -size large -n 17 -c ",
-      #"fop_default":             	" fop -n 50 -c ",
-      #"jython_large":            	" jython -size large -n 20 -c ",
-      #"luindex_default":         	" luindex -n 30 -c ",
-      #"lusearch_large":          	" lusearch -size large -n 20 -c ",
-      #"pmd_large":               	" pmd -size large -n 30 -c ",
-      #"sunflow_large":           	" sunflow -size large -n 20 -c ",
-      #"xalan_large":             	" xalan -size large -n 20 -c "
+      "fop_default":             	" fop -n 50 -c ",
+      "jython_large":            	" jython -size large -n 20 -c ",
+      "luindex_default":         	" luindex -n 30 -c ",
+      "lusearch_large":          	" lusearch -size large -n 20 -c ",
+      "pmd_large":               	" pmd -size large -n 30 -c ",
+      "sunflow_large":           	" sunflow -size large -n 20 -c ",
+      "xalan_large":             	" xalan -size large -n 20 -c "
 
 }
 BM_Hazelcast = {
@@ -93,21 +96,21 @@ BM_Hazelcast = {
       #"hazelcast":             	" " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST + " org.example.StreamingRound3 [10k, 20k, 40k ... 100k]"
       }
 BM_DaCapo2021 = {
-      #"zxing_def":             	" zxing",
-      #"tradesoap_small":             	" tradesoap -size small",#only young
-      #"tradesoap_large":             	" tradesoap -size large",#only young
-      #"tradesoap_huge":             	" tradesoap -size huge",#only young
-      #"tradesoap_def":             	" tradesoap",#only young generation
+      "zxing_def":                  	" zxing -n 25 -c ",
+      "tradesoap_small":             	" tradesoap -size small -n 25 -c ",#only young
+      "tradesoap_large":             	" tradesoap -size large -n 25 -c ",#only young
+      "tradesoap_huge":             	" tradesoap -size huge -n 25 -c ",#only young
+      "tradesoap_def":             	" tradesoap -n 25 -c ",#only young generation
       #"tomcat_small":             	" tomcat -size small",#fails with validation
       #"tomcat_large":             	" tomcat -size large",#fails with validation
       #"tomcat_def":             	" tomcat",#fails with validations
       #"kafka_def":             	" kafka",#broken, does not run
       #"graphchi_large":             	" graphchi -size large",#big data needed
       #"graphchi_huge":             	" graphchi -size huge",#big data needed
-      #"graphchi_def":             	" graphchi",#is it latency oriented?
-      "jme_def":             	        " jme",#For some reason there is System.gc calls inside of this bm
+      "graphchi_def":             	" graphchi -n 25 -c ",#is it latency oriented?
+      "jme_def":             	        " jme -n 25 -c ",#For some reason there is System.gc calls inside of this bm
       #"h2o_def":             	        " h2o",#latest java 11 supported
-      #"biojava_def":                   " biojava",#only young
+      "biojava_def":                   " biojava -n 25 -c ",#only young
       #"h2_small":             	        " h2 -size small -t 4",
       #"h2_large":             	        " h2 -size large -t 4",
       #"h2_huge":                       " h2 -size huge -t 4",
@@ -128,7 +131,7 @@ HEAP_SIZES = {
 	"sunflow_large": "60m", 
 	"xalan_large": "35m", 
 	"jme_def": "10m",
-	"zxing_def": "10m",
+	"zxing_def": "20m",
 	"tradesoap_small": "21m",
 	"tradesoap_large": "27m", 
 	"tradesoap_huge": "27m", 
@@ -183,7 +186,7 @@ def heap_size_array(BM_tag):
     #print(HS)
     return HS
 
-def execute_bm(BM_tag, BM_conf, GC, JAVA, Callback, CLASSPATH):
+def execute_bm(BM_tag, BM_conf, GC, JAVA, JAVA_LOG, Callback, CLASSPATH):
     #print("Benchmarking " + BM_tag)
     for i in range(0, PASSES):
         for (GC_tag, GC_conf) in GC.items():
@@ -196,7 +199,7 @@ def execute_bm(BM_tag, BM_conf, GC, JAVA, Callback, CLASSPATH):
                         result_path = os.path.join(os.getcwd(), "results", BM_tag, GC_tag + HS_tag, THR_tag)
                         os.system("sudo mkdir -p " + result_path)
                         os.system("sudo chmod 777 " + result_path)
-                        binary_hot = " ".join(["sudo numactl --cpunodebind=0 --membind=0", JAVA, HS_conf, GC_conf, THR_conf, CLASSPATH, BM_conf, Callback])
+                        binary_hot = " ".join(["sudo numactl --cpunodebind=0 --membind=0", JAVA, JAVA_LOG, HS_conf, GC_conf, THR_conf, CLASSPATH, BM_conf, Callback])
                         print(binary_hot)
                         collect_data(binary_hot, result_path)
                         end = timer()
@@ -209,7 +212,7 @@ def execute_bm(BM_tag, BM_conf, GC, JAVA, Callback, CLASSPATH):
                     result_path = os.path.join(os.getcwd(), "results", BM_tag, GC_tag + HS_tag)
                     os.system("sudo mkdir -p " + result_path)
                     os.system("sudo chmod 777 " + result_path)
-                    binary_hot = " ".join(["sudo numactl --cpunodebind=0 --membind=0 ", JAVA, HS_conf, GC_conf, CLASSPATH, BM_conf, Callback])
+                    binary_hot = " ".join(["sudo numactl --cpunodebind=0 --membind=0 ", JAVA, JAVA_LOG, HS_conf, GC_conf, CLASSPATH, BM_conf, Callback])
                     print(binary_hot)
                     collect_data(binary_hot, result_path)
                     end = timer()
@@ -223,30 +226,30 @@ def main():
         print(BM)
         if BM == "DaCapo_j16": 
             for (BM_tag, BM_conf) in BM_DaCapo.items():
-                execute_bm(BM_tag, BM_conf, GC16, JAVA16_HOT, "MyCallback", "-XX:+DisableExplicitGC -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness")
+                execute_bm(BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG, "MyCallback", "-XX:+DisableExplicitGC -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness")
         elif BM == "DaCapo_j13":
             for (BM_tag, BM_conf) in BM_DaCapo.items():
-                execute_bm(BM_tag, BM_conf, GC13, JAVA13, "MyCallback_java13", " -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness")
+                execute_bm(BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, "MyCallback_java13", " -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness")
         elif BM == "DaCapo_j15M1":
             for (BM_tag, BM_conf) in BM_DaCapo.items():
-                print("DC java15")
+                execute_bm(BM_tag, BM_conf, GC15M1, JAVA15M1, JAVA_LOG, "MyCallback_java15", " -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness")
         elif BM == "DaCapo21_j16":
             for (BM_tag, BM_conf) in BM_DaCapo2021.items():
-                execute_bm(BM_tag, BM_conf, GC16, JAVA16_HOT, "", " -jar " + CLASSPATH_DACAPO_NEW)
+                execute_bm(BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG, "MyCallback", " -jar " + CLASSPATH_DACAPO_NEW_java16)
         elif BM == "DaCapo21_j15M1":
             for (BM_tag, BM_conf) in BM_DaCapo2021.items():
-                execute_bm(BM_tag, BM_conf, GC15M1, JAVA15M1, "", " -jar " + CLASSPATH_DACAPO_NEW)
+                execute_bm(BM_tag, BM_conf, GC15M1, JAVA15M1, JAVA_LOG, "MyCallback_java15", " -jar " + CLASSPATH_DACAPO_NEW_java15)
         elif BM == "DaCapo21_j13":
             for (BM_tag, BM_conf) in BM_DaCapo2021.items():
-                execute_bm(BM_tag, BM_conf, GC13, JAVA13, "", " -jar " + CLASSPATH_DACAPO_NEW)
+                execute_bm(BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, "MyCallback_java13", " -jar " + CLASSPATH_DACAPO_NEW_java13)
         elif BM ==  "HazelCast_j16":    
             for (BM_tag, BM_conf) in BM_Hazelcast.items():
-                execute_bm(BM_tag, BM_conf, GCHCast16, JAVA16_HOT, "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
+                execute_bm(BM_tag, BM_conf, GCHCast16, JAVA16_HOT, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
         elif BM ==  "HazelCast_j15M1":    
             for (BM_tag, BM_conf) in BM_Hazelcast.items():
-                execute_bm(BM_tag, BM_conf, GC15M1, JAVA15M1, "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
+                execute_bm(BM_tag, BM_conf, GC15M1, JAVA15M1, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
         elif BM ==  "HazelCast_j13":    
             for (BM_tag, BM_conf) in BM_Hazelcast.items():
-                execute_bm(BM_tag, BM_conf, GCHCast13, JAVA13, "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
+                execute_bm(BM_tag, BM_conf, GCHCast13, JAVA13, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
 
 if __name__ == "__main__": main()

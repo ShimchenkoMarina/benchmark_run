@@ -206,7 +206,7 @@ def store_result(sample, result, res_folder, benchmark_name, baseline_name):
     result_aggregated = merged
     format_columns(result_aggregated)
     result_aggregated.rename(index=lambda s: benchmark_name, inplace=True)
-
+    print(result_aggregated)
     figure = plt.figure()
     plt.ylabel('')
     #result_points.boxplot() IF USING THIS VERIFY CORECTNESS!
@@ -329,7 +329,7 @@ def main():
 
     for (benchmark_name, allconf_runs) in benchmarks_conf.items():
         #print("benchmark name = ", benchmark_name)
-        if (benchmark_name == "h2_small_t4"):
+        if (benchmark_name != "def"):
             dict_for_benchmark = {}
             local_order = []
             local_baseline_name = ""
@@ -408,32 +408,15 @@ def main():
             for el in local_order:
                 order.append(el)
             print("order = ", order)
-            measurement = ["energy_pack", "energy_dram", "energy_cpu", "perf", "watts_cpu", "watts_dram", "watts_pack"]
-            #measurement = ["watts_dram"]
+            #measurement = ["energy_pack", "energy_dram", "energy_cpu", "perf", "watts_cpu", "watts_dram", "watts_pack"]
+            measurement = ["perf"]
             #measurement = ["energy_pack", "energy_dram", "energy_cpu"]
             for m in measurement:
-                #print(m)
-                #print(dict_for_benchmark[baseline_name])
                 if dict_for_benchmark.get(baseline_name) and has_contents(dict_for_benchmark[baseline_name], m):
                        baseline = analyze_baseline(m, dict_for_benchmark[baseline_name], baseline_name, benchmark_name)
                        result = analyze_data(m, dict_for_benchmark, baseline, baseline_name, benchmark_name)
-                       #print("baseline_name = ", baseline_name)
                        store_result(m, result, res_folder, benchmark_name, baseline_name)
             order.clear()
 
-    '''measurement = ["energy_pack", "energy_dram", "energy_cpu"]
-    for (benchmark_name, allconf_runs) in benchmarks_conf.items():
-        print(benchmark_name)
-        for conf_runs in allconf_runs:
-             for m in measurement:
-                 if conf_runs.get(baseline_name) and has_contents(conf_runs[baseline_name], m):
-                       baseline = analyze_baseline(m, conf_runs[baseline_name], baseline_name, benchmark_name)
-                       result = analyze_data(m, conf_runs, baseline, baseline_name, benchmark_name)
-                       store_result(m, result, res_folder, benchmark_name)
-'''
-    '''if has_contents(allconf_runs[baseline_name], m):
-        baseline = analyze_baseline(m, allconf_runs[baseline_name], baseline_name, benchmark_name)
-        result = analyze_data(m, allconf_runs, baseline, baseline_name, benchmark_name)
-        store_result(m, result, res_folder, benchmark_name)'''
 if __name__ == "__main__":
     main()
