@@ -15,7 +15,8 @@ bms = list()
 rows_energy = []
 rows_perf = []
 rows_latency = []
-fields = ["BMs"]
+fields_energy = ["BMs"]
+fields_perf = ["BMs"]
 STR_TYPE = "Type"
 STR_N = "N"
 STR_MEAN = "Mean"
@@ -31,10 +32,13 @@ def read_data(sample, data, configuration_name, benchmark_name):
             df = df.append(pd.DataFrame(curr_df.values, columns=[configuration_name]), ignore_index=True)
     return df
 
-def extract_ordered_data(data):
+def extract_ordered_data(data, sample):
     ordered_data = list()
     for conf in data:
-        fields.append(conf) 
+        if "energy" in sample:
+            fields_energy.append(conf) 
+        if "perf" in sample:
+            fields_perf.append(conf) 
         ordered_data.append((conf, data[conf]))
     return ordered_data
 
@@ -43,7 +47,7 @@ def analyze_data(sample, data, baseline, baseline_name, benchmark_name):
     results_aggregated = baseline[0].copy()
     results_points = baseline[1].copy()
     
-    for (configuration, data) in extract_ordered_data(data):
+    for (configuration, data) in extract_ordered_data(data, sample):
         if configuration == baseline_name:
             continue
         d = read_data(sample, data, configuration, benchmark_name)
@@ -171,7 +175,6 @@ def main():
     #       delimiter =", ", 
     #       fmt ='% s')
     for (benchmark_name, allconf_runs) in benchmarks_conf.items():
-        #print(benchmark_name)
         baseline_name = ""
         dict_for_benchmark = {}
         for conf_runs in allconf_runs:
@@ -187,14 +190,24 @@ def main():
             baseline = analyze_baseline(m, dict_for_benchmark[baseline_name], baseline_name, benchmark_name)
             result = analyze_data(m, dict_for_benchmark, baseline, baseline_name, benchmark_name)
             store_result(m, result, res_folder, benchmark_name, baseline_name)
-    with open (os.path.join("/scratch/Project/benchmark_run/EnergyVsTimePlots", "table_energy.csv"), "w") as f:
-        write = csv.writer(f, skipinitialspace=True, delimiter=';', quoting=csv.QUOTE_NONE)
-        write.writerow(fields)
-        write.writerows(rows_energy)
-    with open (os.path.join("/scratch/Project/benchmark_run/EnergyVsTimePlots", "table_perf.csv"), "w") as f:
-        write = csv.writer(f, skipinitialspace=True, delimiter=';', quoting=csv.QUOTE_NONE)
-        write.writerow(fields)
-        write.writerows(rows_perf)
+        if (fields_energy != fields_perf):
+            print("Error for" + benchmark_name)
+            print("energy = " + fields_energy)
+            print("perf = " + fields_perf)
+        with open (os.path.join(os.getcwd() + "/EnergyVsTimePlots", "table_energy_" + benchmark_name + ".csv"), "w+") as f:
+            write = csv.writer(f, skipinitialspace=True, delimiter=';', quoting=csv.QUOTE_NONE)
+            write.writerow(fields_energy)
+            write.writerows(rows_energy)
+        with open (os.path.join(os.getcwd() + "/EnergyVsTimePlots", "table_perf_" + benchmark_name + ".csv"), "w+") as f:
+            write = csv.writer(f, skipinitialspace=True, delimiter=';', quoting=csv.QUOTE_NONE)
+            write.writerow(fields_perf)
+            write.writerows(rows_perf)
+        rows_perf.clear()
+        rows_energy.clear()
+        fields_perf.clear()
+        fields_energy.clear()
+        fields_perf.append('BMs')
+        fields_energy.append('BMs')
     '''with open (os.path.join("/scratch/Project/benchmark_run/EnergyVsTimePlots", "table_latency.csv"), "w") as f:
         write = csv.writer(f)
         write.writerow(fields)
