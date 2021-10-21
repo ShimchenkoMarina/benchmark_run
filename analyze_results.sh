@@ -4,7 +4,6 @@ COMMIT="results"
 SOCKETS=1
 
 for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
-    echo $dir
     cd ${__dir}
     input_dir=$(realpath $dir/.)
     for (( soc=0; soc<$SOCKETS; soc++ )); do
@@ -30,11 +29,25 @@ for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
     mkdir -p ${raw_dir}/energy_pack
     mkdir -p ${raw_dir}/GC_cycles
     mkdir -p ${raw_dir}/perf
+    mkdir -p ${raw_dir}/mean_latency
+    mkdir -p ${raw_dir}/max_latency
     energy_dram=0
     energy_cpu=0
     energy_pack=0
     time=0
     for i in $(seq 1 $count_files); do
+        if [ ! -s ${input_dir}/${i}.txt ]
+	then
+             	sudo rm -rf ${input_dir}/${i}.txt
+		continue
+	fi
+	python3 ${__dir}/uncomplete.py ${input_dir} ${i}.txt
+	if [ $? != 0 ];
+	then
+             	echo "${input_dir}/${i}.txt has exception!"
+             	#sudo rm -rf ${input_dir}/${i}.txt Keep it for checking an exception
+    		continue
+	fi
         python3 ${__dir}/process_file.py ${input_dir} ${raw_dir} ${i}.txt
         rm -f ${raw_dir}/energy/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "Power consumption of dram s${soc}" | cut -d ' ' -f 6 >> ${raw_dir}/energy_dram/${i}.txt
@@ -48,6 +61,8 @@ for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
         cat ${raw_dir}/${i}.txt | grep "Execution time" | cut -d ' ' -f 3 >> ${raw_dir}/watts_cpu/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "Execution time" | cut -d ' ' -f 3 >> ${raw_dir}/watts_dram/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "Execution time" | cut -d ' ' -f 3 >> ${raw_dir}/watts_pack/${i}.txt
+        cat ${raw_dir}/${i}.txt | grep "#\[Mean" | grep "#\[Mean" | cut -d '=' -f 2 | cut -d ',' -f 1 >> ${raw_dir}/mean_latency/${i}.txt
+        cat ${raw_dir}/${i}.txt | grep "#\[Max" | grep "#\[Mean" | cut -d '=' -f 2 | cut -d ',' -f 1 >> ${raw_dir}/max_latency/${i}.txt
     done
     done
 done
@@ -70,12 +85,10 @@ for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
         	if [ ! -s ${raw_dir}/${i}.txt ]
         	then
              		echo "${raw_dir}/${i}.txt is Empty!"
-             		rm -rf ${raw_dir}/${i}.txt
-        	else 
+             		sudo rm -rf ${raw_dir}/${i}.txt
+        	else
              	python3 ${__dir}/analyze_file.py ${raw_dir} ${output_dir} ${i}.txt
-        	fi    
-        	#python3 ${__dir}/analyze_file.py ${raw_dir} ${output_dir} ${i}.txt
-        	#python3 ${__dir}/analyze_file.py ${raw_dir} ${output_dir} ${i}.txt
+		fi    
     	done
     done
 done

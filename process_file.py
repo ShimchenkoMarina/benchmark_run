@@ -6,7 +6,7 @@ def process_file(input_dir, output_dir, file_num):
     write = False
     i = 0
     with open(os.path.join(input_dir, file_num), 'r') as reader:
-        cut = 14
+        cut = 5
         for bench_name in benchmarks_cut:
             if input_dir.find(bench_name):
                 cut = int(benchmarks_cut[bench_name])
@@ -17,12 +17,21 @@ def process_file(input_dir, output_dir, file_num):
                     i = i + 1
                 if write and i > cut:
                     writer.write(line)
-
 def main():
     if len(sys.argv) != 4:
         print("Usage process_file.py input_dir raw_dir file_num")
         exit(1)
-    process_file(sys.argv[1], sys.argv[2], sys.argv[3])
+    #Process latency and latency-oritnted bms separately, nothing to cut
+    if "latency" in sys.argv[1]:
+        path_from = os.path.join(sys.argv[1], sys.argv[3]) 
+        path_to = os.path.join(sys.argv[2], sys.argv[3])
+        os.system("sudo cp " + path_from + " " + path_to)
+    elif "hazelcast" in sys.argv[1]:
+        path_from = os.path.join(sys.argv[1], sys.argv[3]) 
+        path_to = os.path.join(sys.argv[2], sys.argv[3])
+        os.system("sudo cp " + path_from + " " + path_to)
+    else: 
+        process_file(sys.argv[1], sys.argv[2], sys.argv[3])
 
 if __name__ == "__main__":
     main()

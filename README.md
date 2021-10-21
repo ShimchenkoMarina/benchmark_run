@@ -1,6 +1,6 @@
 # How to run, in 3 steps <br />
-1. python3 collect_data.py <br />
-2. bash analyze_results.sh <br />
+1. sudo python3 collect_data.py <br />
+2. sudo bash analyze_results.sh <br />
 3. python3.7 analyze.py <br />
 4. python3 gather_data_into_csv.py <br />
 5. cd EnergyVsTimePlots <br />

@@ -5,10 +5,11 @@ from os.path import isfile, join
 from os import listdir
 import platform
 from timeit import default_timer as timer
+import sys, getopt
 
 #Parameters for running
-PASSES = 3 
-HEAP_RUNS = 3
+PASSES = 1 
+HEAP_RUNS = 1
 
 #Path variables
 CLASSPATH_jRAPL="/scratch/Project/jRAPL"
@@ -32,12 +33,12 @@ Which_BM = {
         "DaCapo21_j16", 
         "DaCapo21_j15M1", 
         "DaCapo21_j13",
-        "DaCapo_j16", 
-        "DaCapo_j15M1", 
-        "DaCapo_j13", 
-        #"HazelCast_j16",
-        #"HazelCast_j15M1",
-        #"HazelCast_j13",
+        #"DaCapo_j16", 
+        #"DaCapo_j15M1", 
+        #"DaCapo_j13", 
+        "HazelCast_j16",
+        "HazelCast_j15M1",
+        "HazelCast_j13",
 } 
 
 #Specify GCs for each java version
@@ -146,6 +147,10 @@ def get_next_result_name(path):
     files = [f for f in listdir(path) if isfile(join(path, f))]
     return str(len(files) + 1) + ".txt"
 
+def get_current_result_name(path):
+    pathlib.Path(path).mkdir(parents=True, exist_ok=True)
+    files = [f for f in listdir(path) if isfile(join(path, f))]
+    return str(len(files)) + ".txt"
 
 def collect_data(binary, result_path):
     app = subprocess.Popen(binary, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True,shell=True,bufsize=1)
@@ -204,7 +209,6 @@ def execute_bm(BM_tag, BM_conf, GC, JAVA, JAVA_LOG, Callback, CLASSPATH):
                         collect_data(binary_hot, result_path)
                         end = timer()
                         minutes = round((end - start) / 60.0, 3)
-                        #print("Pass " + str(i) + " took " + str(minutes) + " minutes")
             else: 
                 HS = heap_size_array(BM_tag)
                 for (HS_tag, HS_conf) in HS.items():
@@ -217,10 +221,32 @@ def execute_bm(BM_tag, BM_conf, GC, JAVA, JAVA_LOG, Callback, CLASSPATH):
                     collect_data(binary_hot, result_path)
                     end = timer()
                     minutes = round((end - start) / 60.0, 3)
-                    #print("Pass " + str(i) + " took " + str(minutes) + " minutes")        
+                    if "hazelcast" in BM_tag:
+                        f1_path = os.path.join(result_path, get_current_result_name(result_path))
+                        f2_path = os.path.join(os.getcwd(), "histo-latency/0")
+                        # opening first file in append mode and second file in read mode
+                        f1 = open(f1_path, 'a+')
+                        f2 = open(f2_path, 'r')
+                        # appending the contents of the second file to the first file
+                        f1.write(f2.read())
 
 
-def main():
+def main(argv):
+    try:
+      opts, args = getopt.getopt(argv,"hr:s:",["runs=","sizes="])
+    except getopt.GetoptError:
+      print('collect_data.py -r <number_of_runs> -s <how_many_heap_sizes_to_run>')
+      sys.exit(2)
+    for opt, arg in opts:
+        print(opt)
+        print(arg)
+        if opt == '-h':
+            print('collect_data.py -r <number_of_runs> -s <how_many_heap_sizes_to_test>')
+            sys.exit()
+        elif opt in ("-r", "--runs"):
+            PASSES = arg
+        elif opt in ("-s", "--sizes"):
+            HEAP_RUNS = arg
     print("Starting to collect data with " + str(PASSES) + " passes")
     for BM in Which_BM:
         print(BM)
@@ -252,4 +278,4 @@ def main():
             for (BM_tag, BM_conf) in BM_Hazelcast.items():
                 execute_bm(BM_tag, BM_conf, GCHCast13, JAVA13, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
 
-if __name__ == "__main__": main()
+if __name__ == "__main__": main(sys.argv[1:])

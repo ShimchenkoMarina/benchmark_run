@@ -15,40 +15,52 @@ def analyze_file(input_dir, output_dir, file_num):
     exec_time_list = list()
     recorded_heap_list = list()
     max_heap_list = list()
+    mean_latency_list = list()
+    max_latency_list = list()
     s = set()
     max_heap = 0
 
+    with open(os.path.join(input_dir, "mean_latency", file_num), 'r') as reader:
+        for line in reader.readlines():
+            if (float(line) > 0):
+                mean_latency_list.append(float(line))
+        with open(os.path.join(output_dir, "mean_latency.txt"), "a+") as writer:
+           if (len(mean_latency_list) > 0):
+               writer.write(str(avg(mean_latency_list)) + '\n')
+    
+    with open(os.path.join(input_dir, "max_latency", file_num), 'r') as reader:
+        for line in reader.readlines():
+            if (float(line) > 0):
+                max_latency_list.append(float(line))
+        with open(os.path.join(output_dir, "max_latency.txt"), "a+") as writer:
+           if (len(max_latency_list) > 0):
+               writer.write(str(avg(max_latency_list)) + '\n')
+
     with open(os.path.join(input_dir, "energy_cpu", file_num), 'r') as reader:
-        #i=0
         for line in reader.readlines():
             if (float(line) > 0):
                 energy_cpu_list.append(float(line))
         with open(os.path.join(output_dir, "energy_cpu.txt"), "a+") as writer:
            if (len(energy_cpu_list) > 0):
                writer.write(str(avg(energy_cpu_list)) + '\n')
-            #        energy_cpu_list.clear()
 
     with open(os.path.join(input_dir, "energy_pack", file_num), 'r') as reader:
-        #i=0
         for line in reader.readlines():
             if (float(line) > 0):
                 energy_pack_list.append(float(line))
         with open(os.path.join(output_dir, "energy_pack.txt"), "a") as writer:
            if (len(energy_pack_list) > 0):
                writer.write(str(avg(energy_pack_list)) + '\n')
-            #        energy_pack_list.clear()
 
     with open(os.path.join(input_dir, "energy_dram", file_num), 'r') as reader:
-        #i=0
         for line in reader.readlines():
             if (float(line) > 0):
                 energy_dram_list.append(float(line))
         with open(os.path.join(output_dir, "energy_dram.txt"), "a") as writer:
            if (len(energy_dram_list) > 0):
                writer.write(str(avg(energy_dram_list)) + '\n')
-            #        energy_dram_list.clear()
+    
     with open(os.path.join(input_dir, "GC_cycles", file_num), 'r') as reader:
-        #i=0
         last_cycle = ''
         for line in reader.readlines():
             last_cycle = line
