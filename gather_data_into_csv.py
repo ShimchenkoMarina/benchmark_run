@@ -14,9 +14,15 @@ order = []
 bms = list()
 rows_energy = []
 rows_perf = []
+rows_max_latency = []
+rows_mean_latency = []
 rows_latency = []
+rows_watts_pack = []
 fields_energy = ["BMs"]
 fields_perf = ["BMs"]
+fields_max_latency = ["BMs"]
+fields_mean_latency = ["BMs"]
+fields_watts_pack = ["BMs"]
 STR_TYPE = "Type"
 STR_N = "N"
 STR_MEAN = "Mean"
@@ -28,8 +34,14 @@ def read_data(sample, data, configuration_name, benchmark_name):
     df = pd.DataFrame(columns=[configuration_name])
     for file in data:
         if sample in file:
-            curr_df = pd.read_csv(file, header=None)
-            df = df.append(pd.DataFrame(curr_df.values, columns=[configuration_name]), ignore_index=True)
+            try:
+                curr_df = pd.read_csv(file, header=None)
+            except pd.errors.EmptyDataError:
+                curr_df = pd.DataFrame()
+            if not curr_df.empty:
+                df = df.append(pd.DataFrame(curr_df.values, columns=[configuration_name]), ignore_index=True)
+            else:
+                df = pd.DataFrame(columns=[configuration_name])
     return df
 
 def extract_ordered_data(data, sample):
@@ -39,6 +51,12 @@ def extract_ordered_data(data, sample):
             fields_energy.append(conf) 
         if "perf" in sample:
             fields_perf.append(conf) 
+        if "max_latency" in sample:
+            fields_max_latency.append(conf) 
+        if "mean_latency" in sample:
+            fields_mean_latency.append(conf) 
+        if "watts_pack" in sample:
+            fields_watts_pack.append(conf) 
         ordered_data.append((conf, data[conf]))
     return ordered_data
 
@@ -114,8 +132,12 @@ def store_result(sample, result, res_folder, benchmark_name, baseline_name):
         rows_energy.append(row)
     if "perf" in sample:
         rows_perf.append(row)
-    if "latency" in sample:
-        rows_latency.append(row)
+    if "max_latency" in sample:
+        rows_max_latency.append(row)
+    if "mean_latency" in sample:
+        rows_mean_latency.append(row)
+    if "watts_pack" in sample:
+        rows_watts_pack.append(row)
 
 def has_contents(data, sample):
     for file in data:
@@ -175,17 +197,24 @@ def main():
     #       delimiter =", ", 
     #       fmt ='% s')
     for (benchmark_name, allconf_runs) in benchmarks_conf.items():
+        print(benchmark_name)
         baseline_name = ""
         dict_for_benchmark = {}
         for conf_runs in allconf_runs:
-            for conf in conf_runs:
+            if isinstance(conf_runs, dict):
+                for conf in conf_runs:
+                    print(conf)
+                    if baseline_name == "":
+                        baseline_name = conf
+                    append_value(dict_for_benchmark, conf, conf_runs[conf])
+            else:
                 if baseline_name == "":
-                    baseline_name = conf
-                append_value(dict_for_benchmark, conf, conf_runs[conf])
+                    baseline_name = conf_runs
+                append_value(dict_for_benchmark, conf_runs, allconf_runs[conf_runs])
         #print(dict_for_benchmark[baseline_name])
         #TODO: add latency parcing
         #TODO: add multiple measurements handeling
-        measurement = ["energy_pack", "perf"]
+        measurement = ["energy_pack", "perf", "max_latency", "mean_latency", "watts_pack"]
         for m in measurement:
             baseline = analyze_baseline(m, dict_for_benchmark[baseline_name], baseline_name, benchmark_name)
             result = analyze_data(m, dict_for_benchmark, baseline, baseline_name, benchmark_name)
@@ -202,16 +231,33 @@ def main():
             write = csv.writer(f, skipinitialspace=True, delimiter=';', quoting=csv.QUOTE_NONE)
             write.writerow(fields_perf)
             write.writerows(rows_perf)
+        with open (os.path.join(os.getcwd() + "/EnergyVsTimePlots", "table_max_latency_" + benchmark_name + ".csv"), "w+") as f:
+            write = csv.writer(f, skipinitialspace=True, delimiter=';', quoting=csv.QUOTE_NONE)
+            write.writerow(fields_max_latency)
+            write.writerows(rows_max_latency)
+        with open (os.path.join(os.getcwd() + "/EnergyVsTimePlots", "table_mean_latency_" + benchmark_name + ".csv"), "w+") as f:
+            write = csv.writer(f, skipinitialspace=True, delimiter=';', quoting=csv.QUOTE_NONE)
+            write.writerow(fields_mean_latency)
+            write.writerows(rows_mean_latency)
+        with open (os.path.join(os.getcwd() + "/EnergyVsTimePlots", "table_watts_pack_" + benchmark_name + ".csv"), "w+") as f:
+            write = csv.writer(f, skipinitialspace=True, delimiter=';', quoting=csv.QUOTE_NONE)
+            write.writerow(fields_watts_pack)
+            write.writerows(rows_watts_pack)
         rows_perf.clear()
+        rows_max_latency.clear()
+        rows_mean_latency.clear()
         rows_energy.clear()
-        fields_perf.clear()
+        rows_watts_pack.clear()
         fields_energy.clear()
+        fields_perf.clear()
+        fields_max_latency.clear()
+        fields_mean_latency.clear()
+        fields_watts_pack.clear()
         fields_perf.append('BMs')
         fields_energy.append('BMs')
-    '''with open (os.path.join("/scratch/Project/benchmark_run/EnergyVsTimePlots", "table_latency.csv"), "w") as f:
-        write = csv.writer(f)
-        write.writerow(fields)
-        write.writerows(rows_latency)'''
+        fields_max_latency.append('BMs')
+        fields_mean_latency.append('BMs')
+        fields_watts_pack.append('BMs')
 
 if __name__ == "__main__":
     main()

@@ -8,8 +8,8 @@ from timeit import default_timer as timer
 import sys, getopt
 
 #Parameters for running
-PASSES = 1 
-HEAP_RUNS = 1
+#PASSES = 1 
+#HEAP_RUNS = 1
 
 #Path variables
 CLASSPATH_jRAPL="/scratch/Project/jRAPL"
@@ -18,6 +18,8 @@ CLASSPATH_DACAPO="/scratch/Project/Dacapo_jar:/scratch/Project/Dacapo_jar/harnes
 CLASSPATH_DACAPO_NEW_java16="/scratch/Project/DaCapo2021_java16.jar"
 CLASSPATH_DACAPO_NEW_java15="/scratch/Project/DaCapo2021_java15.jar"
 CLASSPATH_DACAPO_NEW_java13="/scratch/Project/DaCapo2021_java13.jar"
+CLASSPATH_RENAISSANCE="/scratch/Project/renaissance/target/renaissance-gpl-0.13.0-5-g76e6065.jar"
+MyCallback_RENAISSANCE="/scratch/Project/renaissance/plugins/energy-utils/target/plugin-energyutils-assembly-0.0.2.jar"
 CLASSPATH_HAZELCAST="/scratch/Project/jet-gc-benchmark/target/hazelcast-jet-4.2.jar:/scratch/Project/jet-gc-benchmark/target/jet-gc-benchmark-1.0-SNAPSHOT-jar-with-dependencies.jar:/scratch/Project/jRAPL_jar/build/Energy.jar:/scratch/Project/jet-gc-benchmark/target/classes/"
 FLAGS_HAZELCAST="--add-modules java.se --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.management/sun.management=ALL-UNNAMED"
 
@@ -30,15 +32,18 @@ JAVA_LOG = " -Xlog:gc* "
 
 #Specify here which bm+java you want to run
 Which_BM = {
-        "DaCapo21_j16", 
-        "DaCapo21_j15M1", 
-        "DaCapo21_j13",
+        #"DaCapo21_j16", 
+        #"DaCapo21_j15M1", 
+        #"DaCapo21_j13",
         #"DaCapo_j16", 
         #"DaCapo_j15M1", 
         #"DaCapo_j13", 
         "HazelCast_j16",
-        "HazelCast_j15M1",
-        "HazelCast_j13",
+        #"HazelCast_j15M1",
+        #"HazelCast_j13",
+        #"Renaissance_j13",
+        #"Renaissance_j16",
+        #"Renaissance_j15M1",
 } 
 
 #Specify GCs for each java version
@@ -59,7 +64,7 @@ GC15M1 = {
 
 GCHCast13 = { 
         "j13CMS": "-XX:+UseConcMarkSweepGC",
-	"j13Z": "-XX:+UnlockExperimentalVMOptions -XX:+UseZGC" ,
+	#"j13Z": "-XX:+UnlockExperimentalVMOptions -XX:+UseZGC" ,
 }
 
 GC16 = { 'j16Ser': '-XX:+UseSerialGC',
@@ -97,11 +102,11 @@ BM_Hazelcast = {
       #"hazelcast":             	" " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST + " org.example.StreamingRound3 [10k, 20k, 40k ... 100k]"
       }
 BM_DaCapo2021 = {
-      "zxing_def":                  	" zxing -n 25 -c ",
-      "tradesoap_small":             	" tradesoap -size small -n 25 -c ",#only young
-      "tradesoap_large":             	" tradesoap -size large -n 25 -c ",#only young
-      "tradesoap_huge":             	" tradesoap -size huge -n 25 -c ",#only young
-      "tradesoap_def":             	" tradesoap -n 25 -c ",#only young generation
+      #"zxing_def":                  	" zxing -n 25 -c ",
+      "tradesoap_small":             	" tradesoap -size small -n 15 -c ",#only young
+      "tradesoap_large":             	" tradesoap -size large -n 15 -c ",#only young
+      "tradesoap_huge":             	" tradesoap -size huge -n 15 -c ",#only young
+      "tradesoap_def":             	" tradesoap -n 15 -c ",#only young generation
       #"tomcat_small":             	" tomcat -size small",#fails with validation
       #"tomcat_large":             	" tomcat -size large",#fails with validation
       #"tomcat_def":             	" tomcat",#fails with validations
@@ -118,6 +123,33 @@ BM_DaCapo2021 = {
       #"h2_def":             	        " h2 -t 4",
       }
 
+BM_Renaissance = {
+      "als":             	"als --plugin ",#apache-spark
+      "chi-square":      	"chi-square --plugin ",
+      "dec-tree":               "dec-tree --plugin ",
+      "gauss-mix":              "gauss-mix --plugin ",
+      "log-regression":         "log-regression --plugin ",
+      "movie-lens":             "movie-lens --plugin ",
+      "naive-bayes":            "naive-bayes --plugin ",
+      "page-rank":              "page-rank --plugin ",
+      "akka-uct":               "akka-uct --plugin ",#concurrency
+      "fj-kmeans":              "fj-kmeans --plugin ",
+      "reactors":               "reactors --plugin ",
+      "db-shootout":            "db-shootout --plugin ",#database
+      "neo4j-analytics":        "neo4j-analytics --plugin ",
+      "future-genetic":         "future-genetic --plugin ",#functional
+      "mnemonics":              "mnemonics --plugin ",
+      "par-mnemonics":          "par-mnemonics --plugin ",
+      "rx-scrabble":            "rx-scrabble --plugin ",
+      "scrabble":               "scrabble --plugin ",
+      "dotty":                  "dotty --plugin ",#scala
+      "philosophers":           "philosophers --plugin ",
+      "scala-doku":             "scala-doku --plugin ",
+      "scala-kmeans":           "scala-kmeans --plugin ",
+      "scala-stm-bench7":       "scala-stm-bench7 --plugin ",
+      "finagle-chirper":        "finagle-chirper --plugin ",#web
+      "finagle-http":           "finagle-http --plugin ",
+      }
 #The maximum heap size for each application is set to 3X of its respective minimum heap size 
 HEAP_SIZES = {
 	"h2_small_t4": "210m",
@@ -139,7 +171,7 @@ HEAP_SIZES = {
 	"tradesoap_def": "27m", 
 	"graphchi_def": "700m", 
 	"biojava_def": "525m", 
-	"hazelcast": "4g" 
+	"hazelcast": "5g" 
 }
 
 def get_next_result_name(path):
@@ -165,7 +197,7 @@ def collect_data(binary, result_path):
 
 #We need to decide which space between heap sizes we want. In theory we want to have 
 #twice less GC cycles with the next heap size. 
-def heap_size_array(BM_tag):
+def heap_size_array(BM_tag, HEAP_RUNS):
     start_HS = 1
     start_Value = "m"
     param_max = "-Xmx"
@@ -191,17 +223,17 @@ def heap_size_array(BM_tag):
     #print(HS)
     return HS
 
-def execute_bm(BM_tag, BM_conf, GC, JAVA, JAVA_LOG, Callback, CLASSPATH):
+def execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, JAVA, JAVA_LOG, Callback, CLASSPATH):
     #print("Benchmarking " + BM_tag)
     for i in range(0, PASSES):
         for (GC_tag, GC_conf) in GC.items():
             #print(GC[GC_tag])
             if (GC_conf == '-XX:+UseParallelGC'):
                 for (THR_tag, THR_conf) in NUM_THREADS.items():
-                    HS = heap_size_array(BM_tag)
+                    HS = heap_size_array(BM_tagi, HEAP_RUNS)
                     for (HS_tag, HS_conf) in HS.items():
                         start = timer()
-                        result_path = os.path.join(os.getcwd(), "results", BM_tag, GC_tag + HS_tag, THR_tag)
+                        result_path = os.path.join(os.getcwd(), "results_" + BM_tag, BM_tag, GC_tag + HS_tag, THR_tag)
                         os.system("sudo mkdir -p " + result_path)
                         os.system("sudo chmod 777 " + result_path)
                         binary_hot = " ".join(["sudo numactl --cpunodebind=0 --membind=0", JAVA, JAVA_LOG, HS_conf, GC_conf, THR_conf, CLASSPATH, BM_conf, Callback])
@@ -210,10 +242,10 @@ def execute_bm(BM_tag, BM_conf, GC, JAVA, JAVA_LOG, Callback, CLASSPATH):
                         end = timer()
                         minutes = round((end - start) / 60.0, 3)
             else: 
-                HS = heap_size_array(BM_tag)
+                HS = heap_size_array(BM_tag, HEAP_RUNS)
                 for (HS_tag, HS_conf) in HS.items():
                     start = timer()
-                    result_path = os.path.join(os.getcwd(), "results", BM_tag, GC_tag + HS_tag)
+                    result_path = os.path.join(os.getcwd(), "results_" + BM_tag, BM_tag, GC_tag + HS_tag)
                     os.system("sudo mkdir -p " + result_path)
                     os.system("sudo chmod 777 " + result_path)
                     binary_hot = " ".join(["sudo numactl --cpunodebind=0 --membind=0 ", JAVA, JAVA_LOG, HS_conf, GC_conf, CLASSPATH, BM_conf, Callback])
@@ -229,6 +261,7 @@ def execute_bm(BM_tag, BM_conf, GC, JAVA, JAVA_LOG, Callback, CLASSPATH):
                         f2 = open(f2_path, 'r')
                         # appending the contents of the second file to the first file
                         f1.write(f2.read())
+                        os.system("sudo rm -rf " + f2_path)
 
 
 def main(argv):
@@ -244,38 +277,48 @@ def main(argv):
             print('collect_data.py -r <number_of_runs> -s <how_many_heap_sizes_to_test>')
             sys.exit()
         elif opt in ("-r", "--runs"):
-            PASSES = arg
+            PASSES = int(arg)
+            
         elif opt in ("-s", "--sizes"):
-            HEAP_RUNS = arg
+            HEAP_RUNS = int(arg)
     print("Starting to collect data with " + str(PASSES) + " passes")
     for BM in Which_BM:
         print(BM)
         if BM == "DaCapo_j16": 
             for (BM_tag, BM_conf) in BM_DaCapo.items():
-                execute_bm(BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG, "MyCallback", "-XX:+DisableExplicitGC -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness")
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG, "MyCallback", "-XX:+DisableExplicitGC -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness")
         elif BM == "DaCapo_j13":
             for (BM_tag, BM_conf) in BM_DaCapo.items():
-                execute_bm(BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, "MyCallback_java13", " -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness")
+                execute_bm(iPASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, "MyCallback_java13", " -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness")
         elif BM == "DaCapo_j15M1":
             for (BM_tag, BM_conf) in BM_DaCapo.items():
-                execute_bm(BM_tag, BM_conf, GC15M1, JAVA15M1, JAVA_LOG, "MyCallback_java15", " -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness")
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, JAVA_LOG, "MyCallback_java15", " -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness")
         elif BM == "DaCapo21_j16":
             for (BM_tag, BM_conf) in BM_DaCapo2021.items():
-                execute_bm(BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG, "MyCallback", " -jar " + CLASSPATH_DACAPO_NEW_java16)
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG, "MyCallback", " -jar " + CLASSPATH_DACAPO_NEW_java16)
         elif BM == "DaCapo21_j15M1":
             for (BM_tag, BM_conf) in BM_DaCapo2021.items():
-                execute_bm(BM_tag, BM_conf, GC15M1, JAVA15M1, JAVA_LOG, "MyCallback_java15", " -jar " + CLASSPATH_DACAPO_NEW_java15)
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, JAVA_LOG, "MyCallback_java15", " -jar " + CLASSPATH_DACAPO_NEW_java15)
         elif BM == "DaCapo21_j13":
             for (BM_tag, BM_conf) in BM_DaCapo2021.items():
-                execute_bm(BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, "MyCallback_java13", " -jar " + CLASSPATH_DACAPO_NEW_java13)
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, "MyCallback_java13", " -jar " + CLASSPATH_DACAPO_NEW_java13)
         elif BM ==  "HazelCast_j16":    
             for (BM_tag, BM_conf) in BM_Hazelcast.items():
-                execute_bm(BM_tag, BM_conf, GCHCast16, JAVA16_HOT, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GCHCast16, JAVA16_HOT, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
         elif BM ==  "HazelCast_j15M1":    
             for (BM_tag, BM_conf) in BM_Hazelcast.items():
-                execute_bm(BM_tag, BM_conf, GC15M1, JAVA15M1, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
         elif BM ==  "HazelCast_j13":    
             for (BM_tag, BM_conf) in BM_Hazelcast.items():
-                execute_bm(BM_tag, BM_conf, GCHCast13, JAVA13, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GCHCast13, JAVA13, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
+        elif BM ==  "Renaissance_j13":    
+            for (BM_tag, BM_conf) in BM_Renaissance.items():
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
+        elif BM ==  "Renaissance_j16":    
+            for (BM_tag, BM_conf) in BM_Renaissance.items():
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
+        elif BM ==  "Renaissance_j15M1":    
+            for (BM_tag, BM_conf) in BM_Renaissance.items():
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, JAVA_LOG, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
 
 if __name__ == "__main__": main(sys.argv[1:])

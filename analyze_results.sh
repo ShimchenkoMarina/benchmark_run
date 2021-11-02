@@ -61,8 +61,20 @@ for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
         cat ${raw_dir}/${i}.txt | grep "Execution time" | cut -d ' ' -f 3 >> ${raw_dir}/watts_cpu/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "Execution time" | cut -d ' ' -f 3 >> ${raw_dir}/watts_dram/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "Execution time" | cut -d ' ' -f 3 >> ${raw_dir}/watts_pack/${i}.txt
-        cat ${raw_dir}/${i}.txt | grep "#\[Mean" | grep "#\[Mean" | cut -d '=' -f 2 | cut -d ',' -f 1 >> ${raw_dir}/mean_latency/${i}.txt
-        cat ${raw_dir}/${i}.txt | grep "#\[Max" | grep "#\[Mean" | cut -d '=' -f 2 | cut -d ',' -f 1 >> ${raw_dir}/max_latency/${i}.txt
+        cat ${raw_dir}/${i}.txt | grep "Duration" | cut -d ' ' -f 2 >> ${raw_dir}/perf/${i}.txt
+        cat ${raw_dir}/${i}.txt | grep "Duration" | cut -d ' ' -f 2 >> ${raw_dir}/watts_pack/${i}.txt
+        cat ${raw_dir}/${i}.txt | grep "Duration" | cut -d ' ' -f 2 >> ${raw_dir}/watts_dram/${i}.txt
+        cat ${raw_dir}/${i}.txt | grep "Duration" | cut -d ' ' -f 2 >> ${raw_dir}/watts_cpu/${i}.txt
+        cat ${raw_dir}/${i}.txt | grep "#\[Mean" | cut -d '=' -f 2 | cut -d ',' -f 1 >> ${raw_dir}/mean_latency/${i}.txt
+       	if [ ! -s ${raw_dir}/mean_latency/${i}.txt ]
+       	then
+             sudo rm -rf ${raw_dir}/mean_latency/${i}.txt
+	fi
+        cat ${raw_dir}/${i}.txt | grep "#\[Max" | cut -d '=' -f 2 | cut -d ',' -f 1 >> ${raw_dir}/max_latency/${i}.txt
+       	if [ ! -s ${raw_dir}/max_latency/${i}.txt ]
+       	then
+             sudo rm -rf ${raw_dir}/max_latency/${i}.txt
+	fi
     done
     done
 done
