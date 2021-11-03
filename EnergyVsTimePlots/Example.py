@@ -13,8 +13,9 @@ import pandas as pd
 import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
-
-
+import matplotlib
+import random
+import string
 # In[2]:
 #We want to have several output graphs:
 #Energy vs Perf +
@@ -24,11 +25,12 @@ import matplotlib.pyplot as plt
 #Power vs max_Latency
 #Power vs mean_Latency
 
-energy_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith("cast.csv") and f.startswith("table_energy"))])
-perf_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith("cast.csv") and f.startswith("table_perf"))])
-maxl_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith("cast.csv") and f.startswith("table_max_l"))])
-meanl_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith("cast.csv") and f.startswith("table_mean_l"))])
-wattsp_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith("cast.csv") and f.startswith("table_watts_p"))])
+my_markers = [".", "o", "v", "<", ">", "^", "P", "p", "*", "+", "X", "D", 's', 'h', 'x', '8', 'd', 'H', "1", "2", "3", "4"]
+energy_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith("h2_large_t4.csv") and f.startswith("table_energy"))])
+perf_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith("h2_large_t4.csv") and f.startswith("table_perf"))])
+maxl_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith("h2_large_t4.csv") and f.startswith("table_max_l"))])
+meanl_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith("h2_large_t4.csv") and f.startswith("table_mean_l"))])
+wattsp_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith("h2_large_t4.csv") and f.startswith("table_watts_p"))])
 for energy_file, perf_file, maxl_file, meanl_file, wattsp_file in zip(energy_files, perf_files, maxl_files, meanl_files, wattsp_files):
     # Reads data from the first configuration
     print(energy_file)
@@ -123,8 +125,17 @@ for energy_file, perf_file, maxl_file, meanl_file, wattsp_file in zip(energy_fil
                 column_x = "MeanL"
                 ax[index_x][index_y].set(xscale="log")
             plot_data = pd.merge(left, right, on='GC')
+            #print(plot_data)
+            #print(plot_data.sort_values("GC"))
+            '''indexes = []
+            for index in plot_data.index:
+                if "5g" not in plot_data["GC"][index]:
+                    indexes.append(index)
+            print(indexes)
+            plot_data.drop(index=indexes, axis=0, inplace=True)'''
             print(plot_data)
-            ax[index_x][index_y].set(title=(f'{column_y} and {column_x}'))
+            ax[index_x][index_y].set(title=(f"{column_y} and {column_x}"))
             plt.sca(ax[index_x][index_y])
-            sns.scatterplot(data=plot_data, s=300, x=column_x, y=column_y, hue=plot_data['GC'], palette = sns.color_palette('gnuplot', n_colors=len(plot_data['GC']))).get_figure().savefig(str(bm[0]) + ".png")
+            #sns.scatterplot(data=plot_data, s=300, x=column_x, y=column_y, hue=plot_data['GC'], palette = sns.color_palette('gnuplot', n_colors=len(plot_data['GC']))).get_figure().savefig(str(bm[0]) + ".png")
+            sns.scatterplot(data=plot_data, s=300, x=column_x, y=column_y, hue=plot_data['GC'], style=plot_data["GC"], palette = sns.color_palette('gnuplot',n_colors=len(plot_data['GC']))).get_figure().savefig(str(bm[0]) + ".png")
             #splot.set(xscale="log")
