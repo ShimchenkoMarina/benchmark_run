@@ -24,16 +24,17 @@ import string
 #Power vs Perf
 #Power vs max_Latency
 #Power vs mean_Latency
-
+bench = "cast"
 my_markers = [".", "o", "v", "<", ">", "^", "P", "p", "*", "+", "X", "D", 's', 'h', 'x', '8', 'd', 'H', "1", "2", "3", "4"]
-energy_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith("h2_large_t4.csv") and f.startswith("table_energy"))])
-perf_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith("h2_large_t4.csv") and f.startswith("table_perf"))])
-maxl_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith("h2_large_t4.csv") and f.startswith("table_max_l"))])
-meanl_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith("h2_large_t4.csv") and f.startswith("table_mean_l"))])
-wattsp_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith("h2_large_t4.csv") and f.startswith("table_watts_p"))])
-for energy_file, perf_file, maxl_file, meanl_file, wattsp_file in zip(energy_files, perf_files, maxl_files, meanl_files, wattsp_files):
+energy_pack_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_energy_pack"))])
+energy_cpu_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_energy_cpu"))])
+energy_dram_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_energy_dram"))])
+perf_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_perf"))])
+maxl_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_max_l"))])
+meanl_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_mean_l"))])
+wattsp_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_watts_p"))])
+for energy_pack_file,energy_cpu_file, energy_dram_file, perf_file, maxl_file, meanl_file, wattsp_file in zip(energy_pack_files, energy_cpu_files, energy_dram_files, perf_files, maxl_files, meanl_files, wattsp_files):
     # Reads data from the first configuration
-    print(energy_file)
     original_data1 = pd.read_csv(perf_file, sep=';', index_col="BMs")
     # Organizes it for plotting
     data1 = original_data1.stack().reset_index()
@@ -44,8 +45,8 @@ for energy_file, perf_file, maxl_file, meanl_file, wattsp_file in zip(energy_fil
             replace_data[idx] = np.nan
     data1["Time"] = replace_data
 
-    # Reads data from the second configuration
-    original_data2 = pd.read_csv(energy_file, sep=';', index_col="BMs")
+    # Reads energy for the pack
+    original_data2 = pd.read_csv(energy_pack_file, sep=';', index_col="BMs")
     # Organizes it for plotting
     data2 = original_data2.stack().reset_index()
     data2.columns = ['BM', 'GC', 'Energy']
@@ -55,7 +56,7 @@ for energy_file, perf_file, maxl_file, meanl_file, wattsp_file in zip(energy_fil
             replace_data[idx] = np.nan
     data2["Energy"] = replace_data
 
-    # Reads data from the 3d configuration
+    # Reads max latency
     original_data3 = pd.read_csv(maxl_file, sep=';', index_col="BMs")
     # Organizes it for plotting
     data3 = original_data3.stack().reset_index()
@@ -66,7 +67,7 @@ for energy_file, perf_file, maxl_file, meanl_file, wattsp_file in zip(energy_fil
             replace_data[idx] = np.nan
     data3["MaxL"] = replace_data
     
-    # Reads data from the 4th configuration
+    # Reads mean latency
     original_data4 = pd.read_csv(meanl_file, sep=';', index_col="BMs")
     # Organizes it for plotting
     data4 = original_data4.stack().reset_index()
@@ -77,7 +78,7 @@ for energy_file, perf_file, maxl_file, meanl_file, wattsp_file in zip(energy_fil
             replace_data[idx] = np.nan
     data4["MeanL"] = replace_data
     
-    # Reads data from the second configuration
+    # Reads power
     original_data5 = pd.read_csv(wattsp_file, sep=';', index_col="BMs")
     # Organizes it for plotting
     data5 = original_data5.stack().reset_index()
@@ -88,6 +89,30 @@ for energy_file, perf_file, maxl_file, meanl_file, wattsp_file in zip(energy_fil
             replace_data[idx] = np.nan
     data5["WattsP"] = replace_data
 
+    # Reads energy for the pack
+    original_data6 = pd.read_csv(energy_cpu_file, sep=';', index_col="BMs")
+    # Organizes it for plotting
+    data6 = original_data6.stack().reset_index()
+    data6.columns = ['BM', 'GC', 'EnergyC']
+    replace_data = data6["EnergyC"]
+    for idx, data in enumerate(replace_data):
+        if type(data) is str:
+            replace_data[idx] = np.nan
+    data6["EnergyC"] = replace_data
+
+
+    # Reads energy for the pack
+    original_data7 = pd.read_csv(energy_dram_file, sep=';', index_col="BMs")
+    # Organizes it for plotting
+    data7 = original_data7.stack().reset_index()
+    data7.columns = ['BM', 'GC', 'EnergyD']
+    replace_data = data7["EnergyD"]
+    for idx, data in enumerate(replace_data):
+        if type(data) is str:
+            replace_data[idx] = np.nan
+    data7["EnergyD"] = replace_data
+
+
     # Organizes information related to the regions and configurations used
     #configurations = original_data1.columns
     bms1 = original_data1.index
@@ -96,23 +121,17 @@ for energy_file, perf_file, maxl_file, meanl_file, wattsp_file in zip(energy_fil
     print(bms2)
     bm = [value for value in bms1 if value in bms2]
     print(bm)
-    regions = [["EnerPerf", "PowerPerf"], ["EnerMaxL", "EnerMeanL"], ["PowerMaxL", "PowerMeanL"]]
+    regions = [["EnerFPerf", "PowerFPerf"], ["EnerCPerf", "EnerDPerf"], ["EnerFMaxL", "EnerFMeanL"], ["PowerFMaxL", "PowerFMeanL"]]
     
     # In[3]:
     
     
     # Generate scatterplots
-    fig,ax = plt.subplots(3,2, figsize=(15, 3*15), gridspec_kw={'width_ratios': [1, 1], 'height_ratios': [1, 1, 1]})
+    fig,ax = plt.subplots(4,2, figsize=(15, 4*15), gridspec_kw={'width_ratios': [1, 1], 'height_ratios': [1, 1, 1, 1]})
     column_y = ""
     column_x = ""
     for index_x, tuple_region in enumerate(regions):
         for index_y, region in enumerate(tuple_region):
-            if "Ener" in region:
-                left = data2
-                column_y = "Energy"
-            elif "Power" in region:
-                left = data5
-                column_y = "WattsP"
             if "Perf" in region:
                 right = data1
                 column_x = "Time"
@@ -124,8 +143,20 @@ for energy_file, perf_file, maxl_file, meanl_file, wattsp_file in zip(energy_fil
                 right = data4
                 column_x = "MeanL"
                 ax[index_x][index_y].set(xscale="log")
+            if "EnerF" in region:
+                left = data2
+                column_y = "Energy"
+            elif "PowerF" in region:
+                left = data5
+                column_y = "WattsP"
+            elif "EnerC" in region:
+                left = data6
+                column_y = "EnergyC"
+            elif "EnerD" in region:
+                left = data7
+                column_y = "EnergyD"
             plot_data = pd.merge(left, right, on='GC')
-            #print(plot_data)
+            print(plot_data)
             #print(plot_data.sort_values("GC"))
             '''indexes = []
             for index in plot_data.index:
@@ -133,9 +164,9 @@ for energy_file, perf_file, maxl_file, meanl_file, wattsp_file in zip(energy_fil
                     indexes.append(index)
             print(indexes)
             plot_data.drop(index=indexes, axis=0, inplace=True)'''
-            print(plot_data)
+            #print(plot_data)
             ax[index_x][index_y].set(title=(f"{column_y} and {column_x}"))
             plt.sca(ax[index_x][index_y])
             #sns.scatterplot(data=plot_data, s=300, x=column_x, y=column_y, hue=plot_data['GC'], palette = sns.color_palette('gnuplot', n_colors=len(plot_data['GC']))).get_figure().savefig(str(bm[0]) + ".png")
-            sns.scatterplot(data=plot_data, s=300, x=column_x, y=column_y, hue=plot_data['GC'], style=plot_data["GC"], palette = sns.color_palette('gnuplot',n_colors=len(plot_data['GC']))).get_figure().savefig(str(bm[0]) + ".png")
+            sns.scatterplot(data=plot_data, s=300, x=column_x, y=column_y, hue=plot_data['GC'], style=plot_data["GC"]).get_figure().savefig(str(bm[0]) + ".png")
             #splot.set(xscale="log")
