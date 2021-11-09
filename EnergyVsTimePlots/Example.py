@@ -24,7 +24,7 @@ import string
 #Power vs Perf
 #Power vs max_Latency
 #Power vs mean_Latency
-bench = "cast"
+bench = ""
 my_markers = [".", "o", "v", "<", ">", "^", "P", "p", "*", "+", "X", "D", 's', 'h', 'x', '8', 'd', 'H', "1", "2", "3", "4"]
 energy_pack_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_energy_pack"))])
 energy_cpu_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_energy_cpu"))])
@@ -33,7 +33,8 @@ perf_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".cs
 maxl_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_max_l"))])
 meanl_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_mean_l"))])
 wattsp_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_watts_p"))])
-for energy_pack_file,energy_cpu_file, energy_dram_file, perf_file, maxl_file, meanl_file, wattsp_file in zip(energy_pack_files, energy_cpu_files, energy_dram_files, perf_files, maxl_files, meanl_files, wattsp_files):
+gc_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_GC"))])
+for energy_pack_file,energy_cpu_file, energy_dram_file, perf_file, maxl_file, meanl_file, wattsp_file, gc_file in zip(energy_pack_files, energy_cpu_files, energy_dram_files, perf_files, maxl_files, meanl_files, wattsp_files, gc_files):
     # Reads data from the first configuration
     original_data1 = pd.read_csv(perf_file, sep=';', index_col="BMs")
     # Organizes it for plotting
@@ -111,7 +112,18 @@ for energy_pack_file,energy_cpu_file, energy_dram_file, perf_file, maxl_file, me
         if type(data) is str:
             replace_data[idx] = np.nan
     data7["EnergyD"] = replace_data
-
+    
+    # Reads energy for the pack
+    original_data8 = pd.read_csv(gc_file, sep=';', index_col="BMs")
+    # Organizes it for plotting
+    data8 = original_data8.stack().reset_index()
+    data8.columns = ['BM', 'GC', 'GC_cycles']
+    replace_data = data8["GC_cycles"]
+    for idx, data in enumerate(replace_data):
+        if type(data) is str:
+            replace_data[idx] = np.nan
+    data8["GC_cycles"] = replace_data
+    print(data8)
 
     # Organizes information related to the regions and configurations used
     #configurations = original_data1.columns
@@ -127,7 +139,7 @@ for energy_pack_file,energy_cpu_file, energy_dram_file, perf_file, maxl_file, me
     
     
     # Generate scatterplots
-    fig,ax = plt.subplots(4,2, figsize=(15, 4*15), gridspec_kw={'width_ratios': [1, 1], 'height_ratios': [1, 1, 1, 1]})
+    fig,ax = plt.subplots(5,2, figsize=(15, 5*15), gridspec_kw={'width_ratios': [1, 1], 'height_ratios': [1, 1, 1, 1, 1]})
     column_y = ""
     column_x = ""
     for index_x, tuple_region in enumerate(regions):
@@ -170,3 +182,7 @@ for energy_pack_file,energy_cpu_file, energy_dram_file, perf_file, maxl_file, me
             #sns.scatterplot(data=plot_data, s=300, x=column_x, y=column_y, hue=plot_data['GC'], palette = sns.color_palette('gnuplot', n_colors=len(plot_data['GC']))).get_figure().savefig(str(bm[0]) + ".png")
             sns.scatterplot(data=plot_data, s=300, x=column_x, y=column_y, hue=plot_data['GC'], style=plot_data["GC"]).get_figure().savefig(str(bm[0]) + ".png")
             #splot.set(xscale="log")
+    
+    ax[4][0].set(title=(f"GC_cycles per version"))
+    plt.sca(ax[4][0])
+    sns.scatterplot(data=data8, s=300, x="GC", y="GC_cycles", hue=data8['GC'], style=data8["GC"]).get_figure().savefig(str(bm[0]) + ".png")
