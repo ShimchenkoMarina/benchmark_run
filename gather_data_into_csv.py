@@ -6,14 +6,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.ticker as plticker
 import csv
-
+import sys
 #baseline_name = "j16SerH"
 #all_order = ["j16SerH", "j13P_n4", "j13P_n1", "j13P_n2", "j13CMS", "j13Ser", "j16ShenH", "j16ZH", "j16G1H", "j16PH_n1", "j16PH_n2", "j16PH_n4"]
 order = []
 #baseline_priority = ["Ser", "CMS", "P", "Z"]
 bms = list()
-rows_energy = []
-rows_perf = []
+rows = []
+fields = ["BMs"]
+'''rows_perf = []
 rows_max_latency = []
 rows_mean_latency = []
 rows_latency = []
@@ -22,7 +23,7 @@ fields_energy = ["BMs"]
 fields_perf = ["BMs"]
 fields_max_latency = ["BMs"]
 fields_mean_latency = ["BMs"]
-fields_watts_pack = ["BMs"]
+fields_watts_pack = ["BMs"]'''
 STR_TYPE = "Type"
 STR_N = "N"
 STR_MEAN = "Mean"
@@ -47,16 +48,8 @@ def read_data(sample, data, configuration_name, benchmark_name):
 def extract_ordered_data(data, sample):
     ordered_data = list()
     for conf in data:
-        if "energy" in sample:
-            fields_energy.append(conf) 
-        if "perf" in sample:
-            fields_perf.append(conf) 
-        if "max_latency" in sample:
-            fields_max_latency.append(conf) 
-        if "mean_latency" in sample:
-            fields_mean_latency.append(conf) 
-        if "watts_pack" in sample:
-            fields_watts_pack.append(conf) 
+        fields.append(conf)
+        order.append(conf)
         ordered_data.append((conf, data[conf]))
     return ordered_data
 
@@ -76,12 +69,10 @@ def analyze_data(sample, data, baseline, baseline_name, benchmark_name):
             STR_N: d.size,
             STR_MEAN: mean,
             STR_STD: std,
-            STR_STD_MEAN: std / mean,
-            STR_PERF: 1 - mean.divide(baseline[0][STR_MEAN].values[0])  # 1- row$mean/baseline
+            STR_STD_MEAN: std / mean
                 })
         results_points = results_points.join(d, how="outer")
         results_aggregated = results_aggregated.append(result)
-    #results_aggregated = results_aggregated.sort_values(by=[STR_PERF])
     results_aggregated.index = range(1, len(results_aggregated.index) + 1)
    
     return results_aggregated, results_points
@@ -107,13 +98,26 @@ def analyze_baseline(sample, data, baseline, benchmark_name):
     return result_aggregated, d
 
 def normalized_data(df, baseline_name):
-    result = [0.0]
+    result = []
     b = float(df.loc[df[STR_TYPE] == baseline_name][STR_MEAN].values[0])
     for o in order:
         if o == baseline_name:
+            result.append(1.0)
             continue
-        result.append(100.0 * (float(df.loc[df[STR_TYPE] == o][STR_MEAN].values[0])/b - 1))
+        result.append(float(df.loc[df[STR_TYPE] == o][STR_MEAN].values[0])/b)
     return result
+
+def find_best_baseline(res):
+    min_value = res[STR_MEAN].values[0]
+    conf_name = ""
+    for index, number in enumerate(res[STR_MEAN]):
+        if number < min_value:
+            min_value = number
+            conf_name = res[STR_TYPE].values[index]
+    if (conf_name == ""):
+        conf_name = res[STR_TYPE].values[0]
+    return conf_name
+            
 
 def store_result(sample, result, res_folder, benchmark_name, baseline_name):
     #So I need to create a list like this
@@ -126,18 +130,15 @@ def store_result(sample, result, res_folder, benchmark_name, baseline_name):
     result_aggregated, result_points = result
     result_dir = os.path.join("processed_results", res_folder, benchmark_name)
     pathlib.Path(result_dir).mkdir(parents=True, exist_ok=True)
-    for number in result_aggregated[STR_MEAN].astype(float).map("{: .2f}".format):
-        row.append(number)
-    if "energy" in sample:
-        rows_energy.append(row)
-    if "perf" in sample:
-        rows_perf.append(row)
-    if "max_latency" in sample:
-        rows_max_latency.append(row)
-    if "mean_latency" in sample:
-        rows_mean_latency.append(row)
-    if "watts_pack" in sample:
-        rows_watts_pack.append(row)
+    baseline_name = find_best_baseline(result_aggregated)
+    if "GC" not in sample:
+        normilized_results = normalized_data(result_aggregated, baseline_name)
+        for number in normilized_results:
+            row.append("{:.2f}".format(number)) 
+    else:
+        for number in result_aggregated[STR_MEAN]:
+            row.append("{:.2f}".format(number)) 
+    rows.append(row)
 
 def has_contents(data, sample):
     for file in data:
@@ -198,12 +199,14 @@ def main():
     #       fmt ='% s')
     for (benchmark_name, allconf_runs) in benchmarks_conf.items():
         print(benchmark_name)
+        #if "akka" not in benchmark_name:
+        #    continue
         baseline_name = ""
         dict_for_benchmark = {}
         for conf_runs in allconf_runs:
             if isinstance(conf_runs, dict):
                 for conf in conf_runs:
-                    print(conf)
+                    #print(conf)
                     if baseline_name == "":
                         baseline_name = conf
                     append_value(dict_for_benchmark, conf, conf_runs[conf])
@@ -211,53 +214,21 @@ def main():
                 if baseline_name == "":
                     baseline_name = conf_runs
                 append_value(dict_for_benchmark, conf_runs, allconf_runs[conf_runs])
-        #print(dict_for_benchmark[baseline_name])
-        #TODO: add latency parcing
-        #TODO: add multiple measurements handeling
-        measurement = ["energy_pack", "perf", "max_latency", "mean_latency", "watts_pack"]
+        measurement = ["energy_pack", "perf", "max_latency", "mean_latency", "watts_pack", "energy_dram", "energy_cpu", "GC_cycles"]
+        #measurement = ["GC_cycles"]
         for m in measurement:
+            #print(m)
             baseline = analyze_baseline(m, dict_for_benchmark[baseline_name], baseline_name, benchmark_name)
             result = analyze_data(m, dict_for_benchmark, baseline, baseline_name, benchmark_name)
             store_result(m, result, res_folder, benchmark_name, baseline_name)
-        if (fields_energy != fields_perf):
-            print("Error for" + benchmark_name)
-            print("energy = " + fields_energy)
-            print("perf = " + fields_perf)
-        with open (os.path.join(os.getcwd() + "/EnergyVsTimePlots", "table_energy_" + benchmark_name + ".csv"), "w+") as f:
-            write = csv.writer(f, skipinitialspace=True, delimiter=';', quoting=csv.QUOTE_NONE)
-            write.writerow(fields_energy)
-            write.writerows(rows_energy)
-        with open (os.path.join(os.getcwd() + "/EnergyVsTimePlots", "table_perf_" + benchmark_name + ".csv"), "w+") as f:
-            write = csv.writer(f, skipinitialspace=True, delimiter=';', quoting=csv.QUOTE_NONE)
-            write.writerow(fields_perf)
-            write.writerows(rows_perf)
-        with open (os.path.join(os.getcwd() + "/EnergyVsTimePlots", "table_max_latency_" + benchmark_name + ".csv"), "w+") as f:
-            write = csv.writer(f, skipinitialspace=True, delimiter=';', quoting=csv.QUOTE_NONE)
-            write.writerow(fields_max_latency)
-            write.writerows(rows_max_latency)
-        with open (os.path.join(os.getcwd() + "/EnergyVsTimePlots", "table_mean_latency_" + benchmark_name + ".csv"), "w+") as f:
-            write = csv.writer(f, skipinitialspace=True, delimiter=';', quoting=csv.QUOTE_NONE)
-            write.writerow(fields_mean_latency)
-            write.writerows(rows_mean_latency)
-        with open (os.path.join(os.getcwd() + "/EnergyVsTimePlots", "table_watts_pack_" + benchmark_name + ".csv"), "w+") as f:
-            write = csv.writer(f, skipinitialspace=True, delimiter=';', quoting=csv.QUOTE_NONE)
-            write.writerow(fields_watts_pack)
-            write.writerows(rows_watts_pack)
-        rows_perf.clear()
-        rows_max_latency.clear()
-        rows_mean_latency.clear()
-        rows_energy.clear()
-        rows_watts_pack.clear()
-        fields_energy.clear()
-        fields_perf.clear()
-        fields_max_latency.clear()
-        fields_mean_latency.clear()
-        fields_watts_pack.clear()
-        fields_perf.append('BMs')
-        fields_energy.append('BMs')
-        fields_max_latency.append('BMs')
-        fields_mean_latency.append('BMs')
-        fields_watts_pack.append('BMs')
+            with open (os.path.join(os.getcwd() + "/EnergyVsTimePlots", "table_" + m + "_" + benchmark_name + ".csv"), "w+") as f:
+                write = csv.writer(f, skipinitialspace=True, delimiter=';', quoting=csv.QUOTE_NONE)
+                write.writerow(fields)
+                write.writerows(rows)
+            rows.clear()
+            fields.clear()
+            order.clear()
+            fields.append('BMs')
 
 if __name__ == "__main__":
     main()

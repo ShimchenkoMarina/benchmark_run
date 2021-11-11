@@ -9,9 +9,9 @@ for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
     for (( soc=0; soc<$SOCKETS; soc++ )); do
     o1=raw_dir/"${dir}_s${soc}"
     o2=processed_results/"${dir}_s${soc}"
-    rm -rf $o1
+    #rm -rf $o1
     mkdir -p $o1
-    rm -rf $o2
+    #rm -rf $o2
     mkdir -p $o2
 
     raw_dir=$(realpath $o1/.)
@@ -49,14 +49,14 @@ for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
     		continue
 	fi
         python3 ${__dir}/process_file.py ${input_dir} ${raw_dir} ${i}.txt
-        rm -f ${raw_dir}/energy/${i}.txt
+        #rm -f ${raw_dir}/energy/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "Power consumption of dram s${soc}" | cut -d ' ' -f 6 >> ${raw_dir}/energy_dram/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "Power consumption of dram s${soc}" | cut -d ' ' -f 6 >> ${raw_dir}/watts_dram/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "Power consumption of cpu s${soc}" | cut -d ' ' -f 6 >> ${raw_dir}/energy_cpu/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "Power consumption of cpu s${soc}" | cut -d ' ' -f 6 >> ${raw_dir}/watts_cpu/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "Power consumption of package s${soc}" | cut -d ' ' -f 6 >> ${raw_dir}/energy_pack/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "Power consumption of package s${soc}" | cut -d ' ' -f 6 >> ${raw_dir}/watts_pack/${i}.txt
-        cat ${raw_dir}/${i}.txt | grep "GC(" | cut -d ' ' -f 2| cut -d '(' -f 2| cut -d ')' -f 1 >> ${raw_dir}/GC_cycles/${i}.txt
+        cat ${raw_dir}/${i}.txt | grep "GC(" | cut -d '(' -f 2| cut -d ')' -f 1 >> ${raw_dir}/GC_cycles/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "Execution time" | cut -d ' ' -f 3 >> ${raw_dir}/perf/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "Execution time" | cut -d ' ' -f 3 >> ${raw_dir}/watts_cpu/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "Execution time" | cut -d ' ' -f 3 >> ${raw_dir}/watts_dram/${i}.txt
@@ -65,12 +65,16 @@ for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
         cat ${raw_dir}/${i}.txt | grep "Duration" | cut -d ' ' -f 2 >> ${raw_dir}/watts_pack/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "Duration" | cut -d ' ' -f 2 >> ${raw_dir}/watts_dram/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "Duration" | cut -d ' ' -f 2 >> ${raw_dir}/watts_cpu/${i}.txt
-        cat ${raw_dir}/${i}.txt | grep "#\[Mean" | cut -d '=' -f 2 | cut -d ',' -f 1 >> ${raw_dir}/mean_latency/${i}.txt
-       	if [ ! -s ${raw_dir}/mean_latency/${i}.txt ]
+        cat ${raw_dir}/${i}.txt | grep "#\[Mean" | cut -d '=' -f 2 | cut -d '','' -f 1 >> ${raw_dir}/mean_latency/${i}.txt
+       	cat ${raw_dir}/${i}.txt | grep "completed (" | cut -d '(' -f 3 | cut -d ')' -f 1 | cut -d ' ' -f 1 >> ${raw_dir}/perf/${i}.txt
+       	cat ${raw_dir}/${i}.txt | grep "completed (" | cut -d '(' -f 3 | cut -d ')' -f 1 | cut -d ' ' -f 1 >> ${raw_dir}/watts_cpu/${i}.txt
+       	cat ${raw_dir}/${i}.txt | grep "completed (" | cut -d '(' -f 3 | cut -d ')' -f 1 | cut -d ' ' -f 1 >> ${raw_dir}/watts_dram/${i}.txt
+       	cat ${raw_dir}/${i}.txt | grep "completed (" | cut -d '(' -f 3 | cut -d ')' -f 1 | cut -d ' ' -f 1 >> ${raw_dir}/watts_pack/${i}.txt
+	if [ ! -s ${raw_dir}/mean_latency/${i}.txt ]
        	then
              sudo rm -rf ${raw_dir}/mean_latency/${i}.txt
 	fi
-        cat ${raw_dir}/${i}.txt | grep "#\[Max" | cut -d '=' -f 2 | cut -d ',' -f 1 >> ${raw_dir}/max_latency/${i}.txt
+        cat ${raw_dir}/${i}.txt | grep "#\[Max" | cut -d '=' -f 2 | cut -d '','' -f 1 >> ${raw_dir}/max_latency/${i}.txt
        	if [ ! -s ${raw_dir}/max_latency/${i}.txt ]
        	then
              sudo rm -rf ${raw_dir}/max_latency/${i}.txt

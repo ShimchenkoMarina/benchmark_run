@@ -4,6 +4,56 @@ import os
 import re
 from functools import reduce
 
+GC_cycles_convert = {
+                    "zxing": 25,
+                    "tradesoap": 15,
+                    "graphchi": 25,
+                    "jme_def": 25,
+                    "biojava": 25,
+                    "h2_small": 50,
+                    "h2_large": 30,
+                    "h2_huge": 10,
+                    "avrora": 17,
+                    "fop_default": 50,
+                    "juthon": 20,
+                    "luindex": 30,
+                    "lusearch": 20,
+                    "pmd": 30,
+                    "sunflow": 20,
+                    "xalan": 20,
+                    "hazelcast": 1,
+                    "als": 30,
+                    "dec-tree": 40,
+                    "chi-square": 60,
+                    "gauss-mix": 40,
+                    "log-regression": 20,
+                    "movie-lens": 20,
+                    "naive-bayes": 30,
+                    "page-rank": 20,
+                    "akka-uct": 24,
+                    "fj-kmeans": 30,
+                    "reactors": 10,
+                    "db-shootout": 16,
+                    "neo4j-analytics": 20,
+                    "future-genetic": 50,
+                    "mnemonics": 16,
+                    "par-mnemonics": 16,
+                    "rx-scrabble": 80,
+                    "scrabble": 50,
+                    "dotty": 50,
+                    "philosophers": 30,
+                    "scala-doku": 20,
+                    "scala-kmeans": 50,
+                    "scala-stm-bench7": 60,
+                    "finagle-chirper": 90,
+                    "finagle-http": 12
+}
+
+def separate_number_chars(s):
+    res = re.split('([-+]?\d+\.\d+)|([-+]?\d+)', s.strip())
+    res_f = [r.strip() for r in res if r is not None and r.strip() != '']
+    return res_f
+
 def avg(l):
     return reduce(lambda a, b: a + b, l) / len(l)
 
@@ -26,10 +76,14 @@ def analyze_file(input_dir, output_dir, file_num):
         with open(os.path.join(input_dir, "mean_latency", file_num), 'r') as reader:
             for line in reader.readlines():
                 line = line.replace(",", ".")
-                if (float(line) > 0):
-                    mean_latency_list.append(float(line))
-                else: 
-                    mean_latency_list.append(float(line) + OVERFLOW_CONST)
+                try:
+                    if (float(line) > 0):
+                        mean_latency_list.append(float(line))
+                    else: 
+                        mean_latency_list.append(float(line) + OVERFLOW_CONST)
+                except:
+                    with open(os.path.join("bug_report.txt"), "a") as writer:
+                        writer.write("Check numbers in (did not convert) : " +  input_dir + file_num + '\n')
         with open(os.path.join(output_dir, "mean_latency.txt"), "a+") as writer:
             if (len(mean_latency_list) > 0):
                 writer.write(str(avg(mean_latency_list)) + '\n')
@@ -39,57 +93,95 @@ def analyze_file(input_dir, output_dir, file_num):
         with open(os.path.join(input_dir, "max_latency", file_num), 'r') as reader:
             for line in reader.readlines():
                 line = line.replace(",", ".")
-                if (float(line) > 0):
-                    max_latency_list.append(float(line))
-                else: 
-                    max_latency_list.append(float(line) + OVERFLOW_CONST)
+                try:
+                    if (float(line) > 0):
+                        max_latency_list.append(float(line))
+                    else: 
+                        max_latency_list.append(float(line) + OVERFLOW_CONST)
+                except:
+                    with open(os.path.join("bug_report.txt"), "a") as writer:
+                        writer.write("Check numbers in (did not convert) : " +  input_dir + file_num + '\n')
+
         with open(os.path.join(output_dir, "max_latency.txt"), "a+") as writer:
            if (len(max_latency_list) > 0):
                writer.write(str(avg(max_latency_list)) + '\n')
 
     with open(os.path.join(input_dir, "energy_cpu", file_num), 'r') as reader:
         for line in reader.readlines():
-            if (float(line) > 0):
-                energy_cpu_list.append(float(line))
-            else: 
-                energy_cpu_list.append(float(line) + OVERFLOW_CONST)
+            line =line.replace(",", ".")
+            try:
+                if (float(line) > 0):
+                    energy_cpu_list.append(float(line))
+                else: 
+                    energy_cpu_list.append(float(line) + OVERFLOW_CONST)
+            except:
+                with open(os.path.join("bug_report.txt"), "a") as writer:
+                    writer.write("Check numbers in (did not convert) : " +  input_dir + file_num + '\n')
     with open(os.path.join(output_dir, "energy_cpu.txt"), "a+") as writer:
         if (len(energy_cpu_list) > 0):
             writer.write(str(avg(energy_cpu_list)) + '\n')
 
     with open(os.path.join(input_dir, "energy_pack", file_num), 'r') as reader:
         for line in reader.readlines():
-            if (float(line) > 0):
-                energy_pack_list.append(float(line))
-            else:
-                energy_pack_list.append(float(line) + OVERFLOW_CONST)
+            line =line.replace(",", ".")
+            try:
+                if (float(line) > 0):
+                    energy_pack_list.append(float(line))
+                else:
+                    energy_pack_list.append(float(line) + OVERFLOW_CONST)
+            except:
+                with open(os.path.join("bug_report.txt"), "a") as writer:
+                    writer.write("Check numbers in (did not convert) : " +  input_dir + file_num + '\n')
     with open(os.path.join(output_dir, "energy_pack.txt"), "a") as writer:
         if (len(energy_pack_list) > 0):
             writer.write(str(avg(energy_pack_list)) + '\n')
 
     with open(os.path.join(input_dir, "energy_dram", file_num), 'r') as reader:
         for line in reader.readlines():
-            if (float(line) > 0):
-                energy_dram_list.append(float(line))
-            else:
-                energy_dram_list.append(float(line) + OVERFLOW_CONST)
+            line =line.replace(",", ".")
+            try:
+                if (float(line) > 0):
+                    energy_dram_list.append(float(line))
+                else:
+                    energy_dram_list.append(float(line) + OVERFLOW_CONST)
+            except:
+                with open(os.path.join("bug_report.txt"), "a") as writer:
+                    writer.write("Check numbers in (did not convert) : " +  input_dir + file_num + '\n')
         with open(os.path.join(output_dir, "energy_dram.txt"), "a") as writer:
            if (len(energy_dram_list) > 0):
                writer.write(str(avg(energy_dram_list)) + '\n')
     
+    last_cycle = ''
+    run = 1
     with open(os.path.join(input_dir, "GC_cycles", file_num), 'r') as reader:
-        last_cycle = ''
         for line in reader.readlines():
             last_cycle = line
-    with open(os.path.join(output_dir, "GC_cycles.txt"), "a") as writer:
-        writer.write(last_cycle)
+    last_cycle =last_cycle.replace(",", ".")
+    for (bm, runs) in GC_cycles_convert.items():
+        if (bm in input_dir):
+            run = runs
+            break
+    last_cycle = last_cycle.replace(",", ".")
+    try:
+        if float(last_cycle)/run < 2:
+            with open(os.path.join("bug_report.txt"), "a") as writer:
+                writer.write("Report: needs a smaller heap size: " +  input_dir + '\n')
+        with open(os.path.join(output_dir, "GC_cycles.txt"), "a") as writer:
+            writer.write(str(float(last_cycle)/run) + '\n')
+    except:
+        with open(os.path.join("bug_report.txt"), "a") as writer:
+            writer.write("Check numbers in (did not convert) : " +  input_dir + file_num + '\n')
 
     with open(os.path.join(input_dir, "perf", file_num), 'r') as reader:
         #i=0
         for line in reader.readlines():
             line =line.replace(",", ".")
-            if (float(line) > 0):
-                exec_time_list.append(float(line))
+            if not line.strip() and line  not in ['\n', '\r\n']:
+                line_array = separate_number_chars(line)
+                for subline in line_array:
+                    if type(subline) == float and float(subline) > 0:
+                        exec_time_list.append(float(subline))
+
     with open(os.path.join(output_dir, "perf.txt"), "a") as writer:
         if (len(exec_time_list) > 0):
             writer.write(str(avg(exec_time_list)) + '\n')
@@ -104,8 +196,13 @@ def analyze_file(input_dir, output_dir, file_num):
         #we try to figure average power
         for line in reader.readlines():
             line =line.replace(",", ".")
-            number_of_runs = number_of_runs + 1
-            energy_time_cpu_list.append(float(line))
+            if not line.strip() and line  not in ['\n', '\r\n']:
+                line_array = separate_number_chars(line)
+                for subline in line_array:
+                    if type(subline) == float:
+                        energy_time_cpu_list.append(float(subline))
+                        number_of_runs = number_of_runs + 1
+            
         if ((number_of_runs % 2 == 0) and (number_of_runs != 0)):
             number_of_runs = int(number_of_runs / 2)
             for x in range(number_of_runs):
@@ -127,8 +224,12 @@ def analyze_file(input_dir, output_dir, file_num):
         #we try to figure average power
         for line in reader.readlines():
             line =line.replace(",", ".")
-            number_of_runs = number_of_runs + 1
-            energy_time_dram_list.append(float(line))
+            if not line.strip() and line  not in ['\n', '\r\n']:
+                line_array = separate_number_chars(line)
+                for subline in line_array:
+                    if type(subline) == float:
+                        number_of_runs = number_of_runs + 1
+                        energy_time_dram_list.append(float(subline))
         if ((number_of_runs % 2 == 0) and (number_of_runs != 0)):
             number_of_runs = int(number_of_runs / 2)
             for x in range(number_of_runs):
@@ -150,21 +251,19 @@ def analyze_file(input_dir, output_dir, file_num):
         #we try to figure average power
         for line in reader.readlines():
             line = line.replace(",",".")
-            if "hazelcast" in input_dir:
-                print("line is ", line)
-            number_of_runs = number_of_runs + 1
-            energy_time_pack_list.append(float(line))
+            if not line.strip() and line  not in ['\n', '\r\n']:
+                line_array = separate_number_chars(line)
+                for subline in line_array:
+                    print(subline)
+                    if type(subline) == float:
+                        number_of_runs = number_of_runs + 1
+                        energy_time_pack_list.append(float(subline))
         if ((number_of_runs % 2 == 0) and (number_of_runs != 0)):
             number_of_runs = int(number_of_runs / 2)
             for x in range(number_of_runs):
                 if (energy_time_pack_list[x] > 0):
                     av_power_pack_list.append(energy_time_pack_list[x]/energy_time_pack_list[number_of_runs + x] * 1000)
                 else:
-                    if "hazelcast" in input_dir:
-                        print("<0")
-                        print(energy_time_pack_list[x])
-                        print(energy_time_pack_list[x] + OVERFLOW_CONST)
-                        print(energy_time_pack_list[number_of_runs + x])
                     av_power_pack_list.append((energy_time_pack_list[x] + OVERFLOW_CONST)/energy_time_pack_list[number_of_runs + x] * 1000)
     with open(os.path.join(output_dir, "watts_pack.txt"), "a") as writer:
         if (len(av_power_pack_list) > 0):
