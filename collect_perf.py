@@ -24,8 +24,7 @@ if "laptop" not in computer:
     MyCallback_RENAISSANCE="/scratch/Project/renaissance/plugins/energy-utils/target/plugin-energyutils-assembly-0.0.2.jar"
     CLASSPATH_HAZELCAST="/scratch/Project/jet-gc-benchmark/target/hazelcast-jet-4.2.jar:/scratch/Project/jet-gc-benchmark/target/jet-gc-benchmark-1.0-SNAPSHOT-jar-with-dependencies.jar:/scratch/Project/jRAPL_jar/build/Energy.jar:/scratch/Project/jet-gc-benchmark/target/classes/"
 else:
-    CLASSPATH_RENAISSANCE="/home/marina/workspace/2021NewProject/OpenJDK/renaissance/target/renaissance-gpl-0.13.0-5-g76e6065.jar"
-    MyCallback_RENAISSANCE="/home/marina/workspace/2021NewProject/OpenJDK/renaissance/plugins/energy-utils/target/plugin-energyutils-assembly-0.0.2.jar"
+    CLASSPATH_RENAISSANCE="/home/marina/workspace/2021NewProject/OpenJDK/renaissance/target/renaissance-gpl-0.13.0.jar"
 
 FLAGS_HAZELCAST="--add-modules java.se --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.management/sun.management=ALL-UNNAMED"
 
@@ -131,54 +130,54 @@ BM_DaCapo2021 = {
       }
 
 BM_Renaissance = {
-      #"als":             	"als --plugin ",#apache-spark
-      #"chi-square":      	"chi-square --plugin ",
-      #"dec-tree":               "dec-tree --plugin ",
-      #"gauss-mix":              "gauss-mix --plugin ",
-      #"log-regression":         "log-regression --plugin ",
-      #"movie-lens":             "movie-lens --plugin ",
-      "naive-bayes":            "naive-bayes --plugin ",
-      "page-rank":              "page-rank --plugin ",
-      "akka-uct":               "akka-uct --plugin ",#concurrency
-      "fj-kmeans":              "fj-kmeans --plugin ",
-      "reactors":               "reactors --plugin ",
-      #"db-shootout":            "db-shootout --plugin ",#database java version <= 11
-      #"neo4j-analytics":        "neo4j-analytics --plugin ", #java version <=15 supported only
-      #"future-genetic":         "future-genetic --plugin ",#functional
-      #"mnemonics":              "mnemonics --plugin ",
-      #"par-mnemonics":          "par-mnemonics --plugin ",
-      #"rx-scrabble":            "rx-scrabble --plugin ",
-      #"scrabble":               "scrabble --plugin ",
-      #"dotty":                  "dotty --plugin ",#scala
-      #"philosophers":           "philosophers --plugin ",
-      #"scala-doku":             "scala-doku --plugin ",
-      #"scala-kmeans":           "scala-kmeans --plugin ",
-      #"scala-stm-bench7":       "scala-stm-bench7 --plugin ",
-      #"finagle-chirper":        "finagle-chirper --plugin ",#web
-      #"finagle-http":           "finagle-http --plugin ",
+      "als":                     "als  ",#apache-spark
+      #"chi-square":             "chi-square  ",
+      #"dec-tree":               "dec-tree  ",
+      #"gauss-mix":              "gauss-mix  ",
+      #"log-regression":         "log-regression  ",
+      "movie-lens":              "movie-lens  ",
+      #"naive-bayes":            "naive-bayes  ",
+      #"page-rank":              "page-rank  ",
+      #"akka-uct":               "akka-uct  ",#concurrency
+      #"fj-kmeans":              "fj-kmeans  ",
+      #"reactors":               "reactors  ",
+      #"db-shootout":            "db-shootout  ",#database java version <= 11
+      #"neo4j-analytics":        "neo4j-analytics  ", #java version <=15 supported only
+      #"future-genetic":         "future-genetic  ",#functional
+      "mnemonics":              "mnemonics  ",
+      "par-mnemonics":          "par-mnemonics  ",
+      #"rx-scrabble":            "rx-scrabble  ",
+      "scrabble":               "scrabble  ",
+      #"dotty":                  "dotty  ",#scala
+      #"philosophers":           "philosophers  ",
+      #"scala-doku":             "scala-doku  ",
+      #"scala-kmeans":           "scala-kmeans  ",
+      #"scala-stm-bench7":       "scala-stm-bench7  ",
+      #"finagle-chirper":        "finagle-chirper  ",#web
+      #"finagle-http":           "finagle-http  ",
       }
 #The maximum heap size for each application is set to 3X of its respective minimum heap size 
 HEAP_SIZES = {
-	"h2_small_t4": "300m",#100min
-	"h2_large_t4": "1200m",#400min 
-	"h2_huge_t4": "2g", 
-	"avrora_large": "45m",#15min
-	"fop_default": "135m",#45min 
-	"jython_large": "135m",#45min 
-	"luindex_default": "21m",#7min 
-	"lusearch_large": "21m", #7min
-	"pmd_large": "150m", 
-	"sunflow_large": "60m", 
-	"xalan_large": "35m", 
-	"jme_def": "10m",
-	"zxing_def": "20m",
-	"tradesoap_small": "21m",
-	"tradesoap_large": "27m", 
-	"tradesoap_huge": "27m", 
-	"tradesoap_def": "27m", 
-	"graphchi_def": "700m", 
-	"biojava_def": "525m", 
-	"hazelcast": "5g", 
+        "h2_small_t4": "300m",#100min
+        "h2_large_t4": "1200m",#400min 
+        "h2_huge_t4": "2g", 
+        "avrora_large": "45m",#15min
+        "fop_default": "135m",#45min 
+        "jython_large": "135m",#45min 
+        "luindex_default": "21m",#7min 
+        "lusearch_large": "21m", #7min
+        "pmd_large": "150m", 
+        "sunflow_large": "60m", 
+        "xalan_large": "35m", 
+        "jme_def": "10m",
+        "zxing_def": "20m",
+        "tradesoap_small": "21m",
+        "tradesoap_large": "27m", 
+        "tradesoap_huge": "27m", 
+        "tradesoap_def": "27m", 
+        "graphchi_def": "700m", 
+        "biojava_def": "525m", 
+        "hazelcast": "5g", 
         "als":             	"1455m",#apache-spark485min
         "chi-square":      	"1455m",#485min
         "dec-tree":               "1455m",#485min
@@ -255,89 +254,22 @@ def heap_size_array(BM_tag, HEAP_RUNS):
     #print(HS)
     return HS
 
-def find_heap_size(BM_tag, BM_conf, JAVA, Callback, CLASSPATH):
-    start_HS = 5
-    start_Value = "m"
-    param_max = "-Xmx"
-    param_min = " -Xms"
-    space = 0 
-    found = False
-    i = 0
-    while not found:
-        HS_conf = param_max + str(start_HS + space*i) + start_Value + param_min + str(start_HS+ space*i) + start_Value
-        HS_tag = str(start_HS + space*i) + start_Value
-        if (start_HS < 100 and start_Value == "m"):
-            space = 10
-        if (start_HS > 99 and start_Value == "m"):
-            space = 25
-        if (start_HS > 999 and start_Value == "m"):
-            space = 150
-        if (start_Value == "g"):
-            space = 1
-        result_path = os.path.join(os.getcwd(), "find_heap_size", BM_tag, HS_tag)
-        os.system("sudo mkdir -p " + result_path)
-        os.system("sudo chmod 777 " + result_path)
-        binary = " ".join(["sudo numactl --cpunodebind=0 --membind=0 ",  JAVA,  HS_conf, '-XX:+UseSerialGC' , CLASSPATH, BM_conf, Callback])
-        print(binary)
-        collect_data(binary, result_path)
-        f_path = os.path.join(result_path, get_current_result_name(result_path))
-        not_break = True 
-        with open(f_path, 'r') as reader:
-            for line in reader.readlines():
-                if "The following benchmarks failed:" in line or "java.lang.OutOfMemoryError" in line:
-                    i = i + 1
-                    not_break = False
-                    break 
-        if not_break: 
-            found = True
-            with open("./find_heap_size/heap_size_report.txt", 'a') as writer:
-                writer.write("For " + BM_tag + " use " + HS_tag + "\n")
-            #to_results = os.path.join(os.getcwd(), "results", BM_tag)
-            #binary = " ".join(["sudo numactl --cpunodebind=0 --membind=0 ",  JAVA, JAVA_LOG,  HS_conf, '-XX:+UseSerialGC' , CLASSPATH, BM_conf, Callback])
-            #collect_data(binary, to_results)
-            #print(binary)
-            
-        
-
-def execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, JAVA, JAVA_LOG, Callback, CLASSPATH):
+def execute_bm_with_perf(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, JAVA, CLASSPATH):
     #print("Benchmarking " + BM_tag)
     for i in range(0, PASSES):
         for (GC_tag, GC_conf) in GC.items():
             #print(GC[GC_tag])
                 HS = heap_size_array(BM_tag, HEAP_RUNS)
-                
-                if (GC_conf == '-XX:+UseParallelGC'):
-                    for (THR_tag, THR_conf) in NUM_THREADS.items():
-                        for (HS_tag, HS_conf) in HS.items():
-                            start = timer()
-                            result_path = os.path.join(os.getcwd(), "results", BM_tag, GC_tag + HS_tag, THR_tag)
-                            os.system("sudo mkdir -p " + result_path)
-                            os.system("sudo chmod 777 " + result_path)
-                            binary_hot = " ".join(["sudo numactl --cpunodebind=0 --membind=0", JAVA, JAVA_LOG, HS_conf, GC_conf, THR_conf, CLASSPATH, BM_conf, Callback])
-                            print(binary_hot)
-                            collect_data(binary_hot, result_path)
-                            end = timer()
-                            minutes = round((end - start) / 60.0, 3)
-                else:
-                    for (HS_tag, HS_conf) in HS.items():
-                        start = timer()
-                        result_path = os.path.join(os.getcwd(), "results", BM_tag, GC_tag + HS_tag)
-                        os.system("sudo mkdir -p " + result_path)
-                        os.system("sudo chmod 777 " + result_path)
-                        binary_hot = " ".join(["sudo numactl --cpunodebind=0 --membind=0 ", JAVA, JAVA_LOG, HS_conf, GC_conf, CLASSPATH, BM_conf, Callback])
-                        print(binary_hot)
-                        collect_data(binary_hot, result_path)
-                        end = timer()
-                        minutes = round((end - start) / 60.0, 3)
-                        if "hazelcast" in BM_tag:
-                            f1_path = os.path.join(result_path, get_current_result_name(result_path))
-                            f2_path = os.path.join(os.getcwd(), "histo-latency/0")
-                            # opening first file in append mode and second file in read mode
-                            f1 = open(f1_path, 'a+')
-                            f2 = open(f2_path, 'r')
-                            # appending the contents of the second file to the first file
-                            f1.write(f2.read())
-                            os.system("sudo rm -rf " + f2_path)
+                for (HS_tag, HS_conf) in HS.items():
+                    start = timer()
+                    result_path = os.path.join(os.getcwd(), "results_perf", BM_tag, GC_tag + HS_tag)
+                    os.system("sudo mkdir -p " + result_path)
+                    os.system("sudo chmod 777 " + result_path)
+                    binary_hot = " ".join(["sudo perf stat -e task-clock,cycles,instructions,cache-references,cache-misses", JAVA, HS_conf, GC_conf, CLASSPATH, BM_conf])
+                    print(binary_hot)
+                    collect_data(binary_hot, result_path)
+                    end = timer()
+                    minutes = round((end - start) / 60.0, 3)
 
 def main(argv):
     try:
@@ -361,44 +293,41 @@ def main(argv):
         print(BM)
         if BM == "DaCapo_j16": 
             for (BM_tag, BM_conf) in BM_DaCapo.items():
-                find_heap_size(BM_tag, BM_conf, JAVA16_HOT, "MyCallback", " -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness")
-                #execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG, "MyCallback", "-XX:+DisableExplicitGC -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness")
+                execute_bm_with_perf(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG, "MyCallback", "-XX:+DisableExplicitGC -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness")
         elif BM == "DaCapo_j13":
             for (BM_tag, BM_conf) in BM_DaCapo.items():
-                execute_bm(iPASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, "MyCallback_java13", " -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness")
+                execute_bm_with_perf(iPASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, "MyCallback_java13", " -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness")
         elif BM == "DaCapo_j15M1":
             for (BM_tag, BM_conf) in BM_DaCapo.items():
                 #find_heap_size(BM_tag, BM_conf, JAVA15M1, "MyCallback_java15", " -cp " + CLASSPATH_jRAPL_java15 + ":" + CLASSPATH_DACAPO + " Harness")
-                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, JAVA_LOG, "MyCallback_java15", " -cp " + CLASSPATH_jRAPL_java15 + ":" + CLASSPATH_DACAPO + " Harness")
+                execute_bm_with_perf(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, JAVA_LOG, "MyCallback_java15", " -cp " + CLASSPATH_jRAPL_java15 + ":" + CLASSPATH_DACAPO + " Harness")
         elif BM == "DaCapo21_j16":
             for (BM_tag, BM_conf) in BM_DaCapo2021.items():
-                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG, "MyCallback", " -jar " + CLASSPATH_DACAPO_NEW_java16)
+                execute_bm_with_perf(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG, "MyCallback", " -jar " + CLASSPATH_DACAPO_NEW_java16)
         elif BM == "DaCapo21_j15M1":
             for (BM_tag, BM_conf) in BM_DaCapo2021.items():
-                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, JAVA_LOG, "MyCallback_java15", " -jar " + CLASSPATH_DACAPO_NEW_java15)
+                execute_bm_with_perf(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, JAVA_LOG, "MyCallback_java15", " -jar " + CLASSPATH_DACAPO_NEW_java15)
         elif BM == "DaCapo21_j13":
             for (BM_tag, BM_conf) in BM_DaCapo2021.items():
-                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, "MyCallback_java13", " -jar " + CLASSPATH_DACAPO_NEW_java13)
+                execute_bm_with_perf(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, "MyCallback_java13", " -jar " + CLASSPATH_DACAPO_NEW_java13)
         elif BM ==  "HazelCast_j16":    
             for (BM_tag, BM_conf) in BM_Hazelcast.items():
-                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GCHCast16, JAVA16_HOT, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
+                execute_bm_with_perf(PASSES, HEAP_RUNS, BM_tag, BM_conf, GCHCast16, JAVA16_HOT, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
         elif BM ==  "HazelCast_j15M1":    
             for (BM_tag, BM_conf) in BM_Hazelcast.items():
-                find_heap_size(BM_tag, BM_conf, JAVA15M1, "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
-                #execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
+                execute_bm_with_perf(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
         elif BM ==  "HazelCast_j13":    
             for (BM_tag, BM_conf) in BM_Hazelcast.items():
-                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GCHCast13, JAVA13, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
+                execute_bm_with_perf(PASSES, HEAP_RUNS, BM_tag, BM_conf, GCHCast13, JAVA13, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
         elif BM ==  "Renaissance_j13":    
             for (BM_tag, BM_conf) in BM_Renaissance.items():
-                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
+                execute_bm_with_perf(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
         elif BM ==  "Renaissance_j16":    
             for (BM_tag, BM_conf) in BM_Renaissance.items():
-                find_heap_size(BM_tag, BM_conf, JAVA16_HOT, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
-            #    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
+                execute_bm_with_perf(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16, " -jar " + CLASSPATH_RENAISSANCE)
         elif BM ==  "Renaissance_j15M1":    
             for (BM_tag, BM_conf) in BM_Renaissance.items():
                 #find_heap_size(BM_tag, BM_conf, JAVA15M1, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
-                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, JAVA_LOG, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
+                execute_bm_with_perf(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, JAVA_LOG, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
 
 if __name__ == "__main__": main(sys.argv[1:])

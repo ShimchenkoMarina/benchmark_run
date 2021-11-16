@@ -34,6 +34,7 @@ maxl_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".cs
 meanl_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_mean_l"))])
 wattsp_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_watts_p"))])
 gc_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_GC"))])
+
 for energy_pack_file,energy_cpu_file, energy_dram_file, perf_file, maxl_file, meanl_file, wattsp_file, gc_file in zip(energy_pack_files, energy_cpu_files, energy_dram_files, perf_files, maxl_files, meanl_files, wattsp_files, gc_files):
     # Reads data from the first configuration
     original_data1 = pd.read_csv(perf_file, sep=';', index_col="BMs")
@@ -133,13 +134,19 @@ for energy_pack_file,energy_cpu_file, energy_dram_file, perf_file, maxl_file, me
     print(bms2)
     bm = [value for value in bms1 if value in bms2]
     print(bm)
-    regions = [["EnerFPerf", "PowerFPerf"], ["EnerCPerf", "EnerDPerf"], ["EnerFMaxL", "EnerFMeanL"], ["PowerFMaxL", "PowerFMeanL"]]
-    
+    if "hazelcast" in bm:
+        regions = [["EnerFPerf", "PowerFPerf"], ["EnerCPerf", "EnerDPerf"], ["EnerFMaxL", "EnerFMeanL"], ["PowerFMaxL", "PowerFMeanL"]]
+    else:
+        regions = [["EnerFPerf", "PowerFPerf"], ["EnerCPerf", "EnerDPerf"]]
+        
     # In[3]:
     
     
     # Generate scatterplots
-    fig,ax = plt.subplots(5,2, figsize=(15, 5*15), gridspec_kw={'width_ratios': [1, 1], 'height_ratios': [1, 1, 1, 1, 1]})
+    if "hazelcast" in bm:
+        fig,ax = plt.subplots(5,2, figsize=(15, 5*15), gridspec_kw={'width_ratios': [1, 1], 'height_ratios': [1, 1, 1, 1, 1]})
+    else: 
+        fig,ax = plt.subplots(3,2, figsize=(15, 5*15), gridspec_kw={'width_ratios': [1, 1], 'height_ratios': [1, 1, 1]})
     column_y = ""
     column_x = ""
     for index_x, tuple_region in enumerate(regions):
@@ -182,7 +189,12 @@ for energy_pack_file,energy_cpu_file, energy_dram_file, perf_file, maxl_file, me
             #sns.scatterplot(data=plot_data, s=300, x=column_x, y=column_y, hue=plot_data['GC'], palette = sns.color_palette('gnuplot', n_colors=len(plot_data['GC']))).get_figure().savefig(str(bm[0]) + ".png")
             sns.scatterplot(data=plot_data, s=300, x=column_x, y=column_y, hue=plot_data['GC'], style=plot_data["GC"]).get_figure().savefig(str(bm[0]) + ".png")
             #splot.set(xscale="log")
-    
-    ax[4][0].set(title=(f"GC_cycles per version"))
-    plt.sca(ax[4][0])
-    sns.scatterplot(data=data8, s=300, x="GC", y="GC_cycles", hue=data8['GC'], style=data8["GC"]).get_figure().savefig(str(bm[0]) + ".png")
+    if "hazelcast" in bm:
+        ax[4][0].plot([0, len(data8['GC'])],[2, 2], "r--") 
+        ax[4][0].set(title=(f"GC_cycles per version"))
+        plt.sca(ax[4][0])
+    else:
+        ax[2][0].plot([0, len(data8['GC'])],[2, 2], "r--") 
+        ax[2][0].set(title=(f"GC_cycles per version"))
+        plt.sca(ax[2][0])
+    sns.scatterplot(data=data8, s=300, x="GC",y="GC_cycles", hue=data8['GC'], style=data8["GC"]).get_figure().savefig(str(bm[0]) + ".png")
