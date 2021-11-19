@@ -49,24 +49,73 @@ populate = np.array([[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
                     [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
                     [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]])
 
+count_P=0
+count_Z = 0
+count_Ser = 0
+count_Shen = 0
+count_G1 = 0
+count_CMS = 0
+def normilize_populate():
+    global count_P
+    global count_Ser
+    global count_Z
+    global count_Shen
+    global count_G1
+    global count_CMS
+    count_array = []
+    count_array.append(count_P)
+    count_array.append(count_Ser)
+    count_array.append(count_Z)
+    count_array.append(count_G1)
+    count_array.append(count_Shen)
+    count_array.append(count_CMS)
+    count_array.sort()
+    norm = count_array[0]
+    for i in range(len(main_configurations)):
+        for j in range(len(main_configurations)):
+            if i is 0 or j is 0: #Serial
+                populate[i][j] = populate[i][j] / (count_Ser / norm)
+            if i is 1 or j is 1: #Parallel
+                populate[i][j] = populate[i][j] / (count_P / norm)
+            if i is 2 or j is 2: #Z
+                populate[i][j] = populate[i][j] / (count_Z / norm)
+            if i is 3 or j is 3: #Shen
+                populate[i][j] = populate[i][j] / (count_Shen / norm)
+            if i is 4 or j is 4: #G1
+                populate[i][j] = populate[i][j] / (count_G1 / norm)
+            if i is 5 or j is 5: #CMS
+                populate[i][j] = populate[i][j] / (count_CMS / norm)
+        
 def mark_x(GC, index):
     incr = 1 / value
     if "P" in GC:
+        global count_P
+        count_P = count_P + 1
         for i in range(6):
             populate[i][1] = populate[i][1] + incr
     if "Ser" in GC:
+        global count_Ser 
+        count_Ser = count_Ser + 1
         for i in range(6):
             populate[i][0] = populate[i][0] + incr
     if "Z" in GC:
+        global count_Z
+        count_Z = count_Z + 1
         for i in range(6):
             populate[i][2] = populate[i][2] + incr
     if "Shen" in GC:
+        global count_Shen
+        count_Shen = count_Shen + 1
         for i in range(6):
             populate[i][3] = populate[i][3] + incr
     if "G1" in GC:
+        global count_G1
+        count_G1 = count_G1 + 1
         for i in range(6):
             populate[i][4] = populate[i][4] + incr
     if "CMS" in GC:
+        global count_CMS
+        count_CMS = count_CMS + 1
         for i in range(6):
             populate[i][5] = populate[i][5] + incr
 
@@ -133,10 +182,18 @@ for bench in benchmark_groups:
             value = data2["Energy"][index]
             mark_y(GC, value)
 
-
+#print("count_P = ", count_P)
+#print("count_Ser = ", count_Ser)
+#print("count_Z = ", count_Z)
+#print("count_G1 = ", count_G1)
+#print("count_Shen = ", count_Shen)
+#print("count_CMS = ", count_CMS)
+print(populate)
+normilize_populate()
+print(populate)
 fig, ax = plt.subplots()
 im = ax.imshow(populate)
-
+sns.heatmap(populate, annot=True,  linewidths=.5)
 # We want to show all ticks...
 ax.set_xticks(np.arange(len(main_configurations)))
 ax.set_yticks(np.arange(len(main_configurations)))
@@ -146,6 +203,8 @@ ax.set_yticklabels(main_configurations)
 
 # Rotate the tick labels and set their alignment.
 plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+         rotation_mode="anchor")
+plt.setp(ax.get_yticklabels(), rotation=0, ha="right",
          rotation_mode="anchor")
 
 ax.set_title("The best energy/perf configurations")

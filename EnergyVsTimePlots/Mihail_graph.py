@@ -24,7 +24,7 @@ import string
 #Power vs Perf
 #Power vs max_Latency
 #Power vs mean_Latency
-bench = ""
+bench = "als"
 my_markers = [".", "o", "v", "<", ">", "^", "P", "p", "*", "+", "X", "D", 's', 'h', 'x', '8', 'd', 'H', "1", "2", "3", "4"]
 energy_pack_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_energy_pack"))])
 energy_cpu_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_energy_cpu"))])
@@ -124,16 +124,16 @@ for energy_pack_file,energy_cpu_file, energy_dram_file, perf_file, maxl_file, me
         if type(data) is str:
             replace_data[idx] = np.nan
     data8["GC_cycles"] = replace_data
-    print(data8)
+    #print(data8)
 
     # Organizes information related to the regions and configurations used
     #configurations = original_data1.columns
     bms1 = original_data1.index
-    print(bms1)
+    #print(bms1)
     bms2 = original_data2.index
-    print(bms2)
+    #print(bms2)
     bm = [value for value in bms1 if value in bms2]
-    print(bm)
+    #print(bm)
     if "hazelcast" in bm:
         regions = [["EnerFPerf", "PowerFPerf"], ["EnerCPerf", "EnerDPerf"], ["EnerFMaxL", "EnerFMeanL"], ["PowerFMaxL", "PowerFMeanL"]]
     else:
