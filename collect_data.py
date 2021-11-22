@@ -7,25 +7,42 @@ import platform
 from timeit import default_timer as timer
 import sys, getopt
 
-#Parameters for running
-#PASSES = 1 
-#HEAP_RUNS = 1
-computer = "laptop"
 #Path variables
-if "laptop" not in computer:
-    CLASSPATH_jRAPL="/scratch/Project/jRAPL"
-    CLASSPATH_jRAPL_java13="/scratch/Project/jRAPL_13"
-    CLASSPATH_jRAPL_java15="/scratch/Project/jRAPL_15"
-    CLASSPATH_DACAPO="/scratch/Project/Dacapo_jar:/scratch/Project/Dacapo_jar/harness:/scratch/Project/Dacapo_jar/dacapo-9.12-MR1-bach.jar"
-    CLASSPATH_DACAPO_NEW_java16="/scratch/Project/DaCapo2021_java16.jar"
-    CLASSPATH_DACAPO_NEW_java15="/scratch/Project/DaCapo2021_java15.jar"
-    CLASSPATH_DACAPO_NEW_java13="/scratch/Project/DaCapo2021_java13.jar"
-    CLASSPATH_RENAISSANCE="/scratch/Project/renaissance/target/renaissance-gpl-0.13.0-5-g76e6065.jar"
-    MyCallback_RENAISSANCE="/scratch/Project/renaissance/plugins/energy-utils/target/plugin-energyutils-assembly-0.0.2.jar"
-    CLASSPATH_HAZELCAST="/scratch/Project/jet-gc-benchmark/target/hazelcast-jet-4.2.jar:/scratch/Project/jet-gc-benchmark/target/jet-gc-benchmark-1.0-SNAPSHOT-jar-with-dependencies.jar:/scratch/Project/jRAPL_jar/build/Energy.jar:/scratch/Project/jet-gc-benchmark/target/classes/"
-else:
-    CLASSPATH_RENAISSANCE="/home/marina/workspace/2021NewProject/OpenJDK/renaissance/target/renaissance-gpl-0.13.0-5-g76e6065.jar"
-    MyCallback_RENAISSANCE="/home/marina/workspace/2021NewProject/OpenJDK/renaissance/plugins/energy-utils/target/plugin-energyutils-assembly-0.0.2.jar"
+CLASSPATH_jRAPL=""
+CLASSPATH_jRAPL_java13=""
+CLASSPATH_jRAPL_java15=""
+CLASSPATH_DACAPO=""
+CLASSPATH_DACAPO_NEW_java16=""
+CLASSPATH_DACAPO_NEW_java15=""
+CLASSPATH_DACAPO_NEW_java13=""
+CLASSPATH_RENAISSANCE=""
+MyCallback_RENAISSANCE=""
+CLASSPATH_HAZELCAST=""
+
+
+file = open('path_file.txt', 'r')
+for line in file:
+    variable = line.split("=")[0]
+    if "CLASSPATH_jRAPL" in variable:    
+        CLASSPATH_jRAPL=line.split("=")[1]
+    if "CLASSPATH_jRAPL_java13" in variable:    
+        CLASSPATH_jRAPL_java13=line.split("=")[1]
+    if "CLASSPATH_jRAPL_java15" in variable:    
+        CLASSPATH_jRAPL_java15=line.split("=")[1]
+    if "CLASSPATH_DACAPO" in variable:    
+        CLASSPATH_DACAPO=line.split("=")[1]
+    if "CLASSPATH_DACAPO_NEW_java16" in variable:    
+        CLASSPATH_DACAPO_NEW_java16=line.split("=")[1]
+    if "CLASSPATH_DACAPO_NEW_java15" in variable:    
+        CLASSPATH_DACAPO_NEW_java15=line.split("=")[1]
+    if "CLASSPATH_DACAPO_NEW_java13" in variable:   
+         CLASSPATH_DACAPO_NEW_java13=line.split("=")[1]
+    if "CLASSPATH_RENAISSANCE" in variable:    
+        CLASSPATH_RENAISSANCE=line.split("=")[1]
+    if "CLASSPATH_HAZELCAST" in variable:    
+        CLASSPATH_HAZELCAST=line.split("=")[1]
+    if "MyCallback_RENAISSANCE" in variable:
+        MyCallback_RENAISSANCE=line.split("=")[1]
 
 FLAGS_HAZELCAST="--add-modules java.se --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.management/sun.management=ALL-UNNAMED"
 
