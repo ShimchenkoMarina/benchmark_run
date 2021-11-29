@@ -2,11 +2,12 @@ import numpy as np
 import sys
 from matplotlib import pyplot as plt
 from scipy.cluster.hierarchy import dendrogram
+from scipy.cluster.hierarchy import fcluster
 from sklearn.datasets import load_iris
 from sklearn.cluster import AgglomerativeClustering
 
 
-def plot_dendrogram(model, **kwargs):
+def plot_dendrogram(num_cl, model, **kwargs):
     # Create linkage matrix and then plot the dendrogram
 
     # create the counts of samples under each node
@@ -24,7 +25,11 @@ def plot_dendrogram(model, **kwargs):
         [model.children_, model.distances_, counts]
     ).astype(float)
     # Plot the corresponding dendrogram
+    fl = fcluster(linkage_matrix,num_cl, criterion='maxclust')
+    with open("bridge_for_clustering.txt", 'w') as writer:
+        writer.write(str(fl))
     dendrogram(linkage_matrix, **kwargs,  leaf_rotation = 90)
+    
 
 def setup_dendrogram(data, bms, name):
     # setting distance_threshold=0 ensures we compute the full tree.
@@ -32,7 +37,7 @@ def setup_dendrogram(data, bms, name):
     model = model.fit(data)
     plt.title("Hierarchical Clustering Dendrogram")
     # plot the top three levels of the dendrogram
-    plot_dendrogram(model, truncate_mode="level", labels=list(bms))
+    plot_dendrogram(len(bms), model, truncate_mode="level", labels=list(bms))
     plt.xlabel("Clustering for default confs.")
     plt.savefig(name, bbox_inches='tight',dpi=100)
     plt.close()
@@ -42,4 +47,4 @@ if __name__ == '__main__':
     data = sys.arg[1]
     bms = sys.arg[2]
     name = sys.arg[3]
-    setup_dendrogram(data, bms,name)
+    fl = setup_dendrogram(data, bms,name)

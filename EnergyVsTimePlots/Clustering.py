@@ -18,6 +18,7 @@ import random
 import string
 
 import PlotDendrogram
+import PlotHeatMap
 # In[2]:
 bench = ""
 #TODO: add j13 and P_def
@@ -100,9 +101,13 @@ for energy_pack_file, perf_file in zip(energy_pack_files, perf_files):
         array_of_BMs.append(data1["BM"][0])
 name = "Clustering_Perf"
 PlotDendrogram.setup_dendrogram(array_of_arrays_perf, array_of_BMs, name)
+name = "HeatMapClust_Perf"
+PlotHeatMap.get_order(array_of_arrays_perf, array_of_BMs, basic_configurations, name)
 name = "Clustering_energy_pack"
-print(array_of_arrays_energy_pack)
-print(array_of_BMs)
+#print(array_of_arrays_energy_pack)
+#print(array_of_BMs)
 PlotDendrogram.setup_dendrogram(array_of_arrays_energy_pack, array_of_BMs, name)
+name = "HeatMapClust_Energy_pack"
+PlotHeatMap.get_order(array_of_arrays_energy_pack, array_of_BMs, basic_configurations, name)
 
 

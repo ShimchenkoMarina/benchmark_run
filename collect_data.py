@@ -30,9 +30,9 @@ for line in file:
     if "CLASSPATH_jRAPL_java15" in variable:    
         CLASSPATH_jRAPL_java15=line.split("=")[1].split("\"")[1]
         continue
-    if "CLASSPATH_jRAPL" in variable:    
+    if "CLASSPATH_jRAPL" in variable:
         CLASSPATH_jRAPL=line.split("=")[1].split("\"")[1]
-    if "CLASSPATH_DACAPO_NEW_java16" in variable:    
+    if "CLASSPATH_DACAPO_NEW_java16" in variable:
         CLASSPATH_DACAPO_NEW_java16=line.split("=")[1].split("\"")[1]
         continue
     if "CLASSPATH_DACAPO_NEW_java15" in variable:    
@@ -124,12 +124,12 @@ NUM_THREADS= {
 
 #Specify bms
 BM_DaCapo = {
-      #"h2_small_t4":             	" h2 -size small -n 50 -t 4 -c ",#50
-      #"h2_large_t4":             	" h2 -size large -n 30 -t 4 -c ",#30
+      "h2_small_t4":             	" h2 -size small -n 50 -t 4 -c ",#50
+      "h2_large_t4":             	" h2 -size large -n 30 -t 4 -c ",#30
       #"h2_huge_t4":              	" h2 -size huge -n 10 -t 4 -c ",
       #"tradesoap_huge_n25":     	"-cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness tradebeans -size huge -n 1 -t 4 -c " concurrency bug -- skip
       #"tradebeans_huge_t4":      	"-cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness tradebeans -size huge -n 25 -t 4 -c ",
-      #"avrora_large":            	" avrora -size large -n 17 -c ",
+      "avrora_large":            	" avrora -size large -n 17 -c ",
       "fop_default":             	" fop -n 50 -c ",
       "jython_large":            	" jython -size large -n 20 -c ",
       "luindex_default":         	" luindex -n 30 -c ",
@@ -308,7 +308,7 @@ def find_2xdrop(BM_tag, BM_conf, JAVA, Callback, CLASSPATH):
         result_path = os.path.join(os.getcwd(), "find_2xdrop", BM_tag, HS_tag)
         os.system("sudo mkdir -p " + result_path)
         os.system("sudo chmod 777 " + result_path)
-        binary = " ".join([JAVA,  HS_conf, '-XX:+UseSerialGC' , CLASSPATH, BM_conf, Callback])
+        binary = " ".join([JAVA, JAVA_LOG,  HS_conf, '-XX:+UseSerialGC' , CLASSPATH, BM_conf, Callback])
         print(binary)
         collect_data(binary, result_path)
         f_path = os.path.join(result_path, get_current_result_name(result_path))
@@ -316,15 +316,15 @@ def find_2xdrop(BM_tag, BM_conf, JAVA, Callback, CLASSPATH):
         with open(f_path, 'r') as reader:
             for line in reader.readlines():
                 if "GC(" in line:
-                    GC_cycles = int(line.split("(")[0].split(")")[0])
+                    GC_cycles = int(line.split("(")[1].split(")")[0])
         if GC_cycles_start == 0:
             GC_cycles_start = GC_cycles
         else:
             GC_cycles_cur = GC_cycles
         if GC_cycles_start != 0 and GC_cycles_cur != 0 and GC_cycles_start/GC_cycles_cur > 2: 
             found = True
-            with open("./find_heap_size/heap_size_report.txt", 'a') as writer:
-                writer.write("For " + BM_tag + " use " + str(GC_cycles_cur/GC_cycles_start) + "\n")
+            with open("./find_2xdrop/heap_size_report.txt", 'a') as writer:
+                writer.write("For " + BM_tag + " use " + str(i) + "\n")
         i = i + 1
     
 def find_heap_size(BM_tag, BM_conf, JAVA, Callback, CLASSPATH):
