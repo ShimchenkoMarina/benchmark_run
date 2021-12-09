@@ -34,6 +34,8 @@ STR_PERF = "Performance"
 def read_data(sample, data, configuration_name, benchmark_name):
     df = pd.DataFrame(columns=[configuration_name])
     for file in data:
+        print(file)
+        print("\n")
         if sample in file:
             try:
                 curr_df = pd.read_csv(file, header=None)
@@ -125,6 +127,8 @@ def store_result(sample, result, res_folder, benchmark_name, baseline_name):
     #rows = [[bm1, energy1, energy2, energy3, ...],
     #        [bm2, energy1, energy2, energy3, ...],
     #       ...     #       ]
+    if "perf" in sample:
+        print(result)
     row = [benchmark_name]
 
     result_aggregated, result_points = result
@@ -199,8 +203,8 @@ def main():
     #       fmt ='% s')
     for (benchmark_name, allconf_runs) in benchmarks_conf.items():
         print(benchmark_name)
-        #if "akka" not in benchmark_name:
-        #    continue
+        if "als" not in benchmark_name:
+            continue
         baseline_name = ""
         dict_for_benchmark = {}
         for conf_runs in allconf_runs:

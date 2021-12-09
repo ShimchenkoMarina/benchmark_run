@@ -17,7 +17,8 @@ CLASSPATH_DACAPO_NEW_java15=""
 CLASSPATH_DACAPO_NEW_java13=""
 CLASSPATH_RENAISSANCE=""
 MyCallback_RENAISSANCE=""
-CLASSPATH_HAZELCAST=""
+CLASSPATH_HAZELCAST_java16=""
+CLASSPATH_HAZELCAST_java13=""
 JAVA13 = ""
 JAVA16_HOT = ""
 
@@ -45,8 +46,10 @@ for line in file:
         CLASSPATH_DACAPO=line.split("=")[1].split("\"")[1]
     if "CLASSPATH_RENAISSANCE" in variable:    
         CLASSPATH_RENAISSANCE=line.split("=")[1].split("\"")[1]
-    if "CLASSPATH_HAZELCAST" in variable:    
-        CLASSPATH_HAZELCAST=line.split("=")[1].split("\"")[1]
+    if "CLASSPATH_HAZELCAST_java16" in variable:    
+        CLASSPATH_HAZELCAST_java16=line.split("=")[1].split("\"")[1]
+    if "CLASSPATH_HAZELCAST_java13" in variable:    
+        CLASSPATH_HAZELCAST_java13=line.split("=")[1].split("\"")[1]
     if "MyCallback_RENAISSANCE" in variable:
         MyCallback_RENAISSANCE=line.split("=")[1].split("\"")[1]
     if "JAVA16_HOT" in variable:
@@ -58,7 +61,9 @@ FLAGS_HAZELCAST="--add-modules java.se --add-exports java.base/jdk.internal.ref=
 
 #Java versions
 JAVA16 = "java "
-JAVA15M1 = "/scratch/Project/openjdk-m1/build/linux-x86_64-server-release/images/jdk/bin/java "
+JAVA16_HOT = "/scratch/jdk-16/bin/java "
+JAVA15M1 = "/scratch/mshimche/Project/openjdk-m1/build/linux-x86_64-server-release/images/jdk/bin/java "
+JAVA13 = "/scratch/jdk-13/bin/java "
 JAVA_LOG = " -Xlog:gc* "
 
 #Specify here which bm+java you want to run
@@ -66,19 +71,23 @@ Which_BM = {
         #"DaCapo21_j16", 
         #"DaCapo21_j15M1", 
         #"DaCapo21_j13",
-        "DaCapo_j16", 
+        #"DaCapo_j16", 
         #"DaCapo_j15M1", 
         #"DaCapo_j13", 
         #"HazelCast_j16",
         #"HazelCast_j15M1",
-        #"HazelCast_j13",
+        "HazelCast_j13",
         #"Renaissance_j13",
         #"Renaissance_j16",
         #"Renaissance_j15M1",
+        #"specjbb2015_j16"
+        #"specjbb2015_j13"
+        #"specjbb2015_j15M1"
 } 
 
 #Specify GCs for each java version
-GC13 = { "j13CMS": "-XX:+UseConcMarkSweepGC",
+GC13 = { 
+    #"j13CMS": "-XX:+UseConcMarkSweepGC",
     "j13Ser": "-XX:+UseSerialGC",
     "j13P": "-XX:+UseParallelGC",
 }
@@ -142,6 +151,9 @@ BM_DaCapo = {
 BM_Hazelcast = {
       "hazelcast":             	" org.example.StreamingRound3 [10k, 20k, 40k ... 100k]"
       #"hazelcast":             	" " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST + " org.example.StreamingRound3 [10k, 20k, 40k ... 100k]"
+      }
+BM_specjbb2015 = {
+      "specjbb15":             	" -m COMPOSITEi -c "
       }
 BM_DaCapo2021 = {
       #"zxing_def":                  	" zxing -n 25 -c ",
@@ -214,6 +226,7 @@ HEAP_SIZES = {
 	"graphchi_def": "700m", 
 	"biojava_def": "525m", 
 	"hazelcast": "5000m", 
+	"speckbb2015": "32g", 
         "als":             	"1455m",#apache-spark485min
         "chi-square":      	"1455m",#485min
         "dec-tree":               "1455m",#485min
@@ -264,8 +277,7 @@ def collect_data(binary, result_path):
 
 #We need to decide which space between heap sizes we want.
 #For consistency we can increase the heapsize of all the bms by the same amount
-#that it is representative when we compare configurations 
-#Set up test to know when GC cycles drop by 2x 
+#that it is representative when we compare configurations
 def heap_size_array(BM_tag, HEAP_RUNS):
     start_HS = 10
     start_Value = "m"
@@ -399,15 +411,15 @@ def execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, JAVA, JAVA_LOG, Callback,
                         collect_data(binary_hot, result_path)
                         end = timer()
                         minutes = round((end - start) / 60.0, 3)
-                        if "hazelcast" in BM_tag:
-                            f1_path = os.path.join(result_path, get_current_result_name(result_path))
-                            f2_path = os.path.join(os.getcwd(), "histo-latency/0")
-                            # opening first file in append mode and second file in read mode
-                            f1 = open(f1_path, 'a+')
-                            f2 = open(f2_path, 'r')
-                            # appending the contents of the second file to the first file
-                            f1.write(f2.read())
-                            os.system("sudo rm -rf " + f2_path)
+                if "hazelcast" in BM_tag:
+                    f1_path = os.path.join(result_path, get_current_result_name(result_path))
+                    f2_path = os.path.join(os.getcwd(), "histo-latency/0")
+                    # opening first file in append mode and second file in read mode
+                    f1 = open(f1_path, 'a+')
+                    f2 = open(f2_path, 'r')
+                    # appending the contents of the second file to the first file
+                    f1.write(f2.read())
+                    os.system("sudo rm -rf " + f2_path)
 
 def main(argv):
     try:
@@ -432,8 +444,8 @@ def main(argv):
         if BM == "DaCapo_j16": 
             for (BM_tag, BM_conf) in BM_DaCapo.items():
                 #find_heap_size(BM_tag, BM_conf, JAVA16_HOT, "MyCallback", " -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness")
-                find_2xdrop(BM_tag, BM_conf, JAVA16_HOT, "MyCallback", " -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness")
-                #execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG, "MyCallback", "-XX:+DisableExplicitGC -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness")
+                #find_2xdrop(BM_tag, BM_conf, JAVA16_HOT, "MyCallback", " -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness")
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG, "MyCallback", "-XX:+DisableExplicitGC -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness")
         elif BM == "DaCapo_j13":
             for (BM_tag, BM_conf) in BM_DaCapo.items():
                 execute_bm(iPASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, "MyCallback_java13", " -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness")
@@ -452,24 +464,32 @@ def main(argv):
                 execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, "MyCallback_java13", " -jar " + CLASSPATH_DACAPO_NEW_java13)
         elif BM ==  "HazelCast_j16":    
             for (BM_tag, BM_conf) in BM_Hazelcast.items():
-                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST_java16)
         elif BM ==  "HazelCast_j15M1":    
             for (BM_tag, BM_conf) in BM_Hazelcast.items():
-                find_heap_size(BM_tag, BM_conf, JAVA15M1, "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
-                #execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
+                #find_heap_size(BM_tag, BM_conf, JAVA15M1, "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
         elif BM ==  "HazelCast_j13":    
             for (BM_tag, BM_conf) in BM_Hazelcast.items():
-                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST_java13)
         elif BM ==  "Renaissance_j13":    
             for (BM_tag, BM_conf) in BM_Renaissance.items():
                 execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
         elif BM ==  "Renaissance_j16":    
             for (BM_tag, BM_conf) in BM_Renaissance.items():
-                find_heap_size(BM_tag, BM_conf, JAVA16_HOT, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
-            #    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
+                #find_heap_size(BM_tag, BM_conf, JAVA16_HOT, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
         elif BM ==  "Renaissance_j15M1":
             for (BM_tag, BM_conf) in BM_Renaissance.items():
                 #find_heap_size(BM_tag, BM_conf, JAVA15M1, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
                 execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, JAVA_LOG, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
+        elif BM ==  "specjbb2015_j13":    
+            for (BM_tag, BM_conf) in BM_specjbb2015.items():
+                #find_heap_size(BM_tag, BM_conf, JAVA15M1, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA15M1, JAVA_LOG, MyCallback_specjbb2015, " -jar " + CLASSPATH_RENAISSANCE)
+        elif BM ==  "specjbb2015_j16":    
+            for (BM_tag, BM_conf) in BM_specjbb2015.items():
+                #find_heap_size(BM_tag, BM_conf, JAVA15M1, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA15M1, JAVA_LOG, MyCallback_specjbb2015, " -jar " + CLASSPATH_RENAISSANCE)
 
 if __name__ == "__main__": main(sys.argv[1:])
