@@ -31,11 +31,60 @@ STR_STD_MEAN = "Relative Standard Deviation"
 STR_STD = "Standard Deviation"
 STR_PERF = "Performance"
 
+HEAP_SIZES = {
+        "h2_small_t4": "210m",#100min #300m
+        "h2_large_t4": "750m",#400min #1200m
+        "h2_huge_t4": "2000m", 
+        "avrora_large": "27m",#15min #45m
+        "fop_default": "75m",#45min #135m
+        "jython_large": "75m",#45min #135m
+        "luindex_default": "21m",#7min 
+        "lusearch_large": "21m", #7min
+        "pmd_large": "150m", 
+        "sunflow_large": "60m", 
+        "xalan_large": "35m", 
+        "jme_def": "10m",
+        "zxing_def":              "20m",
+        "tradesoap_small":        "21m",
+        "tradesoap_large":        "27m", 
+        "tradesoap_huge":         "27m", 
+        "tradesoap_def":          "27m", 
+        "graphchi_def":           "700m", 
+        "biojava_def":            "525m", 
+        "hazelcast":              "5000m", 
+        "speckbb2015":            "32g", 
+        "als":                    "1455m",#apache-spark485min
+        "chi-square":             "1455m",#485min
+        "dec-tree":               "1455m",#485min
+        "gauss-mix":              "1455m",#485min
+        "log-regression":         "1455m",#485min
+        "movie-lens":             "1455m",#485min
+        "naive-bayes":            "3825m",#1275min(1600m1)
+        "page-rank":              "1875m",#625min(835m1)
+        "akka-uct":               "705m",#concurrency235min
+        "fj-kmeans":              "285m",#95min(150m1)
+        "reactors":               "1500m",#500 min(900m1)
+        #"db-shootout":            "20m",#database java version <= 11
+        #"neo4j-analytics":        "20m", #java version <=15 supported only
+        "future-genetic":         "30m",#functional 10min
+        "mnemonics":              "180m",#60min
+        "par-mnemonics":          "180m",#60min
+        #"rx-scrabble":            "35m",#no GC invoke at all
+        "scrabble":               "330m",#110min
+        "dotty":                  "180m",#scala 60min
+        "philosophers":           "30m",#10min
+        "scala-doku":             "105m",#35min
+        "scala-kmeans":           "105m",#35min
+        "scala-stm-bench7":       "930m",#310min
+        "finagle-chirper":        "180m",#web 60m min
+        "finagle-http":           "105m",#35min
+}
+
 def read_data(sample, data, configuration_name, benchmark_name):
     df = pd.DataFrame(columns=[configuration_name])
     for file in data:
-        print(file)
-        print("\n")
+        #print(file)
+        #print("\n")
         if sample in file:
             try:
                 curr_df = pd.read_csv(file, header=None)
@@ -127,15 +176,16 @@ def store_result(sample, result, res_folder, benchmark_name, baseline_name):
     #rows = [[bm1, energy1, energy2, energy3, ...],
     #        [bm2, energy1, energy2, energy3, ...],
     #       ...     #       ]
-    if "perf" in sample:
-        print(result)
+    #if "perf" in sample:
+        #print(result)
     row = [benchmark_name]
 
     result_aggregated, result_points = result
     result_dir = os.path.join("processed_results", res_folder, benchmark_name)
     pathlib.Path(result_dir).mkdir(parents=True, exist_ok=True)
-    baseline_name = find_best_baseline(result_aggregated)
+    #baseline_name = find_best_baseline(result_aggregated)
     if "GC" not in sample:
+        print(baseline_name)
         normilized_results = normalized_data(result_aggregated, baseline_name)
         for number in normilized_results:
             row.append("{:.2f}".format(number)) 
@@ -166,6 +216,11 @@ def append_value(dict_obj, key, value):
         # As key is not in dict,
         # so, add key-value pair
         dict_obj[key] = value
+
+def find_heap_size(bm_name):
+    for (bm, size) in HEAP_SIZES.items():
+        if bm_name in bm:
+            return size
 
 def main():
     runs = UniqueRuns()
@@ -203,36 +258,38 @@ def main():
     #       fmt ='% s')
     for (benchmark_name, allconf_runs) in benchmarks_conf.items():
         print(benchmark_name)
-        if "als" not in benchmark_name:
+        if "hazelcast" not in benchmark_name:
             continue
+        heap_size = find_heap_size(benchmark_name)
         baseline_name = ""
         dict_for_benchmark = {}
         for conf_runs in allconf_runs:
             if isinstance(conf_runs, dict):
                 for conf in conf_runs:
                     #print(conf)
-                    if baseline_name == "":
+                    if baseline_name == "" and "G1" in conf and str(heap_size) in conf:
                         baseline_name = conf
                     append_value(dict_for_benchmark, conf, conf_runs[conf])
             else:
-                if baseline_name == "":
+                if baseline_name == "" and "G1" in conf and str(heap_size) in conf:
                     baseline_name = conf_runs
                 append_value(dict_for_benchmark, conf_runs, allconf_runs[conf_runs])
-        measurement = ["energy_pack", "perf", "max_latency", "mean_latency", "watts_pack", "energy_dram", "energy_cpu", "GC_cycles"]
-        #measurement = ["GC_cycles"]
-        for m in measurement:
-            #print(m)
-            baseline = analyze_baseline(m, dict_for_benchmark[baseline_name], baseline_name, benchmark_name)
-            result = analyze_data(m, dict_for_benchmark, baseline, baseline_name, benchmark_name)
-            store_result(m, result, res_folder, benchmark_name, baseline_name)
-            with open (os.path.join(os.getcwd() + "/EnergyVsTimePlots", "table_" + m + "_" + benchmark_name + ".csv"), "w+") as f:
-                write = csv.writer(f, skipinitialspace=True, delimiter=';', quoting=csv.QUOTE_NONE)
-                write.writerow(fields)
-                write.writerows(rows)
-            rows.clear()
-            fields.clear()
-            order.clear()
-            fields.append('BMs')
+        if baseline_name != "":
+            measurement = ["energy_pack", "perf", "max_latency", "mean_latency", "watts_pack", "energy_dram", "energy_cpu", "GC_cycles"]
+            #measurement = ["GC_cycles"]
+            for m in measurement:
+                #print(m)
+                baseline = analyze_baseline(m, dict_for_benchmark[baseline_name], baseline_name, benchmark_name)
+                result = analyze_data(m, dict_for_benchmark, baseline, baseline_name, benchmark_name)
+                store_result(m, result, res_folder, benchmark_name, baseline_name)
+                with open (os.path.join(os.getcwd() + "/EnergyVsTimePlots", "table_" + m + "_" + benchmark_name + ".csv"), "w+") as f:
+                    write = csv.writer(f, skipinitialspace=True, delimiter=';', quoting=csv.QUOTE_NONE)
+                    write.writerow(fields)
+                    write.writerows(rows)
+                rows.clear()
+                fields.clear()
+                order.clear()
+                fields.append('BMs')
 
 if __name__ == "__main__":
     main()

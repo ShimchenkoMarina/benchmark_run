@@ -206,27 +206,27 @@ BM_Renaissance = {
       }
 #The maximum heap size for each application is set to 3X of its respective minimum heap size 
 HEAP_SIZES = {
-	"h2_small_t4": "300m",#100min
-	"h2_large_t4": "1200m",#400min 
-	"h2_huge_t4": "2000m", 
-	"avrora_large": "45m",#15min
-	"fop_default": "135m",#45min 
-	"jython_large": "135m",#45min 
-	"luindex_default": "21m",#7min 
-	"lusearch_large": "21m", #7min
-	"pmd_large": "150m", 
-	"sunflow_large": "60m", 
-	"xalan_large": "35m", 
-	"jme_def": "10m",
-	"zxing_def": "20m",
-	"tradesoap_small": "21m",
-	"tradesoap_large": "27m", 
-	"tradesoap_huge": "27m", 
-	"tradesoap_def": "27m", 
-	"graphchi_def": "700m", 
-	"biojava_def": "525m", 
-	"hazelcast": "5000m", 
-	"speckbb2015": "32g", 
+        "h2_small_t4": "300m",#100min
+        "h2_large_t4": "1200m",#400min 
+        "h2_huge_t4": "2000m", 
+        "avrora_large": "45m",#15min
+        "fop_default": "135m",#45min 
+        "jython_large": "135m",#45min 
+        "luindex_default": "21m",#7min 
+        "lusearch_large": "21m", #7min
+        "pmd_large": "150m", 
+        "sunflow_large": "60m", 
+        "xalan_large": "35m", 
+        "jme_def": "10m",
+        "zxing_def": "20m",
+        "tradesoap_small": "21m",
+        "tradesoap_large": "27m", 
+        "tradesoap_huge": "27m", 
+        "tradesoap_def": "27m", 
+        "graphchi_def": "700m", 
+        "biojava_def": "525m", 
+        "hazelcast": "5000m", 
+        "speckbb2015": "32g", 
         "als":             	"1455m",#apache-spark485min
         "chi-square":      	"1455m",#485min
         "dec-tree":               "1455m",#485min

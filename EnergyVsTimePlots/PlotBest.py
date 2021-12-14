@@ -8,7 +8,7 @@
 import os
 from os import listdir
 from os.path import isfile, join
-
+import matplotlib.patches as mpatches
 import pandas as pd
 import seaborn as sns
 import numpy as np
@@ -77,6 +77,76 @@ def find_heap_size(bm_name):
         if bm_name in bm:
             return size
 
+#Output
+#    x axis - benchmark names
+#    y axis - two dots, connected with vertical line; with two versions
+BMs = []
+vmin = []
+vmax = []
+legend = []
+def find_gaps(data1, data2, time_label, min_heap_size):
+    temp_data = data1
+    for idx, data in enumerate(data1["GC"]):
+        if str(min_heap_size) not in data:
+            temp_data.drop(idx, inplace = True)
+    data1 = temp_data 
+    data1.reset_index(drop=True, inplace=True)
+    temp_data = data2
+    for idx, data in enumerate(data2["GC"]):
+        if str(min_heap_size) not in data:
+            temp_data.drop(idx, inplace = True)
+    data2 = temp_data 
+    data2.reset_index(drop=True, inplace=True)
+    if len(data1["GC"] ) != len(data2["GC"]) or data1.empty or data2.empty:
+        if data1.empty or data2.empty:
+            return
+        if len(data1["GC"]) < len(data2["GC"]):
+            temp_data = data2
+            for idx, GC in enumerate(data2["GC"]):
+                found = False
+                for GC2 in data1["GC"]:
+                    if GC2 == GC:
+                        found = True
+                        break
+                if not found:
+                    temp_data.drop(idx, inplace = True)
+            data2 = temp_data
+        if len(data1["GC"]) > len(data2["GC"]):
+            temp_data = data1
+            for idx, GC in enumerate(data1["GC"]):
+                found = False
+                for GC2 in data2["GC"]:
+                    if GC2 == GC:
+                        found = True
+                        break
+                if not found:
+                    temp_data.drop(idx, inplace = True)
+            data1 = temp_data
+        if len(data1["GC"] ) != len(data2["GC"]):
+            return
+    minE = data2["Energy"][0]
+    minE_idx = 0
+    BMs.append(data1["BM"][0])
+    for idx, data in enumerate(data2["Energy"]):
+        if data < minE and minE_idx < len(data1[time_label]):
+            minE = data
+            minE_idx = idx
+    minP = data1[time_label][minE_idx]
+    minP_idx = minE_idx
+    
+    for idx, data in enumerate(data1[time_label]):
+        if data < minP and idx < len(data2["Energy"]):
+            minP = data
+            minP_idx = idx
+    if data1["GC"][minP_idx] == data2["GC"][minE_idx]:
+        vmin.append(0)
+        vmax.append(0)
+        legend.append(data2["GC"][minE_idx])
+    else:
+        vmin.append(0) 
+        vmax.append(data2["Energy"][minE_idx] - data2["Energy"][minP_idx])
+        legend.append(data2["GC"][minE_idx] + " " + data2["GC"][minP_idx])
+
 energy_pack_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_energy_pack"))])
 energy_cpu_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_energy_cpu"))])
 energy_dram_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_energy_dram"))])
@@ -130,39 +200,16 @@ for energy_pack_file, perf_file, meanl_file in zip(energy_pack_files, perf_files
     #Figure the basic configurations
     #Find default heap size
     min_heap_size = find_heap_size(data1['BM'][0])
-    for conf in basic_configurations:
-            for index, GC in enumerate(data1["GC"]):
-                if conf + str(min_heap_size) in GC and "P" not in GC:
-                    array_perf.append(data1[time_label][index])
-                    break
-                if "P" in GC and conf[:4] + str(min_heap_size) in GC:
-                    array_perf.append(data1[time_label][index])
-                    break
-            for index, GC in enumerate(data2["GC"]):
-                if conf + str(min_heap_size) in GC and "P" not in GC:
-                    array_energy_pack.append(data2["Energy"][index])
-                    break
-                if "P" in GC and conf[:4] + str(min_heap_size) in GC:
-                    array_energy_pack.append(data2["Energy"][index])
-                    break
-    if len(array_perf) == len(basic_configurations) and len(array_energy_pack) == len(basic_configurations):
-        array_of_arrays_perf.append(array_perf) 
-        array_of_arrays_energy_pack.append(array_energy_pack) 
-        array_of_BMs.append(data1["BM"][0])
-#for index, bm in enumerate(array_of_BMs):
-#    if "kmeans" in bm:
-#        print(array_of_arrays_energy_pack[index])
-#print(array_of_BMs)
-#print(array_of_arrays_perf)
-#print(array_of_arrays_energy_pack)
-name = "Clustering_Perf"
-PlotDendrogram.setup_dendrogram(array_of_arrays_perf, array_of_BMs, name)
-name = "HeatMapClust_Perf"
-PlotHeatMap.get_order(array_of_arrays_perf, array_of_BMs, basic_configurations, name)
-name = "HeatMapClust_Energy_pack_perf_order"
-PlotHeatMap.get_order(array_of_arrays_energy_pack, array_of_BMs, basic_configurations, name)
-name = "Clustering_energy_pack"
-PlotDendrogram.setup_dendrogram(array_of_arrays_energy_pack, array_of_BMs, name)
-name = "HeatMapClust_Energy_pack_original_order"
-PlotHeatMap.get_order(array_of_arrays_energy_pack, array_of_BMs, basic_configurations, name)
-
+    find_gaps(data1, data2, time_label, min_heap_size)
+lines = []
+fig, ax = plt.subplots()
+clrs = sns.color_palette('gnuplot', n_colors=len(BMs))
+for x, y1, y2, leg, clr in zip(BMs, vmin, vmax, legend, clrs):
+    if y2 != 0:
+        plt.vlines(x, y1, y2, colors=clr, linestyles='solid', label=leg)
+    else:
+        plt.vlines(x, y1, y2, colors=clr, linestyles='dotted', label=leg)
+ax.legend(loc='center left', fancybox=True, ncol=1, bbox_to_anchor=(1, 1.05))
+plt.xticks(rotation = 90)
+plt.savefig("Best_Gaps", bbox_inches='tight',dpi=100)
+#matplotlib.pyplot.vlines(x, ymin, ymax, colors='k', linestyles='solid', label='', *, data=None, **kwargs)
