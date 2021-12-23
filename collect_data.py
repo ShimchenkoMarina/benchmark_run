@@ -13,12 +13,16 @@ CLASSPATH_jRAPL_java13=""
 CLASSPATH_jRAPL_java15=""
 CLASSPATH_DACAPO=""
 CLASSPATH_DACAPO_NEW_java16=""
+CLASSPATH_DACAPO_NEW_java16_likwid=""
 CLASSPATH_DACAPO_NEW_java15=""
 CLASSPATH_DACAPO_NEW_java13=""
+CLASSPATH_DACAPO_NEW_java13_likwid=""
 CLASSPATH_RENAISSANCE=""
 MyCallback_RENAISSANCE=""
+MyCallback_RENAISSANCE_likwid=""
 CLASSPATH_HAZELCAST_java16=""
 CLASSPATH_HAZELCAST_java13=""
+CLASSPATH_likwid=""
 JAVA13 = ""
 JAVA16_HOT = ""
 
@@ -33,11 +37,19 @@ for line in file:
         continue
     if "CLASSPATH_jRAPL" in variable:
         CLASSPATH_jRAPL=line.split("=")[1].split("\"")[1]
+    if "CLASSPATH_likwid" in variable:    
+        CLASSPATH_likwid=line.split("=")[1].split("\"")[1]
+    if "CLASSPATH_DACAPO_NEW_java16_likwid" in variable:
+        CLASSPATH_DACAPO_NEW_java16_likwid=line.split("=")[1].split("\"")[1]
+        continue
     if "CLASSPATH_DACAPO_NEW_java16" in variable:
         CLASSPATH_DACAPO_NEW_java16=line.split("=")[1].split("\"")[1]
         continue
     if "CLASSPATH_DACAPO_NEW_java15" in variable:    
         CLASSPATH_DACAPO_NEW_java15=line.split("=")[1].split("\"")[1]
+        continue
+    if "CLASSPATH_DACAPO_NEW_java13_likwid" in variable:
+        CLASSPATH_DACAPO_NEW_java13_likwid=line.split("=")[1].split("\"")[1]
         continue
     if "CLASSPATH_DACAPO_NEW_java13" in variable:   
         CLASSPATH_DACAPO_NEW_java13=line.split("=")[1].split("\"")[1]
@@ -50,6 +62,9 @@ for line in file:
         CLASSPATH_HAZELCAST_java16=line.split("=")[1].split("\"")[1]
     if "CLASSPATH_HAZELCAST_java13" in variable:    
         CLASSPATH_HAZELCAST_java13=line.split("=")[1].split("\"")[1]
+    if "MyCallback_RENAISSANCE_likwid" in variable:
+        MyCallback_RENAISSANCE_likwid=line.split("=")[1].split("\"")[1]
+        continue
     if "MyCallback_RENAISSANCE" in variable:
         MyCallback_RENAISSANCE=line.split("=")[1].split("\"")[1]
     if "JAVA16_HOT" in variable:
@@ -64,30 +79,75 @@ JAVA16 = "java "
 JAVA16_HOT = "/scratch/jdk-16/bin/java "
 JAVA15M1 = "/scratch/mshimche/Project/openjdk-m1/build/linux-x86_64-server-release/images/jdk/bin/java "
 JAVA13 = "/scratch/jdk-13/bin/java "
-JAVA_LOG = " -Xlog:gc* "
+JAVA_LOG = " -Xlog:gc* -XX:+DisableExplicitGC"
 
 #Specify here which bm+java you want to run
 Which_BM = {
-        #"DaCapo21_j16", 
+        "DaCapo21_j16", 
         #"DaCapo21_j15M1", 
-        #"DaCapo21_j13",
-        #"DaCapo_j16", 
+        "DaCapo21_j13",
+        "DaCapo_j16", 
         #"DaCapo_j15M1", 
-        #"DaCapo_j13", 
+        "DaCapo_j13", 
         #"HazelCast_j16",
         #"HazelCast_j15M1",
-        "HazelCast_j13",
-        #"Renaissance_j13",
-        #"Renaissance_j16",
+        #"HazelCast_j13",
+        "Renaissance_j13",
+        "Renaissance_j16",
         #"Renaissance_j15M1",
         #"specjbb2015_j16"
         #"specjbb2015_j13"
         #"specjbb2015_j15M1"
+        #"DaCapo21_j16_likwid", 
+        #"DaCapo21_j15M1_likwid", 
+        #"DaCapo21_j13_likwid",
+        #"DaCapo_j16_likwid", 
+        #"DaCapo_j15M1_likwid", 
+        #"DaCapo_j13_likwid", 
+        #"HazelCast_j16_likwid",
+        #"HazelCast_j15M1_likwid",
+        #"HazelCast_j13_likwid",
+        #"Renaissance_j13_likwid",
+        #"Renaissance_j16_likwid",
+        #"Renaissance_j15M1_likwid",
+        #"specjbb2015_j16_likwid"
+        #"specjbb2015_j13_likwid"
+        #"specjbb2015_j15M1_likwid"
 } 
+
+GROUPS_LIKWID = { 
+    "BRANCH",
+    #"CLOCK",
+    #"CYCLE_ACTIVITY",
+    #"CYCLE_STALLS",
+    #"DATA",
+    #"DIVIDE",
+    #"ENERGY",
+    #"FALSE_SHARE",
+    #"FLOPS_AVX",
+    #"FLOPS_DP",
+    #"FLOPS_SP",
+    #"ICACHE",
+    #"L2",
+    #"L2CACHE",
+    #"L3CACHE",
+    #"MEM",
+    #"MEM_DP",
+    #"PERF",
+    #"PORT_USAGE",
+    #"RECOVERY",
+    #"TLB_DATA",
+    #"TLB_INSTR",
+    #"TMA",
+    #"UOPS",
+    #"UOPS_EXEC",
+    #"UOPS_ISSUE",
+    #"UOPS_RETIRE"
+}
 
 #Specify GCs for each java version
 GC13 = { 
-    #"j13CMS": "-XX:+UseConcMarkSweepGC",
+    "j13CMS": "-XX:+UseConcMarkSweepGC",
     "j13Ser": "-XX:+UseSerialGC",
     "j13P": "-XX:+UseParallelGC",
 }
@@ -99,29 +159,6 @@ GC16 = {
     'j16Z': '-XX:+UseZGC' ,
     'j16Shen': "-XX:+UseShenandoahGC",
 }
-
-'''GCHCast16 = { 
-    'j16Z': '-XX:+UseZGC' ,
-    'j16Shen': "-XX:+UseShenandoahGC",
-    'j16G1': '-XX:+UseG1GC',
-}
-GCHCast16_forConsistency = {
-    'j16Ser': '-XX:+UseSerialGC',
-    'j16P': '-XX:+UseParallelGC'
-}
-GCHCast13_forConsistency = {
-    'j13Ser': '-XX:+UseSerialGC',
-    'j13P': '-XX:+UseParallelGC'
-}
-
-GC15M1 = { 
-	 'j15Z': '-XX:+UseZGC' 
-}
-
-GCHCast13 = { 
-    "j13CMS": "-XX:+UseConcMarkSweepGC",
-    "j13Z": "-XX:+UnlockExperimentalVMOptions -XX:+UseZGC" ,
-}'''
 
 
 NUM_THREADS= {
@@ -135,40 +172,42 @@ NUM_THREADS= {
 BM_DaCapo = {
       "h2_small_t4":             	" h2 -size small -n 50 -t 4 -c ",#50
       "h2_large_t4":             	" h2 -size large -n 30 -t 4 -c ",#30
-      #"h2_huge_t4":              	" h2 -size huge -n 10 -t 4 -c ",
+      "h2_huge_t4":              	" h2 -size huge -n 10 -t 4 -c ",
       #"tradesoap_huge_n25":     	"-cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness tradebeans -size huge -n 1 -t 4 -c " concurrency bug -- skip
       #"tradebeans_huge_t4":      	"-cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness tradebeans -size huge -n 25 -t 4 -c ",
       "avrora_large":            	" avrora -size large -n 17 -c ",
       "fop_default":             	" fop -n 50 -c ",
       "jython_large":            	" jython -size large -n 20 -c ",
-      "luindex_default":         	" luindex -n 30 -c ",
-      "lusearch_large":          	" lusearch -size large -n 20 -c ",
-      "pmd_large":               	" pmd -size large -n 30 -c ",
-      "sunflow_large":           	" sunflow -size large -n 20 -c ",
-      "xalan_large":             	" xalan -size large -n 20 -c "
+      #"luindex_default":         	" luindex -n 30 -c ",
+      #"lusearch_large":          	" lusearch -size large -n 20 -c ",
+      #"pmd_large":               	" pmd -size large -n 30 -c ",
+      #"sunflow_large":           	" sunflow -size large -n 20 -c ",
+      #"xalan_large":             	" xalan -size large -n 20 -c "
 
 }
 BM_Hazelcast = {
       "hazelcast":             	" org.example.StreamingRound3 [10k, 20k, 40k ... 100k]"
-      #"hazelcast":             	" " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST + " org.example.StreamingRound3 [10k, 20k, 40k ... 100k]"
+      }
+BM_Hazelcast_likwid = {
+      "hazelcast":             	" org.example.StreamingRound3_likwid [10k, 20k, 40k ... 100k]"
       }
 BM_specjbb2015 = {
       "specjbb15":             	" -m COMPOSITEi -c "
       }
 BM_DaCapo2021 = {
       #"zxing_def":                  	" zxing -n 25 -c ",
-      "tradesoap_small":             	" tradesoap -size small -n 15 -c ",#only young
-      "tradesoap_large":             	" tradesoap -size large -n 15 -c ",#only young
-      "tradesoap_huge":             	" tradesoap -size huge -n 15 -c ",#only young
-      "tradesoap_def":             	" tradesoap -n 15 -c ",#only young generation
+      #"tradesoap_small":             	" tradesoap -size small -n 15 -c ",#only young
+      #"tradesoap_large":             	" tradesoap -size large -n 15 -c ",#only young
+      #"tradesoap_huge":             	" tradesoap -size huge -n 15 -c ",#only young
+      #"tradesoap_def":             	" tradesoap -n 15 -c ",#only young generation
       #"tomcat_small":             	" tomcat -size small",#fails with validation
       #"tomcat_large":             	" tomcat -size large",#fails with validation
       #"tomcat_def":             	" tomcat",#fails with validations
       #"kafka_def":             	" kafka",#broken, does not run
       #"graphchi_large":             	" graphchi -size large",#big data needed
       #"graphchi_huge":             	" graphchi -size huge",#big data needed
-      "graphchi_def":             	" graphchi -n 25 -c ",#is it latency oriented?
-      "jme_def":             	        " jme -n 25 -c ",#For some reason there is System.gc calls inside of this bm
+      #"graphchi_def":             	" graphchi -n 25 -c ",#is it latency oriented?
+      #"jme_def":             	        " jme -n 25 -c ",#For some reason there is System.gc calls inside of this bm
       #"h2o_def":             	        " h2o",#latest java 11 supported
       "biojava_def":                   " biojava -n 25 -c ",#only young
       #"h2_small":             	        " h2 -size small -t 4",
@@ -184,17 +223,17 @@ BM_Renaissance = {
       #"gauss-mix":              "gauss-mix --plugin ",
       #"log-regression":         "log-regression --plugin ",
       #"movie-lens":             "movie-lens --plugin ",
-      "naive-bayes":            "naive-bayes --plugin ",
-      "page-rank":              "page-rank --plugin ",
-      "akka-uct":               "akka-uct --plugin ",#concurrency
-      "fj-kmeans":              "fj-kmeans --plugin ",
-      "reactors":               "reactors --plugin ",
+      #"naive-bayes":            "naive-bayes --plugin ",
+      #"page-rank":              "page-rank --plugin ",
+      #"akka-uct":               "akka-uct --plugin ",#concurrency
+      #"fj-kmeans":              "fj-kmeans --plugin ",
+      #"reactors":               "reactors --plugin ",
       #"db-shootout":            "db-shootout --plugin ",#database java version <= 11
       #"neo4j-analytics":        "neo4j-analytics --plugin ", #java version <=15 supported only
       #"future-genetic":         "future-genetic --plugin ",#functional
       #"mnemonics":              "mnemonics --plugin ",
       #"par-mnemonics":          "par-mnemonics --plugin ",
-      #"rx-scrabble":            "rx-scrabble --plugin ",
+      "rx-scrabble":            "rx-scrabble --plugin ",
       #"scrabble":               "scrabble --plugin ",
       #"dotty":                  "dotty --plugin ",#scala
       #"philosophers":           "philosophers --plugin ",
@@ -289,10 +328,10 @@ def heap_size_array(BM_tag, HEAP_RUNS):
         #print (HS_conf)
         if (HS_tag == BM_tag):
             start_HS = int(''.join(filter(str.isdigit, HS_conf)))
-    space = int(start_HS * 0.1) #10% bigger heap size
+    space = int(start_HS * 0.5) #10% bigger heap size
     for i in range (0, HEAP_RUNS):
         conf = param_max + str(start_HS + space*i) + start_Value + param_min + str(start_HS+ space*i) + start_Value
-        tag = str(start_HS + space*i) + start_Value
+        tag = str(1 + i*0.5)
         HS[tag] = conf
     return HS
 
@@ -380,12 +419,14 @@ def find_heap_size(BM_tag, BM_conf, JAVA, Callback, CLASSPATH):
             #print(binary)
             
         
-
-def execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, JAVA, JAVA_LOG, Callback, CLASSPATH):
+#TODO: add GROUP_TAG into the path when run for features collecting. 
+def execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, JAVA, JAVA_LOG, Callback, CLASSPATH, COMMAND):
     #print("Benchmarking " + BM_tag)
+    GROUP_tag = ""
+    if "likwid" in COMMAND:
+        GROUP_tag = COMMAND.split(" ")[5]
     for i in range(0, PASSES):
         for (GC_tag, GC_conf) in GC.items():
-            #print(GC[GC_tag])
                 HS = heap_size_array(BM_tag, HEAP_RUNS)
                 
                 if (GC_conf == '-XX:+UseParallelGC'):
@@ -395,7 +436,7 @@ def execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, JAVA, JAVA_LOG, Callback,
                             result_path = os.path.join(os.getcwd(), "results", BM_tag, GC_tag + HS_tag, THR_tag)
                             os.system("sudo mkdir -p " + result_path)
                             os.system("sudo chmod 777 " + result_path)
-                            binary_hot = " ".join(["sudo numactl --cpunodebind=0 --membind=0", JAVA, JAVA_LOG, HS_conf, GC_conf, THR_conf, CLASSPATH, BM_conf, Callback])
+                            binary_hot = " ".join([COMMAND, JAVA, JAVA_LOG, HS_conf, GC_conf, THR_conf, CLASSPATH, BM_conf, Callback])
                             print(binary_hot)
                             collect_data(binary_hot, result_path)
                             end = timer()
@@ -406,7 +447,7 @@ def execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, JAVA, JAVA_LOG, Callback,
                         result_path = os.path.join(os.getcwd(), "results", BM_tag, GC_tag + HS_tag)
                         os.system("sudo mkdir -p " + result_path)
                         os.system("sudo chmod 777 " + result_path)
-                        binary_hot = " ".join(["sudo numactl --cpunodebind=0 --membind=0 ", JAVA, JAVA_LOG, HS_conf, GC_conf, CLASSPATH, BM_conf, Callback])
+                        binary_hot = " ".join([COMMAND, JAVA, JAVA_LOG, HS_conf, GC_conf, CLASSPATH, BM_conf, Callback])
                         print(binary_hot)
                         collect_data(binary_hot, result_path)
                         end = timer()
@@ -442,54 +483,114 @@ def main(argv):
     for BM in Which_BM:
         print(BM)
         if BM == "DaCapo_j16": 
+            COMMAND = "sudo numactl --cpunodebind=0 --membind=0 "
             for (BM_tag, BM_conf) in BM_DaCapo.items():
                 #find_heap_size(BM_tag, BM_conf, JAVA16_HOT, "MyCallback", " -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness")
                 #find_2xdrop(BM_tag, BM_conf, JAVA16_HOT, "MyCallback", " -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness")
-                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG, "MyCallback", "-XX:+DisableExplicitGC -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness")
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG, "MyCallback", "-XX:+DisableExplicitGC -cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness", COMMAND)
+        elif BM == "DaCapo_j16_likwid": 
+            JAVA_LOG_likwid = "-DLIKWID_PERFMON " + JAVA_LOG
+            for group in GROUPS_LIKWID:
+                COMMAND = "sudo /usr/local/bin/likwid-perfctr -C 0 -g " + group +" -m numactl --cpunodebind=0 --membind=0 "
+                for (BM_tag, BM_conf) in BM_DaCapo.items():
+                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG_likwid, "MyCallback_likwid", " -cp " + CLASSPATH_likwid + ":" + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness", COMMAND)
         elif BM == "DaCapo_j13":
+            COMMAND = "sudo numactl --cpunodebind=0 --membind=0 "
             for (BM_tag, BM_conf) in BM_DaCapo.items():
-                execute_bm(iPASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, "MyCallback_java13", " -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness")
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, "MyCallback_java13", "-XX:+DisableExplicitGC -cp " + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness", COMMAND)
+        elif BM == "DaCapo_j13_likwid": 
+            JAVA_LOG_likwid = "-DLIKWID_PERFMON " + JAVA_LOG
+            for group in GROUPS_LIKWID:
+                COMMAND = "sudo /usr/local/bin/likwid-perfctr -C 0 -g " + group +" -m numactl --cpunodebind=0 --membind=0 "
+                for (BM_tag, BM_conf) in BM_DaCapo.items():
+                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG_likwid, "MyCallback_java13_likwid", " -cp " + CLASSPATH_likwid + ":" + CLASSPATH_jRAPL_java13 + ":" + CLASSPATH_DACAPO + " Harness", COMMAND)
         elif BM == "DaCapo_j15M1":
+            COMMAND = "sudo numactl --cpunodebind=0 --membind=0 "
             for (BM_tag, BM_conf) in BM_DaCapo.items():
                 #find_heap_size(BM_tag, BM_conf, JAVA15M1, "MyCallback_java15", " -cp " + CLASSPATH_jRAPL_java15 + ":" + CLASSPATH_DACAPO + " Harness")
-                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, JAVA_LOG, "MyCallback_java15", " -cp " + CLASSPATH_jRAPL_java15 + ":" + CLASSPATH_DACAPO + " Harness")
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, JAVA_LOG, "MyCallback_java15", "-XX:+DisableExplicitGC -cp " + CLASSPATH_jRAPL_java15 + ":" + CLASSPATH_DACAPO + " Harness", COMMAND)
         elif BM == "DaCapo21_j16":
+            COMMAND = "sudo numactl --cpunodebind=0 --membind=0 "
             for (BM_tag, BM_conf) in BM_DaCapo2021.items():
-                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG, "MyCallback", " -jar " + CLASSPATH_DACAPO_NEW_java16)
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG, "MyCallback", " -jar " + CLASSPATH_DACAPO_NEW_java16, COMMAND)
+        elif BM == "DaCapo21_j16_likwid": 
+            JAVA_LOG_likwid = "-DLIKWID_PERFMON " + JAVA_LOG
+            for group in GROUPS_LIKWID:
+                COMMAND = "sudo /usr/local/bin/likwid-perfctr -C 0 -g " + group +" -m numactl --cpunodebind=0 --membind=0 "
+                for (BM_tag, BM_conf) in BM_DaCapo2021.items():
+                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG_likwid, "MyCallback_likwid", " -jar " + CLASSPATH_DACAPO_NEW_java16_likwid, COMMAND)
         elif BM == "DaCapo21_j15M1":
+            COMMAND = "sudo numactl --cpunodebind=0 --membind=0 "
             for (BM_tag, BM_conf) in BM_DaCapo2021.items():
-                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, JAVA_LOG, "MyCallback_java15", " -jar " + CLASSPATH_DACAPO_NEW_java15)
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, JAVA_LOG, "MyCallback_java15", " -jar " + CLASSPATH_DACAPO_NEW_java15, COMMAND)
         elif BM == "DaCapo21_j13":
+            COMMAND = "sudo numactl --cpunodebind=0 --membind=0 "
             for (BM_tag, BM_conf) in BM_DaCapo2021.items():
-                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, "MyCallback_java13", " -jar " + CLASSPATH_DACAPO_NEW_java13)
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, "MyCallback_java13", " -jar " + CLASSPATH_DACAPO_NEW_java13, COMMAND)
+        elif BM == "DaCapo21_j13_likwid": 
+            JAVA_LOG_likwid = "-DLIKWID_PERFMON " + JAVA_LOG
+            for group in GROUPS_LIKWID:
+                COMMAND = "sudo /usr/local/bin/likwid-perfctr -C 0 -g " + group +" -m numactl --cpunodebind=0 --membind=0 "
+                for (BM_tag, BM_conf) in BM_DaCapo2021.items():
+                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG_likwid, "MyCallback_java13_likwid", " -jar " + CLASSPATH_DACAPO_NEW_java13_likwid, COMMAND)
         elif BM ==  "HazelCast_j16":    
+            COMMAND = "sudo numactl --cpunodebind=0 --membind=0 "
             for (BM_tag, BM_conf) in BM_Hazelcast.items():
-                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST_java16)
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST_java16, COMMAND)
+        elif BM == "HazelCast_j16_likwid": 
+            for group in GROUPS_LIKWID:
+                COMMAND = "sudo /usr/local/bin/likwid-perfctr -C 0 -g " + group +" -m numactl --cpunodebind=0 --membind=0 "
+                for (BM_tag, BM_conf) in BM_Hazelcast_likwid.items():
+                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, " -DLIKWID_PERFMON ", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST_java16 + ":" + CLASSPATH_likwid, COMMAND)
         elif BM ==  "HazelCast_j15M1":    
+            COMMAND = "sudo numactl --cpunodebind=0 --membind=0 "
             for (BM_tag, BM_conf) in BM_Hazelcast.items():
                 #find_heap_size(BM_tag, BM_conf, JAVA15M1, "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
-                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST)
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST, COMMAND)
         elif BM ==  "HazelCast_j13":    
+            COMMAND = "sudo numactl --cpunodebind=0 --membind=0 "
             for (BM_tag, BM_conf) in BM_Hazelcast.items():
-                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST_java13)
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST_java13, COMMAND)
+        elif BM == "HazelCast_j13_likwid": 
+            for group in GROUPS_LIKWID:
+                COMMAND = "sudo /usr/local/bin/likwid-perfctr -C 0 -g " + group +" -m numactl --cpunodebind=0 --membind=0 "
+                for (BM_tag, BM_conf) in BM_Hazelcast_likwid.items():
+                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, " -DLIKWID_PERFMON ", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST_java13 + ":" + CLASSPATH_likwid, COMMAND)
         elif BM ==  "Renaissance_j13":    
+            COMMAND = "sudo numactl --cpunodebind=0 --membind=0 "
             for (BM_tag, BM_conf) in BM_Renaissance.items():
-                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE, COMMAND)
+        elif BM == "Renaissance_j13_likwid": 
+            JAVA_LOG_likwid = "-DLIKWID_PERFMON " + JAVA_LOG
+            for group in GROUPS_LIKWID:
+                COMMAND = "sudo /usr/local/bin/likwid-perfctr -C 0 -g " + group +" -m numactl --cpunodebind=0 --membind=0 "
+                for (BM_tag, BM_conf) in BM_Renaissance.items():
+                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG_likwid, MyCallback_RENAISSANCE_likwid, " -jar " + CLASSPATH_RENAISSANCE, COMMAND)
         elif BM ==  "Renaissance_j16":    
+            COMMAND = "sudo numactl --cpunodebind=0 --membind=0 "
             for (BM_tag, BM_conf) in BM_Renaissance.items():
                 #find_heap_size(BM_tag, BM_conf, JAVA16_HOT, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
-                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG, MyCallback_RENAISSANCE_likwid, " -jar " + CLASSPATH_RENAISSANCE, COMMAND)
+        elif BM == "Renaissance_j16_likwid": 
+            JAVA_LOG_likwid = "-DLIKWID_PERFMON " + JAVA_LOG
+            for group in GROUPS_LIKWID:
+                COMMAND = "sudo /usr/local/bin/likwid-perfctr -C 0 -g " + group +" -m numactl --cpunodebind=0 --membind=0 "
+                for (BM_tag, BM_conf) in BM_Renaissance.items():
+                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG_likwid, MyCallback_RENAISSANCE_likwid, " -jar " + CLASSPATH_RENAISSANCE, COMMAND)
         elif BM ==  "Renaissance_j15M1":
+            COMMAND = "sudo numactl --cpunodebind=0 --membind=0 "
             for (BM_tag, BM_conf) in BM_Renaissance.items():
                 #find_heap_size(BM_tag, BM_conf, JAVA15M1, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
-                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, JAVA_LOG, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, JAVA_LOG, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE, COMMAND)
         elif BM ==  "specjbb2015_j13":    
+            COMMAND = "sudo numactl --cpunodebind=0 --membind=0 "
             for (BM_tag, BM_conf) in BM_specjbb2015.items():
                 #find_heap_size(BM_tag, BM_conf, JAVA15M1, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
-                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA15M1, JAVA_LOG, MyCallback_specjbb2015, " -jar " + CLASSPATH_RENAISSANCE)
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA15M1, JAVA_LOG, MyCallback_specjbb2015, " -jar " + CLASSPATH_RENAISSANCE, COMMAND)
         elif BM ==  "specjbb2015_j16":    
+            COMMAND = "sudo numactl --cpunodebind=0 --membind=0 "
             for (BM_tag, BM_conf) in BM_specjbb2015.items():
                 #find_heap_size(BM_tag, BM_conf, JAVA15M1, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE)
-                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA15M1, JAVA_LOG, MyCallback_specjbb2015, " -jar " + CLASSPATH_RENAISSANCE)
+                execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA15M1, JAVA_LOG, MyCallback_specjbb2015, " -jar " + CLASSPATH_RENAISSANCE, COMMAND)
 
 if __name__ == "__main__": main(sys.argv[1:])

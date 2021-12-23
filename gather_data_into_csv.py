@@ -7,23 +7,11 @@ import numpy as np
 import matplotlib.ticker as plticker
 import csv
 import sys
-#baseline_name = "j16SerH"
-#all_order = ["j16SerH", "j13P_n4", "j13P_n1", "j13P_n2", "j13CMS", "j13Ser", "j16ShenH", "j16ZH", "j16G1H", "j16PH_n1", "j16PH_n2", "j16PH_n4"]
 order = []
-#baseline_priority = ["Ser", "CMS", "P", "Z"]
 bms = list()
 rows = []
 fields = ["BMs"]
-'''rows_perf = []
-rows_max_latency = []
-rows_mean_latency = []
-rows_latency = []
-rows_watts_pack = []
-fields_energy = ["BMs"]
-fields_perf = ["BMs"]
-fields_max_latency = ["BMs"]
-fields_mean_latency = ["BMs"]
-fields_watts_pack = ["BMs"]'''
+
 STR_TYPE = "Type"
 STR_N = "N"
 STR_MEAN = "Mean"
@@ -31,7 +19,7 @@ STR_STD_MEAN = "Relative Standard Deviation"
 STR_STD = "Standard Deviation"
 STR_PERF = "Performance"
 
-HEAP_SIZES = {
+'''HEAP_SIZES = {
         "h2_small_t4": "210m",#100min #300m
         "h2_large_t4": "750m",#400min #1200m
         "h2_huge_t4": "2000m", 
@@ -78,7 +66,7 @@ HEAP_SIZES = {
         "scala-stm-bench7":       "930m",#310min
         "finagle-chirper":        "180m",#web 60m min
         "finagle-http":           "105m",#35min
-}
+}'''
 
 def read_data(sample, data, configuration_name, benchmark_name):
     df = pd.DataFrame(columns=[configuration_name])
@@ -181,11 +169,8 @@ def store_result(sample, result, res_folder, benchmark_name, baseline_name):
     row = [benchmark_name]
 
     result_aggregated, result_points = result
-    result_dir = os.path.join("processed_results", res_folder, benchmark_name)
-    pathlib.Path(result_dir).mkdir(parents=True, exist_ok=True)
-    #baseline_name = find_best_baseline(result_aggregated)
     if "GC" not in sample:
-        print(baseline_name)
+        #print(baseline_name)
         normilized_results = normalized_data(result_aggregated, baseline_name)
         for number in normilized_results:
             row.append("{:.2f}".format(number)) 
@@ -217,11 +202,11 @@ def append_value(dict_obj, key, value):
         # so, add key-value pair
         dict_obj[key] = value
 
-def find_heap_size(bm_name):
+'''def find_heap_size(bm_name):
     for (bm, size) in HEAP_SIZES.items():
         if bm_name in bm:
             return size
-
+'''
 def main():
     runs = UniqueRuns()
     #this array should have the following format:{type: [/home/..../file_pack.txt,file_cpu.txt, file_dram.txt],  } 
@@ -257,25 +242,25 @@ def main():
     #       delimiter =", ", 
     #       fmt ='% s')
     for (benchmark_name, allconf_runs) in benchmarks_conf.items():
-        print(benchmark_name)
-        if "hazelcast" not in benchmark_name:
-            continue
-        heap_size = find_heap_size(benchmark_name)
+        #print(benchmark_name)
+        #if "akka-uct" not in benchmark_name:
+        #    continue
         baseline_name = ""
         dict_for_benchmark = {}
         for conf_runs in allconf_runs:
             if isinstance(conf_runs, dict):
                 for conf in conf_runs:
                     #print(conf)
-                    if baseline_name == "" and "G1" in conf and str(heap_size) in conf:
+                    if baseline_name == "" and "G1" in conf and str(1.0) in conf:
                         baseline_name = conf
                     append_value(dict_for_benchmark, conf, conf_runs[conf])
             else:
-                if baseline_name == "" and "G1" in conf and str(heap_size) in conf:
+                if baseline_name == "" and "G1" in conf and str(1.0) in conf:
                     baseline_name = conf_runs
                 append_value(dict_for_benchmark, conf_runs, allconf_runs[conf_runs])
+        #print("baseline", baseline_name)
         if baseline_name != "":
-            measurement = ["energy_pack", "perf", "max_latency", "mean_latency", "watts_pack", "energy_dram", "energy_cpu", "GC_cycles"]
+            measurement = ["energy_pack", "perf", "max_latency", "mean_latency", "watts_pack", "energy_dram", "energy_cpu", "GC_cycles", "energy_pack_dram"]
             #measurement = ["GC_cycles"]
             for m in measurement:
                 #print(m)
@@ -284,8 +269,15 @@ def main():
                 store_result(m, result, res_folder, benchmark_name, baseline_name)
                 with open (os.path.join(os.getcwd() + "/EnergyVsTimePlots", "table_" + m + "_" + benchmark_name + ".csv"), "w+") as f:
                     write = csv.writer(f, skipinitialspace=True, delimiter=';', quoting=csv.QUOTE_NONE)
+                    temp_row = rows[0].copy()
+                    temp_index = 0
+                    for index, number in enumerate(rows[0]):
+                            if "nan" in number:
+                                del temp_row[index - temp_index]
+                                del fields[index - temp_index]
+                                temp_index = temp_index + 1
                     write.writerow(fields)
-                    write.writerows(rows)
+                    write.writerow(temp_row)
                 rows.clear()
                 fields.clear()
                 order.clear()

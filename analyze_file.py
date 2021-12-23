@@ -158,6 +158,10 @@ def analyze_file(input_dir, output_dir, file_num):
         with open(os.path.join(output_dir, "energy_dram.txt"), "a") as writer:
            if (len(energy_dram_list) > 0):
                writer.write(str(avg(energy_dram_list)) + '\n')
+
+    with open(os.path.join(output_dir, "energy_pack_dram.txt"), "a") as writer:
+        if (len(energy_dram_list) > 0) and len(energy_pack_list) > 0:
+            writer.write(str(avg(energy_dram_list) + avg(energy_pack_list)) + '\n')
     
     last_cycle = ''
     run = 1
