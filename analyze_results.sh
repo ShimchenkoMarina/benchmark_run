@@ -1,13 +1,15 @@
 #!/bin/bash
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-COMMIT="results"
-SOCKETS=1
-
+declare -a arr=("results" "results_NUMA" "results_features" "results_features_NUMA")
+for i in "${arr[@]}"
+do 
+COMMIT=$i
+echo $COMMIT
 for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
     cd ${__dir}
     input_dir=$(realpath $dir/.)
-    for (( soc=0; soc<$SOCKETS; soc++ )); do
-    o1=raw_dir/"${dir}_s${soc}"
+    #o1=raw_dir/"${dir}_s${soc}"
+    o1=raw_dir/"${dir}"
     rm -rf $o1
     mkdir -p $o1
 
@@ -39,10 +41,10 @@ for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
 	fi
         python3 ${__dir}/process_file.py ${input_dir} ${raw_dir} ${i}.txt
         #rm -f ${raw_dir}/energy/${i}.txt
-        cat ${raw_dir}/${i}.txt | grep "Power consumption of dram s${soc}" | cut -d ' ' -f 6 >> ${raw_dir}/energy_dram/${i}.txt
-        cat ${raw_dir}/${i}.txt | grep "Power consumption of cpu s${soc}" | cut -d ' ' -f 6 >> ${raw_dir}/energy_cpu/${i}.txt
-        cat ${raw_dir}/${i}.txt | grep "Power consumption of package s${soc}" | cut -d ' ' -f 6 >> ${raw_dir}/energy_pack/${i}.txt
-        cat ${raw_dir}/${i}.txt | grep "GC(" | cut -d '(' -f 2| cut -d ')' -f 1 >> ${raw_dir}/GC_cycles/${i}.txt
+        cat ${raw_dir}/${i}.txt | grep "Power consumption of dram s" | cut -d ' ' -f 6 >> ${raw_dir}/energy_dram/${i}.txt
+        cat ${raw_dir}/${i}.txt | grep "Power consumption of cpu s" | cut -d ' ' -f 6 >> ${raw_dir}/energy_cpu/${i}.txt
+        cat ${raw_dir}/${i}.txt | grep "Power consumption of package s" | cut -d ' ' -f 6 >> ${raw_dir}/energy_pack/${i}.txt
+	cat ${raw_dir}/${i}.txt | grep "GC(" | cut -d '(' -f 2| cut -d ')' -f 1 >> ${raw_dir}/GC_cycles/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "Execution time" | cut -d ' ' -f 3 >> ${raw_dir}/perf/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "Duration" | cut -d ' ' -f 2 >> ${raw_dir}/perf/${i}.txt
         cat ${raw_dir}/${i}.txt | grep "#\[Mean" | cut -d '=' -f 2 | cut -d '','' -f 1 >> ${raw_dir}/mean_latency/${i}.txt
@@ -57,7 +59,7 @@ for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
              sudo rm -rf ${raw_dir}/max_latency/${i}.txt
 	fi
     done
-    done
+done
 done
 #sudo bash analyze_results_raw_to_proccessed.sh 
 '''for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
