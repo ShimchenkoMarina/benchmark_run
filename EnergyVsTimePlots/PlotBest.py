@@ -22,60 +22,7 @@ import PlotHeatMap
 # In[2]:
 bench = ""
 #TODO: and P_def
-basic_configurations = ["j16Z", "j16Ser", "j16G1", "j16Shen", "j16P_n1", "j16P_n2", "j16P_n4", "j13Ser", "j13CMS", "j13P_n1", "j13P_n2", "j13P_n4"]
-HEAP_SIZES = {
-        "h2_small_t4": "210m",#100min #300m
-        "h2_large_t4": "750m",#400min #1200m
-        "h2_huge_t4": "2000m", 
-        "avrora_large": "27m",#15min #45m
-        "fop_default": "75m",#45min #135m
-        "jython_large": "75m",#45min #135m
-        "luindex_default": "21m",#7min 
-        "lusearch_large": "21m", #7min
-        "pmd_large": "150m", 
-        "sunflow_large": "60m", 
-        "xalan_large": "35m", 
-        "jme_def": "10m",
-        "zxing_def":              "20m",
-        "tradesoap_small":        "21m",
-        "tradesoap_large":        "27m", 
-        "tradesoap_huge":         "27m", 
-        "tradesoap_def":          "27m", 
-        "graphchi_def":           "700m", 
-        "biojava_def":            "525m", 
-        "hazelcast":              "5000m", 
-        "speckbb2015":            "32g", 
-        "als":                    "1455m",#apache-spark485min
-        "chi-square":             "1455m",#485min
-        "dec-tree":               "1455m",#485min
-        "gauss-mix":              "1455m",#485min
-        "log-regression":         "1455m",#485min
-        "movie-lens":             "1455m",#485min
-        "naive-bayes":            "3825m",#1275min(1600m1)
-        "page-rank":              "1875m",#625min(835m1)
-        "akka-uct":               "705m",#concurrency235min
-        "fj-kmeans":              "285m",#95min(150m1)
-        "reactors":               "1500m",#500 min(900m1)
-        #"db-shootout":            "20m",#database java version <= 11
-        #"neo4j-analytics":        "20m", #java version <=15 supported only
-        "future-genetic":         "30m",#functional 10min
-        "mnemonics":              "180m",#60min
-        "par-mnemonics":          "180m",#60min
-        #"rx-scrabble":            "35m",#no GC invoke at all
-        "scrabble":               "330m",#110min
-        "dotty":                  "180m",#scala 60min
-        "philosophers":           "30m",#10min
-        "scala-doku":             "105m",#35min
-        "scala-kmeans":           "105m",#35min
-        "scala-stm-bench7":       "930m",#310min
-        "finagle-chirper":        "180m",#web 60m min
-        "finagle-http":           "105m",#35min
-}
-
-def find_heap_size(bm_name):
-    for (bm, size) in HEAP_SIZES.items():
-        if bm_name in bm:
-            return size
+basic_configurations = ["j16Z1.0", "j16Ser1.0", "j16G11.0", "j16Shen1.0", "j16P1.0_n1", "j16P1.0_n2", "j16P1.0_n4", "j13Ser1.0", "j13CMS1.0", "j13P1.0_n1", "j13P1.0_n2", "j13P1.0_n4"]
 
 #Output
 #    x axis - benchmark names
@@ -84,18 +31,18 @@ BMs = []
 vmin = []
 vmax = []
 legend = []
-def find_gaps(data1, data2, time_label, min_heap_size):
+def find_gaps(data1, data2, time_label):
     temp_data = data1
     for idx, data in enumerate(data1["GC"]):
-        if str(min_heap_size) not in data:
+        if str(1.0) not in data:
             temp_data.drop(idx, inplace = True)
     data1 = temp_data 
-    data1.reset_index(drop=True, inplace=True)
     temp_data = data2
     for idx, data in enumerate(data2["GC"]):
-        if str(min_heap_size) not in data:
+        if str(1.0) not in data:
             temp_data.drop(idx, inplace = True)
-    data2 = temp_data 
+    data2 = temp_data
+    data1.reset_index(drop=True, inplace=True)
     data2.reset_index(drop=True, inplace=True)
     if len(data1["GC"] ) != len(data2["GC"]) or data1.empty or data2.empty:
         if data1.empty or data2.empty:
@@ -146,8 +93,11 @@ def find_gaps(data1, data2, time_label, min_heap_size):
         vmin.append(0) 
         vmax.append(data2["Energy"][minE_idx] - data2["Energy"][minP_idx])
         legend.append(data2["GC"][minE_idx] + " " + data2["GC"][minP_idx])
+    #print(vmin)
+    print(vmax)
 
-energy_pack_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_energy_pack"))])
+energy_pack_dram_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_energy_pack_dram"))])
+energy_pack_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_energy_pack") and "dram" not in f)])
 energy_cpu_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_energy_cpu"))])
 energy_dram_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_energy_dram"))])
 perf_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_perf"))])
@@ -155,11 +105,14 @@ maxl_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".cs
 meanl_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_mean_l"))])
 wattsp_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_watts_p"))])
 gc_files = sorted([f for f in listdir(os.getcwd()) if (f.endswith(bench + ".csv") and f.startswith("table_GC"))])
-
+#for i in range(len(perf_files)):
+#    print(energy_pack_dram_files[i][17:] + "   > " + perf_files[i][10:])
+print(energy_pack_dram_files)
+print(perf_files)
 array_of_arrays_perf = []
 array_of_arrays_energy_pack = []
 array_of_BMs = []
-for energy_pack_file, perf_file, meanl_file in zip(energy_pack_files, perf_files, meanl_files):
+for energy_pack_dram_file, perf_file, meanl_file in zip(energy_pack_dram_files, perf_files, meanl_files):
     array_perf = []
     array_energy_pack = []
     # Reads data from the first configuration
@@ -173,7 +126,7 @@ for energy_pack_file, perf_file, meanl_file in zip(energy_pack_files, perf_files
             replace_data[idx] = np.nan
     data1["Time"] = replace_data
     
-    original_data2 = pd.read_csv(energy_pack_file, sep=';', index_col="BMs")
+    original_data2 = pd.read_csv(energy_pack_dram_file, sep=';', index_col="BMs")
     # Organizes it for plotting
     data2 = original_data2.stack().reset_index()
     data2.columns = ['BM', 'GC', 'Energy']
@@ -199,8 +152,16 @@ for energy_pack_file, perf_file, meanl_file in zip(energy_pack_files, perf_files
 
     #Figure the basic configurations
     #Find default heap size
-    min_heap_size = find_heap_size(data1['BM'][0])
-    find_gaps(data1, data2, time_label, min_heap_size)
+    #min_heap_size = find_heap_size(data1['BM'][0])
+    
+    #print("data1 = ", data1)
+    if data1["BM"][0] == data2["BM"][0]:
+        print("yes")
+    else:
+        print("no")
+    #print("data2 = ", data2)
+    find_gaps(data1, data2, time_label)
+
 lines = []
 fig, ax = plt.subplots()
 clrs = sns.color_palette('gnuplot', n_colors=len(BMs))

@@ -1,6 +1,6 @@
 #!/bin/bash
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-declare -a arr=("results" "results_NUMA" "results_features")
+declare -a arr=("results" "results_NUMA")
 for i in "${arr[@]}"
 do
 COMMIT=$i
@@ -30,11 +30,11 @@ for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
              sudo rm -rf ${raw_dir}/${i}.txt
         else
              python3 ${__dir}/analyze_file.py ${raw_dir} ${output_dir} ${i}.txt
-	     for file in $(find ${output_dir}/ -empty); do
-		echo "$file in the last stage is Empty!"
-		sudo rm -rf file
-		done
-	fi    
+         for file in $(find ${output_dir}/ -empty); do
+            echo "$file in the last stage is Empty!"
+            sudo rm -rf file
+        done
+        fi    
     done
 done
 done

@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import random
 import string
+import csv
 
 import PlotDendrogram
 import PlotHeatMap
@@ -119,17 +120,35 @@ for energy_pack_file, perf_file, meanl_file, maxl_file, epd_file in zip(energy_p
 #for index, bm in enumerate(array_of_BMs):
 #    if "kmeans" in bm:
 #        print(array_of_arrays_energy_pack[index])
-#print(array_of_BMs)
-#print(array_of_arrays_perf)
-#print(array_of_arrays_energy_pack)
+'''f = open('/home/marina/workspace/2021NewProject/OpenJDK/benchmark_run/EnergyVsTimePlots/all_data_perf.csv', 'w')
+writer = csv.writer(f)
+writer.writerow(basic_configurations)
+for index, bm in enumerate(array_of_BMs):
+    row = array_of_arrays_perf[index]
+    row.insert(0,bm)
+    print(row)
+    writer.writerow(row)
+f.close()
+f = open('/home/marina/workspace/2021NewProject/OpenJDK/benchmark_run/EnergyVsTimePlots/all_data_energy.csv', 'w')
+writer = csv.writer(f)
+writer.writerow(basic_configurations)
+for index, bm in enumerate(array_of_BMs):
+    row = array_of_arrays_energy_pack[index]
+    row.insert(0,bm)
+    print(row)
+    writer.writerow(row)
+f.close()
+print(array_of_BMs)
+print(array_of_arrays_perf)
+print(array_of_arrays_energy_pack)'''
 name = "Clustering_Perf"
 PlotDendrogram.setup_dendrogram(array_of_arrays_perf, array_of_BMs, name)
 name = "HeatMapClust_Perf"
 PlotHeatMap.get_order(array_of_arrays_perf, array_of_BMs, basic_configurations, name)
-name = "HeatMapClust_Energy_pack_perf_order"
+name = "HeatMapClust_Energy_full_perf_order"
 PlotHeatMap.get_order(array_of_arrays_energy_pack, array_of_BMs, basic_configurations, name)
-name = "Clustering_energy_pack"
+name = "Clustering_energy_full"
 PlotDendrogram.setup_dendrogram(array_of_arrays_energy_pack, array_of_BMs, name)
-name = "HeatMapClust_Energy_pack_original_order"
+name = "HeatMapClust_Energy_full_original_order"
 PlotHeatMap.get_order(array_of_arrays_energy_pack, array_of_BMs, basic_configurations, name)
 

@@ -72,7 +72,7 @@ def analyze_file(input_dir, output_dir, file_num):
     max_heap = 0
     
     #We need this if since we collect latency only for some bms    
-    if os.path.exists(os.path.join(input_dir, "mean_latency", file_num)):
+    if "hazelcast" in input_dir:
         with open(os.path.join(input_dir, "mean_latency", file_num), 'r') as reader:
             for line in reader.readlines():
                 line = line.replace(",", ".")
@@ -91,9 +91,21 @@ def analyze_file(input_dir, output_dir, file_num):
             else:
                 with open(os.path.join("list_of_empty_files.txt"), "a") as writer:
                     writer.write(output_dir + file_num + '\n')
+    else:
+        with open(os.path.join(input_dir, "mean_latency", file_num), 'r') as reader:
+            for line in reader.readlines():
+                pause = line.split(" ")[-1][0:-3]
+                mean_latency_list.append(float(pause))
+        with open(os.path.join(output_dir, "mean_latency.txt"), "a+") as writer:
+           if (len(mean_latency_list) > 0):
+               writer.write(str(avg(mean_latency_list)) + '\n')
+        with open(os.path.join(output_dir, "max_latency.txt"), "a+") as writer:
+           if (len(mean_latency_list) > 0):
+               writer.write(str(max(mean_latency_list)) + '\n')
+
     
     #We need this if since we collect latency only for some bms    
-    if os.path.exists(os.path.join(input_dir, "max_latency", file_num)):
+    if os.path.exists(os.path.join(input_dir, "max_latency", file_num)) and "hazelcast" in input_dir:
         with open(os.path.join(input_dir, "max_latency", file_num), 'r') as reader:
             for line in reader.readlines():
                 line = line.replace(",", ".")
@@ -206,7 +218,6 @@ def analyze_file(input_dir, output_dir, file_num):
             writer.write("Check numbers in (did not convert) : " +  input_dir +" " + file_num + " --> " + last_cycle + '\n')
 
     with open(os.path.join(input_dir, "perf", file_num), 'r') as reader:
-        #i=0
         for line in reader.readlines():
             line =line.replace(",", ".")
             if line.strip() and line  not in ['\n', '\r\n']:
@@ -227,6 +238,7 @@ def analyze_file(input_dir, output_dir, file_num):
         else:
             with open(os.path.join("bug_report.txt"), "a") as writer:
                 writer.write("No time reported in " +  input_dir + file_num + '\n')
+            
             
 
     av_power_cpu_list = list()
