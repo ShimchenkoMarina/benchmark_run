@@ -28,7 +28,7 @@ def plot_dendrogram(num_cl, model, **kwargs):
     fl = fcluster(linkage_matrix,num_cl, criterion='maxclust')
     with open("bridge_for_clustering.txt", 'w') as writer:
         writer.write(str(fl))
-    dendrogram(linkage_matrix, **kwargs,  leaf_rotation = 90)
+    dendrogram(linkage_matrix, **kwargs)
     
 
 def setup_dendrogram(data, bms, name):
@@ -37,9 +37,8 @@ def setup_dendrogram(data, bms, name):
     model = model.fit(data)
     plt.title("Hierarchical Clustering Dendrogram")
     # plot the top three levels of the dendrogram
-    plot_dendrogram(len(bms), model, truncate_mode="level", labels=list(bms))
-    plt.xlabel("Clustering for default confs.")
-    plt.savefig(name, bbox_inches='tight',dpi=100)
+    plot_dendrogram(len(bms), model, truncate_mode="level", orientation="right", labels=list(bms), leaf_font_size=4)
+    plt.savefig(name, bbox_inches='tight', dpi=200)
     plt.close()
 
 
