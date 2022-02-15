@@ -106,14 +106,14 @@ Which_BM = {
         #"DaCapo_j16", 
         #"DaCapo_j15M1", 
         #"DaCapo_j13", 
-        #"HazelCast_j16",
+        "HazelCast_j16",
         #"HazelCast_j15M1",
-        #"HazelCast_j13",
+        "HazelCast_j13",
         #"Renaissance_j13",
         #"Renaissance_j16",
         #"Renaissance_j15M1",
-        "specjbb2015_j16"
-        "specjbb2015_j13"
+        #"specjbb2015_j16"
+        #"specjbb2015_j13"
         #"specjbb2015_j15M1"
         #"DaCapo21_j16_likwid", 
         #"DaCapo21_j15M1_likwid", 
@@ -133,35 +133,16 @@ Which_BM = {
 } 
 
 GROUPS_LIKWID = { 
-    "BRANCH",
-    #"CLOCK",
-    #"CYCLE_ACTIVITY",
-    "CYCLE_STALLS",
-    "DATA",
-    #"DIVIDE",
-    "ENERGY",
-    #"FALSE_SHARE",
-    #"FLOPS_AVX",
-    #"FLOPS_DP",
-    #"FLOPS_SP",
+    #"BRANCH",
+    #"CYCLE_STALLS",
+    #"DATA",
+    #"ENERGY",
     "ICACHE",
-    #"L2",
-    "L2CACHE",
-    #"L3",
-    "L3CACHE",
-    #"MEM",
+    #"L2CACHE",
+    #"L3CACHE",
     "MEM_DP",
-    #"MEM_SP",
     #"NUMA",
-    #"PORT_USAGE",
-    #"RECOVERY",
-    "TLB_DATA",
-    "TLB_INSTR",
-    #"TMA",
-    #"UOPS",
-    #"UOPS_EXEC",
-    #"UOPS_ISSUE",
-    #"UOPS_RETIRE"
+    #"TLB_DATA",
 }
 
 #Specify GCs for each java version
@@ -172,11 +153,11 @@ GC13 = {
 }
 
 GC16 = {
-    'j16Z': '-XX:+UseZGC' ,
+        'j16Z': '-XX:+UseZGC -XX:+UseNUMA' ,#TODO: Use the NUMA parameter only for NUMA
     'j16Ser': '-XX:+UseSerialGC',
     'j16P': '-XX:+UseParallelGC',
-    'j16G1': '-XX:+UseG1GC',
-    'j16Shen': "-XX:+UseShenandoahGC",
+    'j16G1': '-XX:+UseG1GC -XX:+UseNUMA',
+    'j16Shen': "-XX:+UseShenandoahGC -XX:+UseNUMA",
 }
 
 
@@ -198,17 +179,23 @@ BM_DaCapo = {
       "fop_default":             	" fop -n 50 -c ",
       "jython_large":            	" jython -size large -n 20 -c ",
       "luindex_default":         	" luindex -n 30 -c ",
-      #"lusearch_large":          	" lusearch -size large -n 20 -c ",
+      "lusearch_large":          	" lusearch -size large -n 20 -c ",
       "pmd_large":               	" pmd -size large -n 30 -c ",
       "sunflow_large":           	" sunflow -size large -n 20 -c ",
       "xalan_large":             	" xalan -size large -n 20 -c "
 
 }
 BM_Hazelcast = {
-      "hazelcast":             	" org.example.StreamingRound3 [10k, 20k, 40k ... 100k]"
+      #"hazelcast_40_60":             	" org.example.StreamingRound3 [40k, 60k]",
+      #"hazelcast_20_40":             	" org.example.StreamingRound3 [20k, 40k]",
+      "hazelcast":             	" org.example.StreamingRound3 [10k, 20k, 40k ... 100k]",
+      #"hazelcast_60_80":             	" org.example.StreamingRound3 [60k, 80k]"
       }
 BM_Hazelcast_likwid = {
-      "hazelcast":             	" org.example.StreamingRound3_likwid [10k, 20k, 40k ... 100k]"
+      "hazelcast":             	" org.example.StreamingRound3_likwid [10k, 20k, 40k ... 100k]",
+      "hazelcast_20_40":             	" org.example.StreamingRound3_likwid [20k, 40k]",
+      "hazelcast_40_60":             	" org.example.StreamingRound3_likwid [40k, 60k]",
+      "hazelcast_60_80":             	" org.example.StreamingRound3_likwid [60k, 80k]",
       }
 BM_specjbb2015 = {
       "specjbb15":             	" -m COMPOSITE -ikv -p "
@@ -236,31 +223,31 @@ BM_DaCapo2021 = {
       }
 
 BM_Renaissance = {
-      "als":             	"als --plugin ",#apache-spark
-      "chi-square":      	"chi-square --plugin ",
-      "dec-tree":               "dec-tree --plugin ",
-      "gauss-mix":              "gauss-mix --plugin ",
-      "log-regression":         "log-regression --plugin ",
-      "movie-lens":             "movie-lens --plugin ",
-      "naive-bayes":            "naive-bayes --plugin ",
-      "page-rank":              "page-rank --plugin ",
-      "akka-uct":               "akka-uct --plugin ",#concurrency
-      "fj-kmeans":              "fj-kmeans --plugin ",
-      "reactors":               "reactors --plugin ",
+      #"als":             	"als --plugin ",#apache-spark
+      #"chi-square":      	"chi-square --plugin ",
+      #"dec-tree":               "dec-tree --plugin ",
+      #"gauss-mix":              "gauss-mix --plugin ",
+      #"log-regression":         "log-regression --plugin ",
+      #"movie-lens":             "movie-lens --plugin ",
+      #"naive-bayes":            "naive-bayes --plugin ",
+      #"page-rank":              "page-rank --plugin ",
+      #"akka-uct":               "akka-uct --plugin ",#concurrency
+      #"fj-kmeans":              "fj-kmeans --plugin ",
+      #"reactors":               "reactors --plugin ",
+      #"mnemonics":              "mnemonics --plugin ",
+      #"par-mnemonics":          "par-mnemonics --plugin ",
+      #"scrabble":               "scrabble --plugin ",
+      #"dotty":                  "dotty --plugin ",#scala
+      #"philosophers":           "philosophers --plugin ",
+      #"scala-doku":             "scala-doku --plugin ",
+      #"scala-kmeans":           "scala-kmeans --plugin ",
+      #"scala-stm-bench7":       "scala-stm-bench7 --plugin ",
+      #"finagle-chirper":        "finagle-chirper --plugin ",#web
+      #"finagle-http":           "finagle-http --plugin ",
+      "future-genetic":         "future-genetic --plugin ",#functional
       #"db-shootout":            "db-shootout --plugin ",#database java version <= 11
       #"neo4j-analytics":        "neo4j-analytics --plugin ", #java version <=15 supported only
-      "future-genetic":         "future-genetic --plugin ",#functional
-      "mnemonics":              "mnemonics --plugin ",
-      "par-mnemonics":          "par-mnemonics --plugin ",
-      "rx-scrabble":            "rx-scrabble --plugin ",
-      "scrabble":               "scrabble --plugin ",
-      "dotty":                  "dotty --plugin ",#scala
-      "philosophers":           "philosophers --plugin ",
-      "scala-doku":             "scala-doku --plugin ",
-      "scala-kmeans":           "scala-kmeans --plugin ",
-      "scala-stm-bench7":       "scala-stm-bench7 --plugin ",
-      "finagle-chirper":        "finagle-chirper --plugin ",#web
-      "finagle-http":           "finagle-http --plugin ",
+      #"rx-scrabble":            "rx-scrabble --plugin ",#no GC at all
       }
 #The maximum heap size for each application is set to 3X of its respective minimum heap size 
 HEAP_SIZES = {
@@ -284,6 +271,9 @@ HEAP_SIZES = {
         "graphchi_def": "700m", 
         "biojava_def": "525m", 
         "hazelcast": "5000m", 
+        "hazelcast_60_80": "5000m", 
+        "hazelcast_40_60": "5000m", 
+        "hazelcast_20_40": "5000m", 
         "specjbb15": "32000m", 
         "als":             	"1455m",#apache-spark485min
         "chi-square":      	"1455m",#485min
@@ -349,10 +339,7 @@ def heap_size_array(BM_tag, HEAP_RUNS):
             start_HS = int(''.join(filter(str.isdigit, HS_conf)))
     space = int(start_HS * 0.5) #10% bigger heap size
     for i in range (0, HEAP_RUNS):
-        if "spec" not in BM_tag:
-            conf = param_max + str(start_HS + space*i) + start_Value + param_min + str(start_HS+ space*i) + start_Value
-        else:
-            conf = param_max + str(start_HS + space*i) + start_Value
+        conf = param_max + str(start_HS + space*i) + start_Value + param_min + str(start_HS+ space*i) + start_Value
         tag = str(1 + i*0.5)
         HS[tag] = conf
     return HS
@@ -446,11 +433,13 @@ def execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, JAVA, JAVA_LOG, Callback,
     #print("Benchmarking " + BM_tag)
     GROUP_tag = ""
     if "likwid" in COMMAND:
+        binary_set_number_of_threads = " ".join("export OMP_NUM_THREADS=32")
         GROUP_tag = COMMAND.split(" ")[5]
     for i in range(0, PASSES):
         for (GC_tag, GC_conf) in GC.items():
                 HS = heap_size_array(BM_tag, HEAP_RUNS)
-                
+                print(HS)
+                result_path = ""
                 if (GC_conf == '-XX:+UseParallelGC'):
                     for (THR_tag, THR_conf) in NUM_THREADS.items():
                         for (HS_tag, HS_conf) in HS.items():
@@ -458,31 +447,44 @@ def execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, JAVA, JAVA_LOG, Callback,
                             result_path = os.path.join(os.getcwd(), RES_FOLDER, BM_tag, GC_tag + HS_tag, THR_tag, GROUP_tag)
                             os.system("sudo mkdir -p " + result_path)
                             os.system("sudo chmod 777 " + result_path)
+                            binary_cache_flush = " ".join("./cache-flush")
+                            print(binary_cache_flush)
                             binary_hot = " ".join([COMMAND, JAVA, JAVA_LOG, HS_conf, GC_conf, THR_conf, CLASSPATH, BM_conf, Callback])
                             print(binary_hot)
                             collect_data(binary_hot, result_path)
                             end = timer()
                             minutes = round((end - start) / 60.0, 3)
+                            if "hazelcast" in BM_tag:
+                                f1_path = os.path.join(result_path, get_current_result_name(result_path))
+                                f2_path = os.path.join(os.getcwd(), "histo-latency/0")
+                                # opening first file in append mode and second file in read mode
+                                f1 = open(f1_path, 'a+')
+                                f2 = open(f2_path, 'r')
+                                # appending the contents of the second file to the first file
+                                f1.write(f2.read())
+                                os.system("sudo rm -rf " + f2_path)
                 else:
                     for (HS_tag, HS_conf) in HS.items():
                         start = timer()
                         result_path = os.path.join(os.getcwd(), RES_FOLDER, BM_tag, GC_tag + HS_tag, GROUP_tag)
                         os.system("sudo mkdir -p " + result_path)
                         os.system("sudo chmod 777 " + result_path)
+                        binary_cache_flush = " ".join("./cache-flush")
+                        print(binary_cache_flush)
                         binary_hot = " ".join([COMMAND, JAVA, JAVA_LOG, HS_conf, GC_conf, CLASSPATH, BM_conf, Callback])
                         print(binary_hot)
                         collect_data(binary_hot, result_path)
                         end = timer()
                         minutes = round((end - start) / 60.0, 3)
-                if "hazelcast" in BM_tag:
-                    f1_path = os.path.join(result_path, get_current_result_name(result_path))
-                    f2_path = os.path.join(os.getcwd(), "histo-latency/0")
-                    # opening first file in append mode and second file in read mode
-                    f1 = open(f1_path, 'a+')
-                    f2 = open(f2_path, 'r')
-                    # appending the contents of the second file to the first file
-                    f1.write(f2.read())
-                    os.system("sudo rm -rf " + f2_path)
+                        if "hazelcast" in BM_tag:
+                            f1_path = os.path.join(result_path, get_current_result_name(result_path))
+                            f2_path = os.path.join(os.getcwd(), "histo-latency/0")
+                            # opening first file in append mode and second file in read mode
+                            f1 = open(f1_path, 'a+')
+                            f2 = open(f2_path, 'r')
+                            # appending the contents of the second file to the first file
+                            f1.write(f2.read())
+                            os.system("sudo rm -rf " + f2_path)
 
 def main(argv):
     try:
@@ -505,6 +507,7 @@ def main(argv):
     print("Starting to collect data with " + str(PASSES) + " passes")
     for BM in Which_BM:
         print(BM)
+        binary_cache_cpufreq_set = " ".join("sudo cpupower frequency-set --governor performance")
         if "likwid" not in BM:
             if NUMA == 0:
                 COMMAND = "sudo numactl --cpunodebind=0 --membind=0 "
@@ -534,13 +537,13 @@ def main(argv):
                     execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, "MyCallback_java13", " -jar " + CLASSPATH_DACAPO_NEW_java13, COMMAND, RES_FOLDER)
             elif BM ==  "HazelCast_j16":    
                 for (BM_tag, BM_conf) in BM_Hazelcast.items():
-                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST_java16, COMMAND, RES_FOLDER)
+                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC16, JAVA16_HOT, JAVA_LOG, "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST_java16, COMMAND, RES_FOLDER)
             elif BM ==  "HazelCast_j15M1":    
                 for (BM_tag, BM_conf) in BM_Hazelcast.items():
                     execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC15M1, JAVA15M1, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST, COMMAND, RES_FOLDER)
             elif BM ==  "HazelCast_j13":    
                 for (BM_tag, BM_conf) in BM_Hazelcast.items():
-                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, "", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST_java13, COMMAND, RES_FOLDER)
+                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST_java13, COMMAND, RES_FOLDER)
             elif BM ==  "Renaissance_j13":    
                 for (BM_tag, BM_conf) in BM_Renaissance.items():
                     execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC13, JAVA13, JAVA_LOG, MyCallback_RENAISSANCE, " -jar " + CLASSPATH_RENAISSANCE, COMMAND, RES_FOLDER)
@@ -560,7 +563,7 @@ def main(argv):
             for group in GROUPS_LIKWID:
                 JAVA_LOG_likwid = "-DLIKWID_PERFMON " + JAVA_LOG
                 if NUMA == 0:
-                    COMMAND = "sudo /usr/local/bin/likwid-perfctr -C 0-31 -g " + group +" -m numactl --cpunodebind=0 --membind=0 "
+                    COMMAND = "sudo /usr/local/bin/likwid-perfctr -C 0-7,16-23 -g " + group +" -m "
                     RES_FOLDER = "results_likwid"
                 else: 
                     COMMAND = "sudo /usr/local/bin/likwid-perfctr -C 0-31 -g " + group +" -m "

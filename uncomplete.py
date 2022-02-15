@@ -11,6 +11,9 @@ def analyze_file(input_dir, file_num):
             if "Exception in thread \"" in line:
                 #print("fail: " + file_name)           
                 exit(100)     
+            if "Java heap space\"" in line:
+                #print("fail: " + file_name)           
+                exit(100)     
 
 def main():
     if len(sys.argv) != 3:

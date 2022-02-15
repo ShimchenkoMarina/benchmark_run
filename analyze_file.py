@@ -124,21 +124,21 @@ def analyze_file(input_dir, output_dir, file_num):
                writer.write(str(avg(max_latency_list)) + '\n')
 
     with open(os.path.join(input_dir, "energy_cpu", file_num), 'r') as reader:
-        sum = 0
+        sum_2soc = 0
         for line in reader.readlines():
             line =line.replace(",", ".")
             try:
                 float(line)
-                if float(line) > 0 and sum == 0:
-                    sum = sum + float(line)
-                elif float(line) > 0 and sum != 0:
-                    energy_cpu_list.append(sum + float(line))
-                    sum = 0
-                elif float(line) <= 0 and sum == 0:
-                    sum = sum + float(line) + OVERFLOW_CONST
-                elif float(line) <= 0 and sun != 0:
-                    energy_cpu_list.append(sum + float(line) + OVERFLOW_CONST)
-                    sum = 0
+                if float(line) > 0 and sum_2soc == 0:
+                    sum_2soc = sum_2soc + float(line)
+                elif float(line) > 0 and sum_2soc != 0:
+                    energy_cpu_list.append(sum_2soc + float(line))
+                    sum_2soc = 0
+                elif float(line) <= 0 and sum_2soc == 0:
+                    sum_2soc = sum_2soc + float(line) + OVERFLOW_CONST
+                elif float(line) <= 0 and sum_2soc != 0:
+                    energy_cpu_list.append(sum_2soc + float(line) + OVERFLOW_CONST)
+                    sum_2soc = 0
             except:
                 with open(os.path.join("bug_report.txt"), "a") as writer:
                     writer.write("Check numbers in (did not convert) : " +  input_dir + file_num + '\n')
@@ -147,21 +147,21 @@ def analyze_file(input_dir, output_dir, file_num):
             writer.write(str(avg(energy_cpu_list)) + '\n')
 
     with open(os.path.join(input_dir, "energy_pack", file_num), 'r') as reader:
-        sum = 0
+        sum_2soc = 0
         for line in reader.readlines():
             line =line.replace(",", ".")
             try:
                 float(line)
-                if float(line) > 0 and sum == 0:
-                    sum = sum + float(line)
-                elif float(line) > 0 and sum != 0:
-                    energy_pack_list.append(sum + float(line))
-                    sum = 0
-                elif float(line) <= 0 and sum == 0:
-                    sum = sum + float(line) + OVERFLOW_CONST
-                elif float(line) <= 0 and sun != 0:
-                    energy_pack_list.append(sum + float(line) + OVERFLOW_CONST)
-                    sum = 0
+                if float(line) > 0 and sum_2soc == 0:
+                    sum_2soc = sum_2soc + float(line)
+                elif float(line) > 0 and sum_2soc != 0:
+                    energy_pack_list.append(sum_2soc + float(line))
+                    sum_2soc = 0
+                elif float(line) <= 0 and sum_2soc == 0:
+                    sum_2soc = sum_2soc + float(line) + OVERFLOW_CONST
+                elif float(line) <= 0 and sum_2soc != 0:
+                    energy_pack_list.append(sum_2soc + float(line) + OVERFLOW_CONST)
+                    sum_2soc = 0
             except:
                 with open(os.path.join("bug_report.txt"), "a") as writer:
                     writer.write("Check numbers in (did not convert) : " +  input_dir + file_num + " --> " + line + '\n')
@@ -170,21 +170,21 @@ def analyze_file(input_dir, output_dir, file_num):
             writer.write(str(avg(energy_pack_list)) + '\n')
 
     with open(os.path.join(input_dir, "energy_dram", file_num), 'r') as reader:
-        sum = 0
+        sum_2soc = 0
         for line in reader.readlines():
             line =line.replace(",", ".")
             try:
                 float(line)
-                if float(line) > 0 and sum == 0:
-                    sum = sum + float(line)
-                elif float(line) > 0 and sum != 0:
-                    energy_dram_list.append(sum + float(line))
-                    sum = 0
-                elif float(line) <= 0 and sum == 0:
-                    sum = sum + float(line) + OVERFLOW_CONST
-                elif float(line) <= 0 and sun != 0:
-                    energy_dram_list.append(sum + float(line) + OVERFLOW_CONST)
-                    sum = 0
+                if float(line) > 0 and sum_2soc == 0:
+                    sum_2soc = sum_2soc + float(line)
+                elif float(line) > 0 and sum_2soc != 0:
+                    energy_dram_list.append(sum_2soc + float(line))
+                    sum_2soc = 0
+                elif float(line) <= 0 and sum_2soc == 0:
+                    sum_2soc = sum_2soc + float(line) + OVERFLOW_CONST
+                elif float(line) <= 0 and sum_2soc != 0:
+                    energy_dram_list.append(sum_2soc + float(line) + OVERFLOW_CONST)
+                    sum_2soc = 0
             except:
                 with open(os.path.join("bug_report.txt"), "a") as writer:
                     writer.write("Check numbers in (did not convert to float) : " +  input_dir + file_num + " --> " + line + '\n')
@@ -195,6 +195,11 @@ def analyze_file(input_dir, output_dir, file_num):
     with open(os.path.join(output_dir, "energy_pack_dram.txt"), "a") as writer:
         if (len(energy_dram_list) > 0) and len(energy_pack_list) > 0:
             writer.write(str(avg(energy_dram_list) + avg(energy_pack_list)) + '\n')
+    with open(os.path.join(output_dir, "energy_pack_dram%.txt"), "w") as writer:
+        if (len(energy_dram_list) > 0) and len(energy_pack_list) > 0:
+            with open(os.path.join("bug_report.txt"), "a") as writer_bug:
+                writer_bug.write("GC% : " +  input_dir + file_num + " --> " + str(avg(energy_dram_list)/(avg(energy_dram_list) + avg(energy_pack_list))) + '\n')
+            writer.write(str(avg(energy_dram_list)/(avg(energy_dram_list) + avg(energy_pack_list))) + '\n')
     
     last_cycle = ''
     run = 1

@@ -28,7 +28,7 @@ def main():
         print("Usage process_file.py input_dir raw_dir file_num")
         exit(1)
     #Process latency and latency-oritnted bms separately, nothing to cut
-    if "hazelcast" in sys.argv[1]:
+    if "hazelcast" in sys.argv[1] or "spec" in sys.argv[1]:
         path_from = os.path.join(sys.argv[1], sys.argv[3]) 
         path_to = os.path.join(sys.argv[2], sys.argv[3])
         os.system("sudo cp " + path_from + " " + path_to)

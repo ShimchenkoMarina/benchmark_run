@@ -1,12 +1,14 @@
 #!/bin/bash
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-declare -a arr=("results" "results_NUMA")
+declare -a arr=("results_NUMA")
+#results
 for i in "${arr[@]}"
 do
 COMMIT=$i
 
 
 for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
+#for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2 | grep hazelcast); do
     cd ${__dir}
     sudo rm -rf ${__dir}/bug_report.txt
     input_dir=$(realpath $dir/.)
@@ -30,10 +32,10 @@ for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
              sudo rm -rf ${raw_dir}/${i}.txt
         else
              python3 ${__dir}/analyze_file.py ${raw_dir} ${output_dir} ${i}.txt
-         for file in $(find ${output_dir}/ -empty); do
-            echo "$file in the last stage is Empty!"
-            sudo rm -rf file
-        done
+             for file in $(find ${output_dir}/ -empty); do
+            	echo "$file in the last stage is Empty!"
+            	sudo rm -rf file
+             done
         fi    
     done
 done

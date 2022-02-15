@@ -29,53 +29,53 @@ for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
         cat ${dir}/${i}.txt | grep "Branch misprediction ratio STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
         cat ${dir}/${i}.txt | grep "Instructions per branch STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
         cat ${dir}/${i}.txt | grep "Instructions per branch STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "Total execution stalls PMC3" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "Stalls caused by L1D misses" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "Stalls caused by L2 misses" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "Execution stall rate" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "Stalls caused by L1D misses rate" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "Stalls caused by L2 misses rate" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "Load to store ratio" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "Energy PP0" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "Power PP0" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "Energy DRAM" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "Power DRAM" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "Energy [J]" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "Power [W]" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "L1I request rate" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "L1I miss rate" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "L1I miss ratio" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "L1I stalls" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "L1I stall rate" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "L1I queue full stalls" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "L1I queue full stall rate" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "L2 request rate" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "L2 miss rate" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "L2 miss ratio" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "L3 request rate" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "L3 miss rate" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "L3 miss ratio" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "Memory read bandwidth" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "Memory read data volume" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "Memory write bandwidth" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "Memory write data volume" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "Memory bandwidth" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "Memory data volume" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "CPI" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "MFLOP/s" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "AVX" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "Packed" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "Scalar" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "Operational intensity" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "L1 DTLB load misses" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "L1 DTLB load miss rate" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "L1 DTLB load miss duration" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "L1 DTLB store misses" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "L1 DTLB store miss rate" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "L1 DTLB store miss duration" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "L1 ITLB misses" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "L1 ITLB miss rate" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
-        cat ${dir}/${i}.txt | grep "L1 ITLB miss duration" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "Total execution stalls PMC3" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "Stalls caused by L1D misses" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "Stalls caused by L2 misses" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "Execution stall rate" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "Stalls caused by L1D misses rate" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "Stalls caused by L2 misses rate" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "Load to store ratio" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "Energy PP0 [J] STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "Power PP0 [W] STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "Energy DRAM [J] STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "Power DRAM [W] STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "Energy [J] STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "Power [W] STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "L1I request rate" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "L1I miss rate" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "L1I miss ratio" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "L1I stalls" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "L1I stall rate" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "L1I queue full stalls" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "L1I queue full stall rate" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "L2 request rate STAT" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "L2 miss rate STAT" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "L2 miss ratio STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "L3 request rate STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "L3 miss rate STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "L3 miss ratio STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "Memory read bandwidth [MBytes/s] STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "Memory read data volume" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "Memory write bandwidth" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "Memory write data volume" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "Memory bandwidth" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "Memory data volume" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "CPI" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "MFLOP/s" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "AVX" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "Packed" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "Scalar" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "Operational intensity" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "L1 DTLB load misses" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "L1 DTLB load miss rate" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "L1 DTLB load miss duration" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "L1 DTLB store misses" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "L1 DTLB store miss rate" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "L1 DTLB store miss duration" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "L1 ITLB misses" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "L1 ITLB miss rate" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
+        cat ${dir}/${i}.txt | grep "L1 ITLB miss duration" | grep "STAT" | cut -d '|' -f 2,3 >> ${raw_dir}/${i}.txt
         python3 ${__dir}/clean_file_likwid.py ${raw_dir} ${i}.txt
     done
 done
