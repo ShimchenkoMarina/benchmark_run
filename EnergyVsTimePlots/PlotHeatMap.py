@@ -14,8 +14,8 @@ def print_heatmap(data, y,x, name):
     data = np.asarray(data) 
     fig, ax = plt.subplots(figsize=(20,20))
     im = ax.imshow(data)
-    #sns.heatmap(data, annot=True,  linewidths=.1, vmin=0, vmax=2, cmap="Greens")
-    sns.heatmap(data, linewidths=.1, vmin=0, vmax=2, cmap="PiYG_r")
+    #sns.heatmap(data, annot=True,  linewidths=.1, vmin=0, vmax=10, cmap="Greens")
+    sns.heatmap(data, linewidths=.1, vmin=0, vmax=2, cmap="PiYG")
     # We want to show all ticks...
     ax.set_xticks(np.arange(len(x)))
     ax.set_yticks(np.arange(len(y)))
