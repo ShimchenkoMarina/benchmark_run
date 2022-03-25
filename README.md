@@ -6,7 +6,8 @@
 5. python3.7 analyze.py <br />
 6. python3 gather_data_into_csv.py <br />
 7. cd EnergyVsTimePlots <br />
-8. python3 Clustering.py <br />
+8. python3 Clustering.py  - builds heatmaps and puts together all_data_energy and all_data_perf<br /> 
+9. pythin3.7 Normileze.py - 3 types of normalization, then copy the files to ML <br />
 #Where to look for output <br />
 1. >> results <br />
 2. >> raw_dir <br />

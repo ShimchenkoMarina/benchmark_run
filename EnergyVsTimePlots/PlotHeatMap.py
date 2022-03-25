@@ -8,28 +8,47 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 import string
-
+from matplotlib import colors
 
 def print_heatmap(data, y,x, name):
     data = np.asarray(data) 
-    fig, ax = plt.subplots(figsize=(20,20))
-    im = ax.imshow(data)
-    #sns.heatmap(data, annot=True,  linewidths=.1, vmin=0, vmax=2, cmap="Greens")
-    sns.heatmap(data, linewidths=.1, vmin=0, vmax=2, cmap="PiYG_r")
+    NUM = int(len(x) / 3)
+    fig, axs = plt.subplots(1, NUM, sharey=True, figsize=(20,20))
+    if "Energy" in name:
+        divnorm=colors.TwoSlopeNorm(vmin=0.0, vcenter=1.0, vmax=2.0)
+    else:
+        divnorm=colors.TwoSlopeNorm(vmin=0.0, vcenter=1.0, vmax=50)
+    for i in range(0, NUM):
+        a1 = axs[i].imshow(data[:,i*3:i*3 +3 ], cmap="PiYG", 
+            norm=divnorm, aspect='auto',  
+            interpolation='nearest', extent=(0, 3, len(y), 0))
+        axs[i].set_xticks(np.arange(3))
+        axs[i].set_yticks(np.arange(len(y)))
+        axs[i].set_xticklabels(x[i*3:(i*3 +3)])
+        axs[i].set_yticklabels(y)
+        axs[i].xaxis.grid(True)
+        #axs[i].grid(color='grey', linestyle='-', linewidth=1)
+        # Rotate the tick labels and set their alignment.
+        plt.setp(axs[i].get_xticklabels(), rotation=45, ha="right",
+             rotation_mode="anchor")
+        plt.setp(axs[i].get_yticklabels(), rotation=0, ha="right",
+             rotation_mode="anchor")
+    #im = ax.imshow(data)
+    #sns.heatmap(data, annot=True,  linewidths=.1, vmin=0, vmax=10, cmap="Greens")
+    #sns.heatmap(data, linewidths=.1, vmin=0, vmax=2, cmap="PiYG")
     # We want to show all ticks...
-    ax.set_xticks(np.arange(len(x)))
-    ax.set_yticks(np.arange(len(y)))
+    for ax,l in zip(axs,['Ser','j13Ser', "j16P_n1", "j16P_n2", "j16P_n4", "j13P_n1", "j13P_n2", "j13P_n4", "CMS", "G1", "Z", "Shen"]):
+        ax.set_xticklabels([])
+        ax.set_xlabel(l)
+    plt.colorbar(a1)
+    #axs.set_xticks(np.arange(len(x)))
+    #axs.set_yticks(np.arange(len(y)))
     # ... and label them with the respective list entries
-    ax.set_xticklabels(x)
-    ax.set_yticklabels(y)
+    #axs.set_xticklabels(x)
+    #axs.set_yticklabels(y)
     
-    # Rotate the tick labels and set their alignment.
-    plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-         rotation_mode="anchor")
-    plt.setp(ax.get_yticklabels(), rotation=0, ha="right",
-         rotation_mode="anchor")
     
-    ax.set_title(name)
+    #axs.set_title(name)
     fig.savefig(name, bbox_inches='tight',dpi=200)
     plt.close()
 

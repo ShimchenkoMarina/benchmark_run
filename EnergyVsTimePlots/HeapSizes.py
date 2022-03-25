@@ -145,15 +145,6 @@ for gc_file, epd_file, e_dram_of_pack_file, dram_file, cpu_file in zip(gc_files,
         print(row_gc_count[0][2])
         print(row_gc_count[1][2])
         print(row_gc_count[2][2])
-        '''global_row = []
-        global_row.append(bm)
-        for el in row[0]:
-            global_row.append(el)
-        for el in row[1]:
-            global_row.append(el)
-        for el in row[2]:
-            global_row.append(el)
-        writer.writerow(global_row)'''
         for x, val in enumerate(row[0]):
             gc1 = basic_configurations1[x]
             gc2 = basic_configurations2[x]
@@ -175,6 +166,8 @@ for gc_file, epd_file, e_dram_of_pack_file, dram_file, cpu_file in zip(gc_files,
                         row_cpu[0][x] = 1'''
             row[1][x] = row[1][x]/val
             row[2][x] = row[2][x]/val
+            row[1][x] = val/row[1][x]
+            row[2][x] = val/row[2][x]
             row[0][x] = 1
         for inx in range(0, len(basic_configurations1)):
             print(basic_configurations2[inx] + " " + str(row_gc_count[1][inx]))
@@ -186,13 +179,12 @@ for gc_file, epd_file, e_dram_of_pack_file, dram_file, cpu_file in zip(gc_files,
         ind = np.arange(len(basic_configurations1)) 
         width = 0.2
         ax[pos_x][pos_y].bar(ind, row[0], width, label='1.0 Jouls Pack', color = 'orangered')
-        #ax[pos_x][pos_y].bar(ind, row_dram[0], width, label='1.0 Jouls DRAM', color = 'b')
         ax[pos_x][pos_y].bar(ind, row_gc_count[0], width, label='1.0 GC', color = 'silver',  alpha=0.5, hatch='///')
         ax[pos_x][pos_y].bar(ind + width, row[1], width,label='1.5 Jouls', color = 'r')
         ax[pos_x][pos_y].bar(ind + width, row_gc_count[1], width, label='1.5 GC', color = 'silver',  alpha=0.5, hatch='--')
-        #ax[pos_x][pos_y].bar(ind + width, row_dram[1], width, label='1.5 Jouls DRAM', color = 'gold')
         ax[pos_x][pos_y].bar(ind + 2*width, row[2], width,label='2.0 Jouls', color = 'salmon')
         ax[pos_x][pos_y].bar(ind + 2*width, row_gc_count[2], width, label='2.0 GC', color = 'silver',  alpha=0.5, hatch='////')
+        
         #ax[pos_x][pos_y].bar(ind + 2*width, row_dram[2], width, label='2.0 Jouls DRAM', color = 'olive')
         #ax[count].bar(ind + 5*width, row_dram[2], width, label='2.0', color = 'khaki')
         #ax[count].bar(ind + 3*width, row_dram[0], width, label='1.0', color = 'gold')
