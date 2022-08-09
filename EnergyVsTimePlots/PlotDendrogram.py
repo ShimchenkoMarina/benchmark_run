@@ -29,16 +29,17 @@ def plot_dendrogram(num_cl, model, **kwargs):
     with open("bridge_for_clustering.txt", 'w') as writer:
         writer.write(str(fl))
     dendrogram(linkage_matrix, **kwargs)
-    
+
 
 def setup_dendrogram(data, bms, name):
+    print(data)
     # setting distance_threshold=0 ensures we compute the full tree.
     model = AgglomerativeClustering(distance_threshold=None, n_clusters=len(data), compute_distances=True)
     model = model.fit(data)
     plt.title("Hierarchical Clustering Dendrogram")
     # plot the top three levels of the dendrogram
     plot_dendrogram(len(bms), model, truncate_mode="level", orientation="right", labels=list(bms), leaf_font_size=4)
-    plt.savefig(name, bbox_inches='tight', dpi=200)
+    plt.savefig("./pngs/" + name, bbox_inches='tight', dpi=200)
     plt.close()
 
 

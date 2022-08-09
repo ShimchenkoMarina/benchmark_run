@@ -9,22 +9,33 @@ import matplotlib.pyplot as plt
 import matplotlib
 import string
 from matplotlib import colors
+from matplotlib import rc
 
 def print_heatmap(data, y,x, name):
-    data = np.asarray(data) 
-    NUM = int(len(x) / 3)
-    fig, axs = plt.subplots(1, NUM, sharey=True, figsize=(20,20))
-    if "Energy" in name:
-        divnorm=colors.TwoSlopeNorm(vmin=0.0, vcenter=1.0, vmax=2.0)
-    else:
-        divnorm=colors.TwoSlopeNorm(vmin=0.0, vcenter=1.0, vmax=50)
+    plt.rcParams["ps.useafm"] = True
+    rc('font', **{'family':'sans-serif', 'sans-serif':['FreeSans']})
+    plt.rcParams['pdf.fonttype'] = 42 #print(array)
+    data = np.asarray(data)
+    min_v = np.min(data)
+    max_v = np.max(data)
+    if max_v <= 1:
+        max_v = 1.2
+    print(max_v)
+    print(min_v)
+    NUM = int(len(x) / 4)
+    #NUM = int(len(x))
+    fig, axs = plt.subplots(1, NUM, sharey=True, figsize=(len(x),len(y)))
+    divnorm=colors.TwoSlopeNorm(vcenter=1.0, vmax=max_v, vmin=min_v)
     for i in range(0, NUM):
-        a1 = axs[i].imshow(data[:,i*3:i*3 +3 ], cmap="PiYG", 
-            norm=divnorm, aspect='auto',  
-            interpolation='nearest', extent=(0, 3, len(y), 0))
-        axs[i].set_xticks(np.arange(3))
+        a1 = axs[i].imshow(data[:,i*4:i*4 +4 ], cmap="PiYG_r",
+            norm=divnorm, aspect='auto',
+            interpolation='nearest', extent=(0, 4, len(y), 0))
+        #a1 = axs[i].imshow(data[:, i:i + 1], cmap="PiYG_r",
+        #    norm=divnorm, aspect='auto',
+        #    interpolation='nearest', extent=(0, 1, len(y), 0))
+        axs[i].set_xticks(np.arange(4))
         axs[i].set_yticks(np.arange(len(y)))
-        axs[i].set_xticklabels(x[i*3:(i*3 +3)])
+        axs[i].set_xticklabels(x[i*4:i*4 + 4])
         axs[i].set_yticklabels(y)
         axs[i].xaxis.grid(True)
         #axs[i].grid(color='grey', linestyle='-', linewidth=1)
@@ -37,7 +48,7 @@ def print_heatmap(data, y,x, name):
     #sns.heatmap(data, annot=True,  linewidths=.1, vmin=0, vmax=10, cmap="Greens")
     #sns.heatmap(data, linewidths=.1, vmin=0, vmax=2, cmap="PiYG")
     # We want to show all ticks...
-    for ax,l in zip(axs,['Ser','j13Ser', "j16P_n1", "j16P_n2", "j16P_n4", "j13P_n1", "j13P_n2", "j13P_n4", "CMS", "G1", "Z", "Shen"]):
+    for ax,l in zip(axs,["j20GZ", "j20YinYanZ", "j20Z"]):
         ax.set_xticklabels([])
         ax.set_xlabel(l)
     plt.colorbar(a1)
@@ -46,10 +57,10 @@ def print_heatmap(data, y,x, name):
     # ... and label them with the respective list entries
     #axs.set_xticklabels(x)
     #axs.set_yticklabels(y)
-    
-    
+
+
     #axs.set_title(name)
-    fig.savefig(name, bbox_inches='tight',dpi=200)
+    fig.savefig("./pngs/" + name + ".pdf", bbox_inches='tight',dpi=200)
     plt.close()
 
 def get_order(data, bms, confs, name):
@@ -74,25 +85,40 @@ def get_order(data, bms, confs, name):
     lst = temp_lst
     ordered_data = []
     ordered_bms = []
-    for i in range(len(bms)):
-        ordered_data.append([])
-        ordered_bms.append([])
-    shift = 0
-    count = 1
-    max_count = max(lst)
-    while count < int(max_count) + 1:
-        for index, i in enumerate(lst):
-            if int(i) == count:
-                if len(ordered_data[int(i) -1 + shift]) == 0:
-                    ordered_data[int(i) -1 + shift] = data[index]
-                    ordered_bms[int(i) -1 + shift] = bms[index]
-                else:
-                    shift = shift + 1
-                    ordered_data[int(i) -1 + shift] = data[index]
-                    ordered_bms[int(i) -1 + shift] = bms[index]
-        count = count + 1
-    print_heatmap(ordered_data, ordered_bms, confs, name)
-            
+    if len(lst) > 1:
+        for i in range(len(bms)):
+            ordered_data.append([])
+            ordered_bms.append([])
+        shift = 0
+        count = 1
+        if len(lst) != 0:
+            max_count = max(lst)
+        while count < int(max_count) + 1:
+            for index, i in enumerate(lst):
+                if int(i) == count:
+                    if len(ordered_data[int(i) -1 + shift]) == 0:
+                        ordered_data[int(i) -1 + shift] = data[index]
+                        ordered_bms[int(i) -1 + shift] = bms[index]
+                    else:
+                        shift = shift + 1
+                        print(ordered_data)
+                        print(int(i) - 1 + shift)
+                        print(data)
+                        print(index)
+                        ordered_data[int(i) -1 + shift] = data[index]
+                        ordered_bms[int(i) -1 + shift] = bms[index]
+            count = count + 1
+    elif len(lst) == 1:
+        print(data)
+        ordered_bms = bms
+        ordered_confs, ordered_data_0 = zip(*sorted(zip(confs, data[0])))
+        ordered_data = []
+        ordered_data.append(ordered_data_0)
+        print(ordered_data)
+        print(ordered_confs)
+    print_heatmap(ordered_data, ordered_bms, ordered_confs, name)
+    #print_heatmap(data, bms, confs, name)
+
 if __name__ == '__main__':
     order = get_order()
     data = sys.arg[1]

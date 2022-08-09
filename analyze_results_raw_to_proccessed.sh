@@ -1,6 +1,6 @@
 #!/bin/bash
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-declare -a arr=("results" "results_NUMA")
+declare -a arr=("results")
 for i in "${arr[@]}"
 do
 COMMIT=$i
@@ -18,23 +18,19 @@ for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
     raw_dir=$(realpath $o1/.)
     output_dir=$(realpath $o2/.)
     count_files=$(expr $(ls -l $input_dir | grep -v ^l | wc -l) - 1)
-	
+
+    #echo ${count_files}
     if [[ $count_files -eq 0 ]]; then # Do we even have raw data?
         continue
     fi
 
     for i in $(seq 1 $count_files); do
-        if [ ! -s ${raw_dir}/${i}.txt ]
-        then
-             echo "${raw_dir}/${i}.txt is Empty!"
-             sudo rm -rf ${raw_dir}/${i}.txt
-        else
-             python3 ${__dir}/analyze_file.py ${raw_dir} ${output_dir} ${i}.txt
-         for file in $(find ${output_dir}/ -empty); do
-            echo "$file in the last stage is Empty!"
-            sudo rm -rf file
-        done
-        fi    
+        python3 ${__dir}/analyze_file.py ${raw_dir} ${output_dir} ${i}
+        #if file in $(find ${output_dir}/ -empty);
+        #do
+        #    echo "$file in the last stage is Empty!"
+        #    sudo rm -rf file
+        #done
     done
 done
 done

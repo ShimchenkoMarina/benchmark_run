@@ -1,8 +1,8 @@
 #!/bin/bash
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-declare -a arr=("results" "results_NUMA")
+declare -a arr=("results")
 for i in "${arr[@]}"
-do 
+do
 COMMIT=$i
 echo $COMMIT
 for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
@@ -19,13 +19,13 @@ for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
     if [[ $count_files -eq 0 ]]; then # Do we even have data?
         continue
     fi
-    mkdir -p ${raw_dir}/energy_dram
-    mkdir -p ${raw_dir}/energy_cpu
-    mkdir -p ${raw_dir}/energy_pack
+    mkdir -p ${raw_dir}/energy
+    mkdir -p ${raw_dir}/power
     mkdir -p ${raw_dir}/GC_cycles
     mkdir -p ${raw_dir}/perf
-    mkdir -p ${raw_dir}/mean_latency
-    mkdir -p ${raw_dir}/max_latency
+    mkdir -p ${raw_dir}/stalls
+    #mkdir -p ${raw_dir}/mean_latency
+    #mkdir -p ${raw_dir}/max_latency
     for i in $(seq 1 $count_files); do
         if [ ! -s ${input_dir}/${i}.txt ]
         then
@@ -39,27 +39,14 @@ for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
             #sudo rm -rf ${input_dir}/${i}.txt Keep it for checking an exception
             continue
         fi
-        python3 ${__dir}/process_file.py ${input_dir} ${raw_dir} ${i}.txt
-        cat ${raw_dir}/${i}.txt | grep "Power consumption of dram s" | cut -d ' ' -f 6 >> ${raw_dir}/energy_dram/${i}.txt
-        cat ${raw_dir}/${i}.txt | grep "Power consumption of cpu s" | cut -d ' ' -f 6 >> ${raw_dir}/energy_cpu/${i}.txt
-        cat ${raw_dir}/${i}.txt | grep "Power consumption of package s" | cut -d ' ' -f 6 >> ${raw_dir}/energy_pack/${i}.txt
-        cat ${raw_dir}/${i}.txt | grep "GC(" | cut -d '(' -f 2| cut -d ')' -f 1 >> ${raw_dir}/GC_cycles/${i}.txt
-        cat ${raw_dir}/${i}.txt | grep "Execution time" | cut -d ' ' -f 3 >> ${raw_dir}/perf/${i}.txt
-        cat ${raw_dir}/${i}.txt | grep "Duration" | cut -d ' ' -f 2 >> ${raw_dir}/perf/${i}.txt
-        cat ${raw_dir}/${i}.txt | grep "#\[Mean" | cut -d '=' -f 2 | cut -d '','' -f 1 >> ${raw_dir}/mean_latency/${i}.txt
-        cat ${raw_dir}/${i}.txt | grep "completed (" | cut -d '(' -f 3 | cut -d ')' -f 1 | cut -d ' ' -f 1 >> ${raw_dir}/perf/${i}.txt
-        cat ${raw_dir}/${i}.txt | grep "#\[Max" | cut -d '=' -f 2 | cut -d '','' -f 1 >> ${raw_dir}/max_latency/${i}.txt
-        if [ ! -s ${raw_dir}/mean_latency/${i}.txt ]
-        then
-            cat ${raw_dir}/${i}.txt | grep "Pause" | grep "ms" >> ${raw_dir}/mean_latency/${i}.txt
-            #sudo rm -rf ${raw_dir}/mean_latency/${i}.txt
-        fi
-        if [ ! -s ${raw_dir}/max_latency/${i}.txt ]
-        then
-             sudo rm -rf ${raw_dir}/max_latency/${i}.txt
-	fi
+        #python3 ${__dir}/process_file.py ${input_dir} ${raw_dir} ${i}.txt No need to cut anything off at least for spec and hazelcast
+        cat ${input_dir}/${i}.txt | grep "Total Energy:" | cut -d ' ' -f 2 | cut -d ":" -f 2 >> ${raw_dir}/energy/${i}.txt
+        cat ${input_dir}/${i}.txt | grep "Average Power:" | cut -d ' ' -f 2 | cut -d ":" -f 2 >> ${raw_dir}/power/${i}.txt
+        cat ${input_dir}/${i}.txt | grep "GC(" | cut -d '(' -f 2| cut -d ')' -f 1 >> ${raw_dir}/GC_cycles/${i}.txt
+        cat ${input_dir}/${i}.txt | grep "Time:" | cut -d ' ' -f 1 | cut -d ":" -f 2 >> ${raw_dir}/perf/${i}.txt
+        cat  ${input_dir}/${i}.txt | grep "Allocation Stall (" | cut -d ")" -f 2  >> ${raw_dir}/stalls/${i}.txt
+
     done
 done
 done
-sudo bash analyze_results_raw_to_proccessed.sh 
-sudo bash analyze_results_likwid.sh
+sudo bash analyze_results_raw_to_proccessed.sh

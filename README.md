@@ -2,7 +2,6 @@
 1. sudo python3 collect_data.py <br />
 2. sudo bash analyze_results.sh <br />
 3. sudo bash analyze_results_raw_to_processed.sh <br />
-4. sudo bash analyze_results_likwid.sh <br />
 5. python3.7 analyze.py <br />
 6. python3 gather_data_into_csv.py <br />
 7. cd EnergyVsTimePlots <br />
