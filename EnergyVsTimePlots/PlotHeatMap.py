@@ -48,7 +48,7 @@ def print_heatmap(data, y,x, name):
     #sns.heatmap(data, annot=True,  linewidths=.1, vmin=0, vmax=10, cmap="Greens")
     #sns.heatmap(data, linewidths=.1, vmin=0, vmax=2, cmap="PiYG")
     # We want to show all ticks...
-    for ax,l in zip(axs,["j20GZ", "j20YinYanZ", "j20Z"]):
+    for ax,l in zip(axs,["j20GZ", "j20YinYanZ"]):
         ax.set_xticklabels([])
         ax.set_xlabel(l)
     plt.colorbar(a1)
@@ -108,6 +108,7 @@ def get_order(data, bms, confs, name):
                         ordered_data[int(i) -1 + shift] = data[index]
                         ordered_bms[int(i) -1 + shift] = bms[index]
             count = count + 1
+        print_heatmap(data, bms, confs, name)
     elif len(lst) == 1:
         print(data)
         ordered_bms = bms
@@ -116,8 +117,7 @@ def get_order(data, bms, confs, name):
         ordered_data.append(ordered_data_0)
         print(ordered_data)
         print(ordered_confs)
-    print_heatmap(ordered_data, ordered_bms, ordered_confs, name)
-    #print_heatmap(data, bms, confs, name)
+        print_heatmap(ordered_data, ordered_bms, ordered_confs, name)
 
 if __name__ == '__main__':
     order = get_order()

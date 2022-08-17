@@ -200,20 +200,20 @@ f.close()
 print("stalls ",array_of_arrays_stalls)
 print("gc ", array_of_arrays_gc)
 PlotGC.plot(array_of_BMs, array_of_arrays_gc, array_of_arrays_stalls, basic_configurations)
-#name = "Clustering_Perf"
-#PlotDendrogram.setup_dendrogram(array_of_arrays_perf, array_of_BMs, name)
-#name = "HeatMapClust_Perf"
-#PlotHeatMap.get_order(array_of_arrays_perf, array_of_BMs, basic_configurations, name)
+name = "Clustering_Perf"
+PlotDendrogram.setup_dendrogram(array_of_arrays_perf, array_of_BMs, name)
+name = "HeatMapClust_Perf"
+PlotHeatMap.get_order(array_of_arrays_perf, array_of_BMs, basic_configurations, name)
 #name = "HeatMapClust_Energy_full_perf_order"
 #PlotHeatMap.get_order(array_of_arrays_energy_pack, array_of_BMs, basic_configurations, name)
 
-#name = "Clustering_Energy"
-#PlotDendrogram.setup_dendrogram(array_of_arrays_energy, array_of_BMs, name)
-#name = "HeatMapClust_Energy"
-#PlotHeatMap.get_order(array_of_arrays_energy, array_of_BMs, basic_configurations, name)
+name = "Clustering_Energy"
+PlotDendrogram.setup_dendrogram(array_of_arrays_energy, array_of_BMs, name)
+name = "HeatMapClust_Energy"
+PlotHeatMap.get_order(array_of_arrays_energy, array_of_BMs, basic_configurations, name)
 
-#name = "Clustering_Power"
-#PlotDendrogram.setup_dendrogram(array_of_arrays_power, array_of_BMs, name)
-#name = "HeatMapClust_Power"
-#PlotHeatMap.get_order(array_of_arrays_power, array_of_BMs, basic_configurations, name)
+name = "Clustering_Power"
+PlotDendrogram.setup_dendrogram(array_of_arrays_power, array_of_BMs, name)
+name = "HeatMapClust_Power"
+PlotHeatMap.get_order(array_of_arrays_power, array_of_BMs, basic_configurations, name)
 
