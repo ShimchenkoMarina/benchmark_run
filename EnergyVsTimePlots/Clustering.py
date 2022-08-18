@@ -25,8 +25,8 @@ import PlotGC
 bench = ""
 #TODO: and P_def
 basic_configurations = ["j20GZ1.0", "j20GZ1.5", "j20GZ2.0", "j20GZ4.0",
-                        "j20YinYanZ1.0", "j20YinYanZ1.5","j20YinYanZ2.0","j20YinYanZ4.0",
-                        "j20Z1.0", "j20Z1.5", "j20Z2.0", "j20Z4.0"]
+                        "j20YinYanZ1.0", "j20YinYanZ1.5","j20YinYanZ2.0","j20YinYanZ4.0"]
+                        #"j20Z1.0", "j20Z1.5", "j20Z2.0", "j20Z4.0"]
 
 energy_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_energy_"))])
 power_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_power"))])
@@ -62,7 +62,7 @@ for energy_file, perf_file, power_file , gc_file, stalls_file in zip(energy_file
         if type(data) is str:
             replace_data[idx] = np.nan
     data1["Time"] = replace_data
-    #print(data1["BM"][0])
+    print(data1["BM"][0])
 
     #if "hazel" not in data1['BM'][0] and "avrora" not in data1['BM'][0] and "spec" not in data1['BM'][0]:
     #    continue
@@ -197,8 +197,8 @@ f.close()
 #print(array_of_BMs)
 #print(array_of_arrays_perf)
 #print(array_of_arrays_energy)
-print("stalls ",array_of_arrays_stalls)
-print("gc ", array_of_arrays_gc)
+#print("stalls ",array_of_arrays_stalls)
+#print("gc ", array_of_arrays_gc)
 PlotGC.plot(array_of_BMs, array_of_arrays_gc, array_of_arrays_stalls, basic_configurations)
 name = "Clustering_Perf"
 PlotDendrogram.setup_dendrogram(array_of_arrays_perf, array_of_BMs, name)
