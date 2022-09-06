@@ -20,13 +20,16 @@ def print_heatmap(data, y,x, name):
     max_v = np.max(data)
     if max_v <= 1:
         max_v = 1.2
-    print(max_v)
-    print(min_v)
+    print(name)
+    print("max is", max_v)
+    print("min is", min_v)
+    print("data is ", data)
     NUM = int(len(x) / 4)
     #NUM = int(len(x))
     fig, axs = plt.subplots(1, NUM, sharey=True, figsize=(len(x),len(y)))
     divnorm=colors.TwoSlopeNorm(vcenter=1.0, vmax=max_v, vmin=min_v)
     for i in range(0, NUM):
+        print("part data is ", data[:, i*4:i*4 + 4])
         a1 = axs[i].imshow(data[:,i*4:i*4 +4 ], cmap="PiYG_r",
             norm=divnorm, aspect='auto',
             interpolation='nearest', extent=(0, 4, len(y), 0))
@@ -38,6 +41,15 @@ def print_heatmap(data, y,x, name):
         axs[i].set_xticklabels(x[i*4:i*4 + 4])
         axs[i].set_yticklabels(y)
         axs[i].xaxis.grid(True)
+        start = 0
+        if i == 0:
+            start = 1
+        else:
+            start = 0
+        for j in range(start,4):
+            for k in range(0,len(y)):
+                print("single data ", data[k:k + 1, i*4 + j:i*4 + j + 1])
+                axs[i].text(j, k, data[k:k + 1, i*4 + j:i*4 + j + 1][0][0], ha="center", va="center", color="black")
         #axs[i].grid(color='grey', linestyle='-', linewidth=1)
         # Rotate the tick labels and set their alignment.
         plt.setp(axs[i].get_xticklabels(), rotation=45, ha="right",
