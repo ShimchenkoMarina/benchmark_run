@@ -19,37 +19,42 @@ def print_heatmap(data, y,x, name):
     min_v = np.min(data)
     max_v = np.max(data)
     if max_v <= 1:
-        max_v = 1.2
-    print(name)
-    print("max is", max_v)
-    print("min is", min_v)
-    print("data is ", data)
-    NUM = int(len(x) / 4)
+        max_v = 1.01
+    if min_v >= 1:
+        min_v = 0.99
+    #print(name)
+    #print("max is", max_v)
+    #print("min is", min_v)
+    #print("data is ", data)
+    #print("len = " + str(len(x)))
+    NUM = int(len(x) / 2)
     #NUM = int(len(x))
-    fig, axs = plt.subplots(1, NUM, sharey=True, figsize=(len(x),len(y)))
+    fig, axs = plt.subplots(1, NUM, sharey=True, figsize=(len(x)/2,len(y)))
     divnorm=colors.TwoSlopeNorm(vcenter=1.0, vmax=max_v, vmin=min_v)
     for i in range(0, NUM):
-        print("part data is ", data[:, i*4:i*4 + 4])
-        a1 = axs[i].imshow(data[:,i*4:i*4 +4 ], cmap="PiYG_r",
+        #print("part data is ", data[:, i*1:i*1 + 1])
+        a1 = axs[i].imshow(data[:,i*1:i*1 +1 ], cmap="PiYG_r",
             norm=divnorm, aspect='auto',
-            interpolation='nearest', extent=(0, 4, len(y), 0))
+            interpolation='nearest', extent=(0, 1, len(y), 0))
         #a1 = axs[i].imshow(data[:, i:i + 1], cmap="PiYG_r",
         #    norm=divnorm, aspect='auto',
         #    interpolation='nearest', extent=(0, 1, len(y), 0))
-        axs[i].set_xticks(np.arange(4))
+        axs[i].set_xticks(np.arange(1))
         axs[i].set_yticks(np.arange(len(y)))
-        axs[i].set_xticklabels(x[i*4:i*4 + 4])
+        axs[i].set_xticklabels(x[i*1:i*1 + 1])
         axs[i].set_yticklabels(y)
         axs[i].xaxis.grid(True)
         start = 0
-        if i == 0:
-            start = 1
-        else:
-            start = 0
-        for j in range(start,4):
+        #if i == 0:
+        #    start = 1
+        #else:
+        #    start = 0
+        #print(data)
+        for j in range(start,1):
             for k in range(0,len(y)):
-                print("single data ", data[k:k + 1, i*4 + j:i*4 + j + 1])
-                axs[i].text(j, k, data[k:k + 1, i*4 + j:i*4 + j + 1][0][0], ha="center", va="center", color="black")
+                print(str(k) + " j = " + str(j) + " i ="  + str(i))
+                print("single data ", data[k:k + 1, (i*1 + j):(i*1 + j + 1)])
+                axs[i].text(j + 0.5, k + 0.5, data[k:k + 1, i*1 + j:i*1 + j + 1][0][0], ha="center", va="center", color="black")
         #axs[i].grid(color='grey', linestyle='-', linewidth=1)
         # Rotate the tick labels and set their alignment.
         plt.setp(axs[i].get_xticklabels(), rotation=45, ha="right",
@@ -60,7 +65,7 @@ def print_heatmap(data, y,x, name):
     #sns.heatmap(data, annot=True,  linewidths=.1, vmin=0, vmax=10, cmap="Greens")
     #sns.heatmap(data, linewidths=.1, vmin=0, vmax=2, cmap="PiYG")
     # We want to show all ticks...
-    for ax,l in zip(axs,["j20GZ", "j20YinYanZ"]):
+    for ax,l in zip(axs,["1x", "1.5", "2x", "4x"]):
         ax.set_xticklabels([])
         ax.set_xlabel(l)
     plt.colorbar(a1)

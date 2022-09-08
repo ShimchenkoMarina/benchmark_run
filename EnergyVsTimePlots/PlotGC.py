@@ -2,14 +2,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import rc
 
-def prepare(bms, cycles, stalls, maxpause, labels):
+def prepare(bms, cycles, stalls, maxpause, labels, name_suffix):
     plt.rcParams["ps.useafm"] = True
     rc('font', **{'family':'sans-serif', 'sans-serif':['FreeSans']})
     plt.rcParams['pdf.fonttype'] = 42 #print(array)
-    suffix = ""
-    print(len(cycles))
+    suffix = name_suffix
+    #print(len(cycles))
     plot(bms, cycles, stalls, maxpause, labels, suffix)
-    suffix = "_norm"
+    suffix = suffix + "_norm"
     #print(len(bms))
     for i in range(0, len(bms)):
         norm_gc = cycles[i][0]
@@ -21,7 +21,7 @@ def prepare(bms, cycles, stalls, maxpause, labels):
                 cycles[i][j] = cycles[i][j]/norm_gc
             if norm_st != 0:
                 stalls[i][j] = stalls[i][j]/norm_st
-    print(len(cycles))
+    #print(len(cycles))
     plot(bms, cycles, stalls, maxpause, labels, suffix)
 
 def plot(bms, cycles, stalls, maxpause, labels, suffix):
@@ -30,17 +30,17 @@ def plot(bms, cycles, stalls, maxpause, labels, suffix):
     if len(bms) > 1:
         fig, ax = plt.subplots(len(bms), 1,figsize= (5, len(bms)*2), sharex=True)
         for i in range(0, len(bms)):
-            cycles_GZ = cycles[i][0:4]
-            cycles_YinYan = cycles[i][4:8]
-            stalls_GZ = stalls[i][0:4]
-            stalls_YinYan = stalls[i][4:8]
-            maxpause_GZ = maxpause[i][0:4]
-            maxpause_YinYan = maxpause[i][4:8]
+            cycles_GZ = cycles[i][::2]
+            cycles_YinYan = cycles[i][1::2]
+            stalls_GZ = stalls[i][::2]
+            stalls_YinYan = stalls[i][1::2]
+            maxpause_GZ = maxpause[i][::2]
+            maxpause_YinYan = maxpause[i][1::2]
             #print(cycles_GZ)
             #print(cycles_YinYan)
             rects1 = ax[i].bar(x - 3*width/2, cycles_GZ, width, color="black",label='GC_GZ')
             rects2 = ax[i].bar(x - width/2, cycles_YinYan, width, color="grey",label='GC_YinYan')
-            if suffix is "":
+            if "norm" not in suffix:
                 ax2 = ax[i].twinx() # Create another axes that shares the same x-axis as ax.
                 rects3 = ax2.bar(x + width/2, stalls_GZ, width, color="salmon", label='Stalls_GZ')
                 rects4 = ax2.bar(x + 3*width/2, stalls_YinYan, width, color="pink", label='Stalls_YinYan')
