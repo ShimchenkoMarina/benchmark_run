@@ -66,6 +66,7 @@ def analyze_file(input_dir, output_dir, file_num):
     gc_rounds_list = list()
     perf_list = list()
     stalls_time_list = list()
+    pause_time_list = list()
 
     #for i in range(1, int(file_num)):
     with open(os.path.join(input_dir, "energy", str(file_num) + ".txt"), 'r') as reader:
@@ -125,8 +126,12 @@ def analyze_file(input_dir, output_dir, file_num):
         with open(os.path.join(output_dir, "GC_cycles.txt"), "a") as writer:
             writer.write(str(float(last_cycle)) + '\n')
     except:
-        with open(os.path.join("bug_report.txt"), "a") as writer:
-            writer.write("Check numbers in (did not convert) : " +  input_dir +" " + file_num + " --> " + last_cycle + '\n')
+        if last_cycle == "":
+            with open(os.path.join(output_dir, "GC_cycles.txt"), "a") as writer:
+                writer.write("0" + '\n')
+        else:
+            with open(os.path.join("bug_report.txt"), "a") as writer:
+                writer.write("Check numbers in (did not convert) : " +  input_dir +" " + file_num + " --> " + last_cycle + '\n')
 
     with open(os.path.join(input_dir, "stalls", file_num + ".txt"), 'r') as reader:
         for line in reader.readlines():
@@ -149,6 +154,25 @@ def analyze_file(input_dir, output_dir, file_num):
         else:
             writer.write("0" + '\n')
 
+    with open(os.path.join(input_dir, "max_latency", file_num + ".txt"), 'r') as reader:
+        for line in reader.readlines():
+            if "ms" not in line:
+                continue
+            line =line.replace(",", ".")
+            if line.strip() and line  not in ['\n', '\r\n']:
+                line_array = separate_number_chars(line)
+                for subline in line_array:
+                    try:
+                        float(subline)
+                        if float(subline) > 0:
+                            pause_time_list.append(float(subline))
+                    except:
+                        pass
+
+
+    with open(os.path.join(output_dir, "max_latency.txt"), "a") as writer:
+        if (len(pause_time_list) > 0):
+            writer.write(str(max(pause_time_list)) + '\n')
 
 def main():
     if len(sys.argv) == 4:

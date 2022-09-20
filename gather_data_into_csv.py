@@ -19,6 +19,26 @@ STR_STD_MEAN = "Relative Standard Deviation"
 STR_STD = "Standard Deviation"
 STR_PERF = "Performance"
 
+def bootstrapped_ci(df_input):
+    columns = [STR_CI_LOWER, STR_CI_UPPER]
+    df_result_sep = pd.DataFrame(columns=columns)
+    columns = ["yerr"]
+    df_result = pd.DataFrame(columns=columns)
+
+    for (columnName, columnData) in df_input.iteritems():
+        df = pd.DataFrame()
+        for i in range(0, 10):
+            df = df.append(df_input[columnName].sample(n=10000, replace=True).reset_index()[columnName])
+        mean = df.mean(axis=0)
+        ci_lower = mean.quantile(0.025)
+        ci_upper = mean.quantile(0.975)
+        df_result.loc[columnName] = (ci_upper - ci_lower)/2
+        df_result_sep.loc[columnName] = [ci_lower, ci_upper]
+
+    #print(df_result.loc[:,["yerr"]])
+    #print(df_result_sep[STR_CI_LOWER])
+    #print(df_result_sep[STR_CI_UPPER])
+    df_result = pd.to_numeric(df_result["yerr"], errors="raise", downcast="float")
 def read_data(sample, data, configuration_name, benchmark_name):
     df = pd.DataFrame(columns=[configuration_name])
     for file in data:
@@ -93,7 +113,7 @@ def normalized_data(sample, df, baseline_name):
     result = []
     b = float(df.loc[df[STR_TYPE] == baseline_name][STR_MEAN].values[0])
     for o in order:
-        if "GC" not in sample:
+        if "GC" not in sample and "stalls" not in sample:
             if o == baseline_name:
                 result.append(1.0)
                 continue
@@ -188,7 +208,7 @@ def main():
     #       delimiter =", ",
     #       fmt ='% s')
     for (benchmark_name, allconf_runs) in benchmarks_conf.items():
-        #print(benchmark_name)
+        print(benchmark_name)
         #if "akka-uct" not in benchmark_name:
         #    continue
         baseline_name = ""
@@ -205,10 +225,10 @@ def main():
         print("baseline", baseline_name)
         if baseline_name != "":
             #measurement = ["energy_pack", "perf", "max_latency", "mean_latency", "watts_pack", "energy_dram", "energy_cpu", "GC_cycles", "energy_pack_dram"]
-            #measurement = ["energy", "power", "perf", "GC_cycles", "stalls"]
-            measurement = ["GC_cycles"]
+            measurement = ["energy", "power", "perf", "stalls", "GC_cycles", "max_latency"]
+            #measurement = ["GC_cycles", "stalls"]
             for m in measurement:
-                #print(m)
+                print(m)
                 baseline = analyze_baseline(m, dict_for_benchmark[baseline_name], baseline_name, benchmark_name)
                 result = analyze_data(m, dict_for_benchmark, baseline, baseline_name, benchmark_name)
                 store_result(m, result, res_folder, benchmark_name, baseline_name)
