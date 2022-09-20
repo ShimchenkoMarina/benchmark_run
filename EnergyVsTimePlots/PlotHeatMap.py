@@ -82,26 +82,30 @@ def print_heatmap(data, y,x, name):
 
 def get_order(data, bms, confs, name):
     lst = []
-    with open("bridge_for_clustering.txt", 'r') as reader:
-        for line in reader.readlines():
-            temp_line = ' '.join(line.split())
-            print(temp_line)
-            if "[" in temp_line and "]" in temp_line:
-                lst.append(temp_line.split("[")[1].split("]")[0].split(" "))
-            elif "[" in temp_line:
-                lst.append(temp_line.split("[")[1].split(" "))
-            elif "]" in temp_line:
-                lst.append(temp_line.split("]")[0].split(" "))
-            else:
-                lst.append(temp_line.split(" "))
-    temp_lst = []
-    for ls in lst:
-        for elem in ls:
-            if (elem != ""):
-                temp_lst.append(int(elem))
-    lst = temp_lst
+    if len(bms) > 1:
+        with open("bridge_for_clustering.txt", 'r') as reader:
+            for line in reader.readlines():
+                temp_line = ' '.join(line.split())
+                print(temp_line)
+                if "[" in temp_line and "]" in temp_line:
+                    lst.append(temp_line.split("[")[1].split("]")[0].split(" "))
+                elif "[" in temp_line:
+                    lst.append(temp_line.split("[")[1].split(" "))
+                elif "]" in temp_line:
+                    lst.append(temp_line.split("]")[0].split(" "))
+                else:
+                    lst.append(temp_line.split(" "))
+        temp_lst = []
+        for ls in lst:
+            for elem in ls:
+                if (elem != ""):
+                    temp_lst.append(int(elem))
+        lst = temp_lst
+    else:
+        lst.append(1)
     ordered_data = []
     ordered_bms = []
+    print("lst = ", lst)
     if len(lst) > 1:
         for i in range(len(bms)):
             ordered_data.append([])
@@ -127,14 +131,14 @@ def get_order(data, bms, confs, name):
             count = count + 1
         print_heatmap(data, bms, confs, name)
     elif len(lst) == 1:
-        print(data)
+        print("data", data)
         ordered_bms = bms
-        ordered_confs, ordered_data_0 = zip(*sorted(zip(confs, data[0])))
-        ordered_data = []
-        ordered_data.append(ordered_data_0)
-        print(ordered_data)
-        print(ordered_confs)
-        print_heatmap(ordered_data, ordered_bms, ordered_confs, name)
+        #ordered_confs, ordered_data_0 = zip(*sorted(zip(confs, data[0])))
+        #ordered_data = []
+        #ordered_data.append(ordered_data_0)
+        #print("ordered data", ordered_data)
+        #print("ordered data", ordered_confs)
+        print_heatmap(data, bms, confs, name)
 
 if __name__ == '__main__':
     order = get_order()

@@ -28,11 +28,12 @@ bench = ""
 #                        "j20YinYanZ1.0", "j20YinYanZ1.5","j20YinYanZ2.0","j20YinYanZ4.0"]
 basic_configurations_for_spec = ["j20GZ1.0", "j20YinYanZ1.0", "j20GZ1.5", "j20YinYanZ1.5","j20GZ2.0", "j20YinYanZ2.0","j20GZ4.0","j20YinYanZ4.0"]
 basic_configurations_for_hazelcast = ["j20GZ1.0", "j20YinYanZ1.0", "j20GZ1.16", "j20YinYanZ1.16","j20GZ1.3", "j20YinYanZ1.3","j20GZ2.0","j20YinYanZ2.0"]
+basic_configurations_for_the_rest = ["j20GZ1.0", "j20YinYanZ1.0", "j20GZ1.5", "j20YinYanZ1.5","j20GZ2.0", "j20YinYanZ2.0","j20GZ2.5","j20YinYanZ2.5"]
 #basic_configurations_for_hazelcast = ["j20GZ1.0", "j20GZ1.2", "j20GZ1.3", "j20GZ1.5",
 #                        "j20YinYanZ1.0", "j20YinYanZ1.2","j20YinYanZ1.3","j20YinYanZ1.5"]
                         #"j20Z1.0", "j20Z1.5", "j20Z2.0", "j20Z4.0"]
-basic_configurations_for_the_rest = ["j20GZ1.0", "j20GZ1.5", "j20GZ2.0", "j20GZ2.5",
-                        "j20YinYanZ1.0", "j20YinYanZ1.5","j20YinYanZ2.0","j20YinYanZ2.5"]
+#basic_configurations_for_the_rest = ["j20GZ1.0", "j20GZ1.5", "j20GZ2.0", "j20GZ2.5",
+#                        "j20YinYanZ1.0", "j20YinYanZ1.5","j20YinYanZ2.0","j20YinYanZ2.5"]
 basic_configurations = []
 
 AOAs_perf = []
@@ -148,6 +149,8 @@ def main_bm(BM):
         AOAs_gc.append(fill_in_global_arrays(array_gc, "gc", bm))
         AOAs_stalls.append(fill_in_global_arrays(array_stalls, "stalls", bm))
         print("gc ", AOAs_gc)
+        print("gc ", AOAs_stalls)
+        print("gc ", AOAs_pause)
     print_graphs(BM)
     #print("bms", array_of_BMs)
     #print("perf", AOAs_perf)
@@ -162,7 +165,7 @@ def main_bm(BM):
 #        print(AOAs_energy[index])
 
 def main():
-    for bm in ["hazelcast"]:
+    for bm in ["finagle"]:
         main_bm(bm)
 
 '''f = open('./all_data/all_data_perf.csv', 'w')
@@ -216,19 +219,22 @@ def print_graphs(bm):
     #print("gc ", AOAs_gc)
     PlotGC.prepare(array_of_BMs, AOAs_gc, AOAs_stalls, AOAs_pause, basic_configurations, bm)
     name = "Clustering_Perf_" +bm
-    PlotDendrogram.setup_dendrogram(AOAs_perf, array_of_BMs, name)
+    if len(array_of_BMs) > 1:
+        PlotDendrogram.setup_dendrogram(AOAs_perf, array_of_BMs, name)
     name = "HeatMapClust_Perf_" + bm
     PlotHeatMap.get_order(AOAs_perf, array_of_BMs, basic_configurations, name)
     #name = "HeatMapClust_Energy_full_perf_order"
     #PlotHeatMap.get_order(AOAs_energy_pack, array_of_BMs, basic_configurations, name)
 
     name = "Clustering_Energy_" + bm
-    PlotDendrogram.setup_dendrogram(AOAs_energy, array_of_BMs, name)
+    if len(array_of_BMs) > 1:
+        PlotDendrogram.setup_dendrogram(AOAs_energy, array_of_BMs, name)
     name = "HeatMapClust_Energy_" + bm
     PlotHeatMap.get_order(AOAs_energy, array_of_BMs, basic_configurations, name)
 
     name = "Clustering_Power_" + bm
-    PlotDendrogram.setup_dendrogram(AOAs_power, array_of_BMs, name)
+    if len(array_of_BMs) > 1:
+        PlotDendrogram.setup_dendrogram(AOAs_power, array_of_BMs, name)
     name = "HeatMapClust_Power_" + bm
     PlotHeatMap.get_order(AOAs_power, array_of_BMs, basic_configurations, name)
 main()

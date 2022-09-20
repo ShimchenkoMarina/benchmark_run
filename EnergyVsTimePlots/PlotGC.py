@@ -72,19 +72,40 @@ def plot(bms, cycles, stalls, maxpause, labels, suffix):
         ax = fig.add_subplot(111) # Create matplotlib axes
         ax2 = ax.twinx() # Create another axes that shares the same x-axis as ax.
 
-        width = 0.4
-
-        ax.bar(x - width/2, cycles[0], width, color= "black", label="GC cycles")
-        ax2.bar(x + width/2, stalls[0], width, color = "grey", label="Stalls")
-
+        width = 0.15
+        cycles_GZ = cycles[0][::2]
+        cycles_YinYan = cycles[0][1::2]
+        stalls_GZ = stalls[0][::2]
+        stalls_YinYan = stalls[0][1::2]
+        maxpause_GZ = maxpause[0][::2]
+        maxpause_YinYan = maxpause[0][1::2]
+        rects1 = ax.bar(x - 3*width/2, cycles_GZ, width, color="black",label='GC_GZ')
+        rects2 = ax.bar(x - width/2, cycles_YinYan, width, color="grey",label='GC_YinYan')
+        if "norm" not in suffix:
+                rects3 = ax2.bar(x + width/2, stalls_GZ, width, color="salmon", label='Stalls_GZ')
+                rects4 = ax2.bar(x + 3*width/2, stalls_YinYan, width, color="pink", label='Stalls_YinYan')
+                ax2.set_ylabel('Stalls ')
+                lines2, labels2 = ax2.get_legend_handles_labels()
+                lines, labels = ax.get_legend_handles_labels()
+                ax.legend(lines + lines2, labels + labels2, loc=0)
+        else:
+                rects3 = ax.bar(x + width/2, stalls_GZ, width, color="salmon", label='Stalls_GZ')
+                rects4 = ax.bar(x + 3*width/2, stalls_YinYan, width, color="pink", label='Stalls_YinYan')
+                rects3 = ax.bar(x + 5*width/2, maxpause_GZ, width, color="darkred", label='MaxPause_GZ')
+                rects4 = ax.bar(x + 7*width/2, maxpause_YinYan, width, color="silver", label='MaxPause_YinYan')
+                lines, labels = ax.get_legend_handles_labels()
+                ax.legend(lines, labels, loc=0)
+        # Add some text for labels, title and custom x-axis tick labels, etc.
         ax.set_ylabel('Cycles')
-        ax2.set_ylabel('Normalized stalls ')
+        ax.set_xticks(x, ["1", "1.5", "2", "2.5"])
+        # ask matplotlib for the plotted objects and their labels
 
-        ax.set_xticks(x, labels)
-        ax.legend()
 
+        ax.set_title(bms[0])
         plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-             rotation_mode="anchor")
+            rotation_mode="anchor")
+        #ax[i].bar_label(rects2, padding=3)
+
 
     fig.tight_layout()
     plt.savefig("./pngs/StallsGC" + suffix + ".pdf", bbox_inches='tight',dpi=100)
