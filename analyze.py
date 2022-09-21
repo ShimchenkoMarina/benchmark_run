@@ -210,12 +210,13 @@ def store_result(sample, result, res_folder, benchmark_name, baseline_name):
     pathlib.Path(result_dir).mkdir(parents=True, exist_ok=True)
 
     df_error, df_result_sep = bootstrapped_ci(result_points)
-    #print(df_result_sep)
+    print(df_result_sep)
+    print(df_error)
     merged = pd.merge(result_aggregated, df_result_sep, how='outer', left_on=["Type"], right_index=True)
     result_aggregated = merged
     format_columns(result_aggregated)
     result_aggregated.rename(index=lambda s: benchmark_name, inplace=True)
-    print(result_aggregated)
+    #print(result_aggregated)
     figure = plt.figure()
     plt.ylabel('')
     #result_points.boxplot() IF USING THIS VERIFY CORECTNESS!

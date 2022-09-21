@@ -64,8 +64,8 @@ Which_BM = {
             #"specjbb2015_j20_gen_clean_static_allocation_rate",
             "HazelCast_j20_olof_static_allocation_rate",
             "HazelCast_j20_gen_clean_static_allocation_rate",
-            "Renaissance_j20_gen_clean_static_allocation_rate",
-            "Renaissance_j20_olof_static_allocation_rate",
+            #"Renaissance_j20_gen_clean_static_allocation_rate",
+            #"Renaissance_j20_olof_static_allocation_rate",
 }
 
 #Specify GCs for each java version
@@ -222,13 +222,15 @@ def heap_size_array(BM_tag, HEAP_RUNS):
     else:
         space = 100
     tag = ""
-    for i in range (0, HEAP_RUNS):
+    for i in range (3, HEAP_RUNS):
         if "spec" not in BM_tag:
             conf = param_max + str(start_HS + space*i) + start_Value + param_min + str(start_HS+ space*i) + start_Value
+            print(conf)
             if "hazelcast" not in BM_tag:
                 tag = str(1 + i*0.5)
             else:
                 tag = str(1 + round(i/11, 1))
+                print(tag)
         else:
             if i >=3:
                 space = int(start_HS)
@@ -248,11 +250,11 @@ def execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAV
                 result_path = os.path.join(os.getcwd(), RES_FOLDER, BM_tag, JAVA_tag + GC_tag + HS_tag)
                 os.system("sudo mkdir -p " + result_path)
                 os.system("sudo chmod 777 " + result_path)
-                os.system("echo "  + BM_tag + " " + JAVA_tag + " >> output.txt")
-                binary_hot = " ".join([COMMAND, JAVA, JAVA_LOG, HS_conf, GC_conf, CLASSPATH, BM_conf, Callback])
+                #os.system("echo "  + BM_tag + " " + JAVA_tag + GC_tag + HS_tag + " >> output.txt")
+                #binary_hot = " ".join([COMMAND, JAVA, JAVA_LOG, HS_conf, GC_conf, CLASSPATH, BM_conf, Callback])
                 print(binary_hot)
-                collect_data(binary_hot, result_path)
-                os.system("echo 777 >> output.txt")
+                #collect_data(binary_hot, result_path)
+                #os.system("echo 777 >> output.txt")
                 #end = timer()
                 #minutes = round((end - start) / 60.0, 3)
                 #if "hazelcast" in BM_tag:

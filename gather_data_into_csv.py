@@ -113,7 +113,10 @@ def normalized_data(sample, df, baseline_name):
     result = []
     b = float(df.loc[df[STR_TYPE] == baseline_name][STR_MEAN].values[0])
     for o in order:
-        if "GC" not in sample and "stalls" not in sample:
+        if "GC" not in sample and \
+                "stalls" not in sample and \
+                "cpu_utilization" not in sample and \
+                "allocation_rate" not in sample:
             if o == baseline_name:
                 result.append(1.0)
                 continue
@@ -225,8 +228,9 @@ def main():
         print("baseline", baseline_name)
         if baseline_name != "":
             #measurement = ["energy_pack", "perf", "max_latency", "mean_latency", "watts_pack", "energy_dram", "energy_cpu", "GC_cycles", "energy_pack_dram"]
-            measurement = ["energy", "power", "perf", "stalls", "GC_cycles", "max_latency"]
+            #measurement = ["energy", "power", "perf", "stalls", "GC_cycles", "max_latency"]
             #measurement = ["GC_cycles", "stalls"]
+            measurement = ["cpu_utilization", "allocation_rate_avg", "allocation_rate_max"]
             for m in measurement:
                 print(m)
                 baseline = analyze_baseline(m, dict_for_benchmark[baseline_name], baseline_name, benchmark_name)

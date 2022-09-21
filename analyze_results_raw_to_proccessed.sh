@@ -25,6 +25,9 @@ for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
     fi
 
     for i in $(seq 1 $count_files); do
+        echo ${raw_dir}
+        echo ${output_dir}
+        echo ${i}
         python3 ${__dir}/analyze_file.py ${raw_dir} ${output_dir} ${i}
         #if file in $(find ${output_dir}/ -empty);
         #do

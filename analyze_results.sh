@@ -25,6 +25,7 @@ for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
     mkdir -p ${raw_dir}/perf
     mkdir -p ${raw_dir}/stalls
     mkdir -p ${raw_dir}/max_latency
+    #mkdir -p ${raw_dir}/allocation_rate
     #mkdir -p ${raw_dir}/mean_latency
     for i in $(seq 1 $count_files); do
         if [ ! -s ${input_dir}/${i}.txt ]
@@ -32,7 +33,7 @@ for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
             sudo rm -rf ${input_dir}/${i}.txt
             continue
         fi
-        python3 ${__dir}/uncomplete.py ${input_dir} ${i}.txt
+        #python3 ${__dir}/uncomplete.py ${input_dir} ${i}.txt
         if [ $? != 0 ];
         then
             echo "${input_dir}/${i}.txt has exception!"
@@ -40,14 +41,19 @@ for dir in $(find $COMMIT/ -mindepth 2 -maxdepth 3 -type d -links 2); do
             continue
         fi
         #python3 ${__dir}/process_file.py ${input_dir} ${raw_dir} ${i}.txt No need to cut anything off at least for spec and hazelcast
-        cat ${input_dir}/${i}.txt | grep "Total Energy:" | cut -d ' ' -f 2 | cut -d ":" -f 2 >> ${raw_dir}/energy/${i}.txt
-        cat ${input_dir}/${i}.txt | grep "Average Power:" | cut -d ' ' -f 2 | cut -d ":" -f 2 >> ${raw_dir}/power/${i}.txt
-        cat ${input_dir}/${i}.txt | grep "GC(" | cut -d '(' -f 2| cut -d ')' -f 1 >> ${raw_dir}/GC_cycles/${i}.txt
-        cat ${input_dir}/${i}.txt | grep "Time:" | cut -d ' ' -f 1 | cut -d ":" -f 2 >> ${raw_dir}/perf/${i}.txt
-        cat  ${input_dir}/${i}.txt | grep "Allocation Stall (" | cut -d ")" -f 2  >> ${raw_dir}/stalls/${i}.txt
+        #cat ${input_dir}/${i}.txt | grep "Total Energy:" | cut -d ' ' -f 2 | cut -d ":" -f 2 >> ${raw_dir}/energy/${i}.txt
+        #cat ${input_dir}/${i}.txt | grep "Average Power:" | cut -d ' ' -f 2 | cut -d ":" -f 2 >> ${raw_dir}/power/${i}.txt
+        #cat ${input_dir}/${i}.txt | grep "GC(" | cut -d '(' -f 2| cut -d ')' -f 1 >> ${raw_dir}/GC_cycles/${i}.txt
+        #cat ${input_dir}/${i}.txt | grep "Time:" | cut -d ' ' -f 1 | cut -d ":" -f 2 >> ${raw_dir}/perf/${i}.txt
+        #cat  ${input_dir}/${i}.txt | grep "Allocation Stall (" | cut -d ")" -f 2  >> ${raw_dir}/stalls/${i}.txt
         #cat ${input_dir}/${i}.txt | grep "#\[Max" | cut -d '=' -f 2 | cut -d '','' -f 1 >> ${raw_dir}/max_latency/${i}.txt
-        cat ${input_dir}/${i}.txt | grep "Pause" | grep "[0-9]ms" |  cut -d ' ' -f 13 >> ${raw_dir}/max_latency/${i}.txt
+        #cat ${input_dir}/${i}.txt | grep "Pause" | grep "[0-9]ms" |  cut -d ' ' -f 13 >> ${raw_dir}/max_latency/${i}.txt
+        if [[ $input_dir == *"allocation_rate"*  ]]; then
+              python3 ${__dir}/analyze_allocation_rate.py ${input_dir} ${i} ${raw_dir}
+
+        fi
+
     done
 done
 done
-sudo bash analyze_results_raw_to_proccessed.sh
+#sudo bash analyze_results_raw_to_proccessed.sh
