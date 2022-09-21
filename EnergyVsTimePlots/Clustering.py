@@ -223,7 +223,7 @@ def main_bm(BM):
 #        print(AOAs_energy[index])
 
 def main():
-    for bm in ["hazelcast"]:
+    for bm in ["finagle"]:
         main_bm(bm)
 
 '''f = open('./all_data/all_data_perf.csv', 'w')
@@ -278,10 +278,10 @@ def print_graphs(bm):
     #print("energy", AOAs_energy)
     #print("stalls ",AOAs_stalls)
     #print("gc ", AOAs_gc)
-    PlotBars.prepare(array_of_BMs, AOAs_cpu, AOAs_alloc_avg, AOAs_alloc_max, basic_configurations, bm + "_util_alloc",
-                     "cpu_utilization", "allocation_rate_avg", "allocation_rate_max", "")
-    #PlotBars.prepare(array_of_BMs, AOAs_gc, AOAs_stalls, AOAs_pause, basic_configurations, bm + "_latency_gc",
-    #                 "gc_cycles", "stalls", "pause", "norm")
+    #PlotBars.prepare(array_of_BMs, AOAs_cpu, AOAs_alloc_avg, AOAs_alloc_max, basic_configurations, bm + "_util_alloc",
+    #                 "cpu_utilization", "allocation_rate_avg", "allocation_rate_max", "")
+    PlotBars.prepare(array_of_BMs, AOAs_gc, AOAs_stalls, AOAs_pause, basic_configurations, bm + "_latency_gc",
+                     "gc_cycles", "stalls", "pause", "norm")
     '''name = "Clustering_Perf_" +bm
     if len(array_of_BMs) > 1:
         PlotDendrogram.setup_dendrogram(AOAs_perf, array_of_BMs, name)
