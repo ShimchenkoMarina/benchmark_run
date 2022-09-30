@@ -11,8 +11,8 @@ def prepare(bms, array1, array2, array3, labels, name_suffix, array1_label, arra
         suffix = name_suffix
         plot(bms, array1, array2, array3, labels, suffix, array1_label, array2_label, array3_label)
     else:
-        print(array1)
-        print(array2)
+        #print(array1)
+        #print(array2)
         suffix = name_suffix + "_norm"
         for i in range(0, len(bms)):
             norm_gc = array1[i][0]
@@ -22,15 +22,15 @@ def prepare(bms, array1, array2, array3, labels, name_suffix, array1_label, arra
                     array1[i][j] = array1[i][j]/norm_gc
                 if norm_st != 0:
                     array2[i][j] = array2[i][j]/norm_st
-        print(array1)
-        print(array2)
-        print(array3)
+        #print(array1)
+        #print(array2)
+        #print(array3)
         plot(bms, array1, array2, array3, labels, suffix, array1_label, array2_label, array3_label)
 
 def plot(bms, array1, array2, array3, labels, suffix, array1_label, array2_label, array3_label):
-    print(array1)
-    print(array2)
-    print(array3)
+    #print(array1)
+    #print(array2)
+    #print(array3)
     x = np.arange(int(len(labels)/2))  # the label locations
     width = 0.15  # the width of the bars
     if len(bms) > 1:
@@ -111,5 +111,6 @@ def plot(bms, array1, array2, array3, labels, suffix, array1_label, array2_label
 
 
     fig.tight_layout()
+    #print(suffix)
     plt.savefig("./pngs/" + suffix + ".pdf", bbox_inches='tight',dpi=100)
 

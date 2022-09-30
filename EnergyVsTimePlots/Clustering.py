@@ -57,9 +57,33 @@ dict = {"energy": 0,
         "pause": 22,
         "stalls": 23}
 
+def init():
+    global AOAs_perf
+    global AOAs_energy
+    global AOAs_power
+    global AOAs_gc
+    global AOAs_stalls
+    global AOAs_pause
+    global AOAs_cpu
+    global AOAs_alloc_avg
+    global AOAs_alloc_max
+    global array_of_BMs
+
+    AOAs_perf = []
+    AOAs_energy = []
+    AOAs_power = []
+    AOAs_gc = []
+    AOAs_stalls = []
+    AOAs_pause = []
+    AOAs_cpu = []
+    AOAs_alloc_avg = []
+    AOAs_alloc_max = []
+    array_of_BMs = []
+
+
 def fill_in_global_arrays(local_array, what, bm):
     global dict
-    print(what)
+    #print(what)
     if dict[what] > 20:
         if int(len(local_array)) == int(len(basic_configurations)):
             #print("yes")
@@ -111,11 +135,11 @@ def process_files(files, array_global, array_type):
     global basic_configurations
     global dict
     for f in files:
-        print(f)
+        #print(f)
         array_local = []
         data = read_data(f)
         bm = data["BM"][0]
-        print(bm)
+        #print(bm)
         add_BM(bm)
         if "spec" in bm:
             basic_configurations = basic_configurations_for_spec
@@ -224,7 +248,12 @@ def main_bm(BM):
 #        print(AOAs_energy[index])
 
 def main():
+<<<<<<< HEAD
     for bm in [""]:
+=======
+    for bm in ["spec", "finagle", "hazelcast"]:
+        init()
+>>>>>>> 4a9cb1a (Separate stats from noise)
         main_bm(bm)
 
 '''f = open('./all_data/all_data_perf.csv', 'w')
@@ -320,5 +349,4 @@ def print_graphs(bm):
         PlotDendrogram.setup_dendrogram(AOAs_power, array_of_BMs, name)
     name = "HeatMapClust_Power_" + bm
     PlotHeatMap.get_order(AOAs_power, array_of_BMs, basic_configurations, name)
-    '''
 main()

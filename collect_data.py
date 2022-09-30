@@ -60,10 +60,10 @@ Which_BM = {
             #"specjbb2015_j20_gen_clean",
             #"specjbb2015_j20_olof_static",
             #"specjbb2015_j20_gen_clean_static",
-            #"specjbb2015_j20_olof_static_allocation_rate",
-            #"specjbb2015_j20_gen_clean_static_allocation_rate",
-            "HazelCast_j20_olof_static_allocation_rate",
-            "HazelCast_j20_gen_clean_static_allocation_rate",
+            "specjbb2015_j20_olof_static_allocation_rate",
+            "specjbb2015_j20_gen_clean_static_allocation_rate",
+            #"HazelCast_j20_olof_static_allocation_rate",
+            #"HazelCast_j20_gen_clean_static_allocation_rate",
             #"Renaissance_j20_gen_clean_static_allocation_rate",
             #"Renaissance_j20_olof_static_allocation_rate",
 }
@@ -106,10 +106,10 @@ BM_Hazelcast = {
       #"specjbb15_25":             	" -m COMPOSITE",#IR=5250
 #      }
 BM_specjbb2015 = {
-      "specjbb15_100":             	" -m COMPOSITE",
-      #"specjbb15_75":             	" -m COMPOSITE",
-      #"specjbb15_50":             	" -m COMPOSITE",
-      #"specjbb15_25":             	" -m COMPOSITE",
+      "specjbb15_100":             	" -m COMPOSITE -p ../spec/config/specjbb2015100.props",
+      "specjbb15_75":             	" -m COMPOSITE -p ../spec/config/specjbb201575.props",
+      "specjbb15_50":             	" -m COMPOSITE -p ../spec/config/specjbb201550.props",
+      "specjbb15_25":             	" -m COMPOSITE -p ../spec/config/specjbb201525.props ",
       }
 #BM_specjbb2015_j20_olof = {
       #"specjbb15_100":             	" -m COMPOSITE",
@@ -222,7 +222,7 @@ def heap_size_array(BM_tag, HEAP_RUNS):
     else:
         space = 100
     tag = ""
-    for i in range (3, HEAP_RUNS):
+    for i in range (0, HEAP_RUNS):
         if "spec" not in BM_tag:
             conf = param_max + str(start_HS + space*i) + start_Value + param_min + str(start_HS+ space*i) + start_Value
             print(conf)
@@ -232,10 +232,11 @@ def heap_size_array(BM_tag, HEAP_RUNS):
                 tag = str(1 + round(i/11, 1))
                 print(tag)
         else:
+            tag = str(1.0 + i*0.5)
             if i >=3:
                 space = int(start_HS)
+                tag = str(1.0 + i)
             conf = param_max + str(start_HS + space*i) + start_Value
-            tag = str(1.0 + i)
         HS[tag] = conf
     return HS
 
@@ -251,10 +252,11 @@ def execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAV
                 os.system("sudo mkdir -p " + result_path)
                 os.system("sudo chmod 777 " + result_path)
                 #os.system("echo "  + BM_tag + " " + JAVA_tag + GC_tag + HS_tag + " >> output.txt")
-                #binary_hot = " ".join([COMMAND, JAVA, JAVA_LOG, HS_conf, GC_conf, CLASSPATH, BM_conf, Callback])
+                binary_hot = " ".join([COMMAND, JAVA, JAVA_LOG, HS_conf, GC_conf, CLASSPATH, BM_conf, Callback])
                 print(binary_hot)
-                #collect_data(binary_hot, result_path)
+                collect_data(binary_hot, result_path)
                 #os.system("echo 777 >> output.txt")
+                os.system("./cache-flush")
                 #end = timer()
                 #minutes = round((end - start) / 60.0, 3)
                 #if "hazelcast" in BM_tag:
@@ -342,7 +344,7 @@ def main(argv):
             GC_pid_tag = ""
             JAVA_tag = ""
             JAVA_local = ""
-            if "_java20_olof" in BM:
+            if "_j20_olof" in BM:
                 GC_pid_tag = "_java20_olof"
                 JAVA_tag = "j20YinYan"
                 JAVA_local = JAVA20_OLOF
@@ -358,7 +360,7 @@ def main(argv):
 
 
 
-
+            print(JAVA_local)
             if "specjbb2015" in BM:
                 #os.system("rm -rf ../benchmark_run/GC_pids_java20_olof.txt")
                 for (BM_tag, BM_conf) in BM_specjbb2015.items():

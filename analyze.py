@@ -323,7 +323,7 @@ def main():
 
     for (benchmark_name, allconf_runs) in benchmarks_conf.items():
         print("benchmark name = ", benchmark_name)
-        if (benchmark_name != "def"):
+        if "specjbb" in benchmark_name and "static" in benchmark_name:
             dict_for_benchmark = {}
             local_order = []
             local_baseline_name = ""
@@ -369,7 +369,7 @@ def main():
                 order.append(el)
             print("order = ", order)
             #measurement = ["energy_pack", "energy_dram", "energy_cpu", "perf", "watts_cpu", "watts_dram", "watts_pack"]
-            measurement = ["perf"]
+            measurement = ["energy"]
             #measurement = ["energy", "power", "perf"]
             for m in measurement:
                 if dict_for_benchmark.get(baseline_name) and has_contents(dict_for_benchmark[baseline_name], m):

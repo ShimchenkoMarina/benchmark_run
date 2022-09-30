@@ -42,8 +42,6 @@ def bootstrapped_ci(df_input):
 def read_data(sample, data, configuration_name, benchmark_name):
     df = pd.DataFrame(columns=[configuration_name])
     for file in data:
-        #print(file)
-        #print("\n")
         if sample in file:
             try:
                 curr_df = pd.read_csv(file, header=None)
@@ -112,6 +110,9 @@ def analyze_baseline(sample, data, baseline, benchmark_name):
 def normalized_data(sample, df, baseline_name):
     result = []
     b = float(df.loc[df[STR_TYPE] == baseline_name][STR_MEAN].values[0])
+    b_std = float(df.loc[df[STR_TYPE] == baseline_name][STR_STD].values[0])
+    #print("baseline = ", str(b))
+    #print("baseline std = ", str(std))
     for o in order:
         if "GC" not in sample and \
                 "stalls" not in sample and \
@@ -120,7 +121,13 @@ def normalized_data(sample, df, baseline_name):
             if o == baseline_name:
                 result.append(1.0)
                 continue
-            result.append(float(df.loc[df[STR_TYPE] == o][STR_MEAN].values[0])/b)
+            #print("number = ", str(df.loc[df[STR_TYPE] == o][STR_MEAN].values[0]))
+            num_std = df.loc[df[STR_TYPE] == o][STR_STD].values[0]
+            diff = float(df.loc[df[STR_TYPE] == o][STR_MEAN].values[0]) - float(df.loc[df[STR_TYPE] == baseline_name][STR_MEAN].values[0])
+            if abs(diff) > (b_std + num_std):
+                result.append(float(df.loc[df[STR_TYPE] == o][STR_MEAN].values[0])/b)
+            else:
+                result.append(1.0)
         else:
             result.append(float(df.loc[df[STR_TYPE] == o][STR_MEAN].values[0]))
     return result
@@ -212,7 +219,9 @@ def main():
     #       fmt ='% s')
     for (benchmark_name, allconf_runs) in benchmarks_conf.items():
         print(benchmark_name)
-        #if "akka-uct" not in benchmark_name:
+        #if "spec" not in benchmark_name:
+        #    continue
+        #if "static" not in benchmark_name:
         #    continue
         baseline_name = ""
         dict_for_benchmark = {}
@@ -230,7 +239,9 @@ def main():
             #measurement = ["energy_pack", "perf", "max_latency", "mean_latency", "watts_pack", "energy_dram", "energy_cpu", "GC_cycles", "energy_pack_dram"]
             #measurement = ["energy", "power", "perf", "stalls", "GC_cycles", "max_latency"]
             #measurement = ["GC_cycles", "stalls"]
-            measurement = ["cpu_utilization", "allocation_rate_avg", "allocation_rate_max"]
+            measurement = ["energy", "power", "perf"]
+            #measurement = ["cpu_utilization", "allocation_rate_avg", "allocation_rate_max"]
+            #measurement = ["cpu_utilization"]
             for m in measurement:
                 print(m)
                 baseline = analyze_baseline(m, dict_for_benchmark[baseline_name], baseline_name, benchmark_name)
