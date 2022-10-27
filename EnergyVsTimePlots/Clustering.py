@@ -163,7 +163,8 @@ def main_bm(BM):
     process_files(allocation_rate_max_files, AOAs_alloc_max, "alloc_max")
 
     #print("gc ", AOAs_pause)
-    print_graphs(BM)
+    #print_graphs(BM)
+    print_paper_graphs(BM)
     #for file1, file2 in zip(energy_files, perf_files):
     #    print(file1 + "  --> " + file2)
     '''for energy_file, perf_file, power_file , gc_file, stalls_file, pause_file in zip(energy_files, perf_files, power_files, gc_files, stalls_files, max_pause_files):
@@ -223,7 +224,7 @@ def main_bm(BM):
 #        print(AOAs_energy[index])
 
 def main():
-    for bm in ["finagle"]:
+    for bm in [""]:
         main_bm(bm)
 
 '''f = open('./all_data/all_data_perf.csv', 'w')
@@ -261,6 +262,24 @@ for index, bm in enumerate(array_of_BMs):
     writer.writerow(row)
 f.close()
 '''
+def print_paper_graphs(bm):
+    global AOAs_perf
+    global AOAs_energy
+    global AOAs_power
+    global AOAs_gc
+    global AOAs_stalls
+    global AOAs_pause
+    global AOAs_cpu
+    global AOAs_alloc_avg
+    global AOAs_alloc_max
+    global array_of_BMs
+    global basic_configurations
+    print("energy", AOAs_energy)
+    print("power", AOAs_power)
+    print("BMs", array_of_BMs)
+    name = "Energy_Power_Latency_" + bm
+    PlotHeatMap.print_paper_heatmap(AOAs_energy, AOAs_power, AOAs_perf, "enough", basic_configurations, array_of_BMs, name)
+
 def print_graphs(bm):
     global AOAs_perf
     global AOAs_energy
@@ -280,9 +299,9 @@ def print_graphs(bm):
     #print("gc ", AOAs_gc)
     #PlotBars.prepare(array_of_BMs, AOAs_cpu, AOAs_alloc_avg, AOAs_alloc_max, basic_configurations, bm + "_util_alloc",
     #                 "cpu_utilization", "allocation_rate_avg", "allocation_rate_max", "")
-    PlotBars.prepare(array_of_BMs, AOAs_gc, AOAs_stalls, AOAs_pause, basic_configurations, bm + "_latency_gc",
-                     "gc_cycles", "stalls", "pause", "norm")
-    '''name = "Clustering_Perf_" +bm
+    #PlotBars.prepare(array_of_BMs, AOAs_gc, AOAs_stalls, AOAs_pause, basic_configurations, bm + "_latency_gc",
+    #                 "gc_cycles", "stalls", "pause", "norm")
+    name = "Clustering_Perf_" +bm
     if len(array_of_BMs) > 1:
         PlotDendrogram.setup_dendrogram(AOAs_perf, array_of_BMs, name)
     name = "HeatMapClust_Perf_" + bm
@@ -290,7 +309,7 @@ def print_graphs(bm):
     #name = "HeatMapClust_Energy_full_perf_order"
     #PlotHeatMap.get_order(AOAs_energy_pack, array_of_BMs, basic_configurations, name)
 
-    name = "Clustering_Energy_" + bm
+    '''name = "Clustering_Energy_" + bm
     if len(array_of_BMs) > 1:
         PlotDendrogram.setup_dendrogram(AOAs_energy, array_of_BMs, name)
     name = "HeatMapClust_Energy_" + bm

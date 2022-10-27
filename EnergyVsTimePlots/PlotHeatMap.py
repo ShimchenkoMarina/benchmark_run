@@ -11,6 +11,62 @@ import string
 from matplotlib import colors
 from matplotlib import rc
 
+heap_to_bm = {
+    "spec_enough": 2,
+    "hazelcast_enough": 2,
+    "finagle_enough": 3,
+    "h2_enough": 3,
+    "kafka_enough": 3,
+    "tomcat_enough": 3
+}
+def find_index(BM, heap_type):
+    for bm in heap_to_bm:
+        if bm.split("_")[0] in BM and heap_type in bm:
+            return heap_to_bm[bm]
+    return "error"
+#Different metrics on the same heatmap but for the same heap size
+def print_paper_heatmap(data1, data2, data3, heapsize, labelsx, labely, name):
+    print(data1)
+    fig, ax = plt.subplots(ncols=3, sharey=True)
+    data_energy= [ [None] * 1 for i1 in range(len(labely)) ]
+    data_power= [ [None] * 1 for i1 in range(len(labely)) ]
+    data_latency= [ [None] * 1 for i1 in range(len(labely)) ]
+    print(data_energy)
+    for i, bms in enumerate(data1):
+        index = find_index(labely[i], heapsize)
+        print(index)
+        if bms:
+            data_energy[i][0] = bms[index]
+        else:
+            data_energy[i][0] = 100
+        print(data_energy)
+    for i, bms in enumerate(data2):
+        if bms:
+            data_power[i][0] = bms[index]
+        else:
+            data_power[i][0] = 100
+    for i, bms in enumerate(data3):
+        if bms:
+            data_latency[i][0] = bms[index]
+        else:
+            data_latency[i][0] = 100
+    print(data_energy)
+    sns.heatmap(data_energy, annot = True, fmt = '.2f', linewidths=.5, ax=ax[0], cmap="PiYG_r", vmin=0.9, vmax=1.1)
+    sns.heatmap(data_power, annot = True, fmt = '.2f', linewidths=.5, ax=ax[1], cmap="PiYG_r", vmin=0.85, vmax=1.1)
+    sns.heatmap(data_latency, annot = True, fmt = '.2f', linewidths=.5, ax=ax[2], cmap="PiYG_r", vmin=0.9, vmax=1.1)
+    ax[0].set_yticks(np.arange(len(labely)))
+    ax[0].set_yticklabels(labely)
+    for axx,l in zip(ax,["Energy", "Power", "Latency"]):
+        axx.set_xticklabels([])
+        axx.set_xlabel(l)
+    plt.setp(ax[0].get_yticklabels(), rotation=0, ha="right",
+             rotation_mode="anchor")
+    fig.tight_layout()
+    fig.savefig("./pngs/random_" + name + ".pdf", bbox_inches='tight',dpi=200)
+    plt.close()
+    return
+
+#this is the same metric printed for 4 different heap sizes
 def print_heatmap(data, y,x, name):
     plt.rcParams["ps.useafm"] = True
     rc('font', **{'family':'sans-serif', 'sans-serif':['FreeSans']})
