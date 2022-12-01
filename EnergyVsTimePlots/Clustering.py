@@ -26,7 +26,8 @@ bench = ""
 #TODO: and P_def
 #basic_configurations_for_spec = ["j20GZ1.0", "j20GZ1.5", "j20GZ2.0", "j20GZ4.0",
 #                        "j20YinYanZ1.0", "j20YinYanZ1.5","j20YinYanZ2.0","j20YinYanZ4.0"]
-basic_configurations_for_spec = ["j20GZ1.0", "j20YinYanZ1.0", "j20GZ1.5", "j20YinYanZ1.5","j20GZ2.0", "j20YinYanZ2.0","j20GZ4.0","j20YinYanZ4.0"]
+#basic_configurations_for_spec = ["j20GZ1.0", "j20YinYanZ1.0", "j20MARKZ1.0", "j20GZ1.5", "j20YinYanZ1.5", "j20MARKZ1.5","j20GZ2.0", "j20YinYanZ2.0","j20MARKZ2.0", "j20GZ4.0","j20YinYanZ4.0", "j20MARKZ4.0"]
+basic_configurations_for_spec = ["j20GZ1.0", "j20YinYanZ1.0", "j20GZ1.5", "j20YinYanZ1.5","j20GZ2.0", "j20YinYanZ2.0", "j20GZ4.0","j20YinYanZ4.0"]
 basic_configurations_for_hazelcast = ["j20GZ1.0", "j20YinYanZ1.0", "j20GZ1.2", "j20YinYanZ1.2","j20GZ1.3", "j20YinYanZ1.3","j20GZ1.5","j20YinYanZ1.5"]
 basic_configurations_for_the_rest = ["j20GZ1.0", "j20YinYanZ1.0", "j20GZ1.5", "j20YinYanZ1.5","j20GZ2.0", "j20YinYanZ2.0","j20GZ2.5","j20YinYanZ2.5"]
 #basic_configurations_for_hazelcast = ["j20GZ1.0", "j20GZ1.2", "j20GZ1.3", "j20GZ1.5",
@@ -42,6 +43,7 @@ AOAs_power = []
 AOAs_gc = []
 AOAs_stalls = []
 AOAs_pause = []
+AOAs_latency = []
 AOAs_cpu = []
 AOAs_alloc_avg = []
 AOAs_alloc_max = []
@@ -50,40 +52,16 @@ array_of_BMs = []
 dict = {"energy": 0,
         "perf": 1,
         "power": 2,
+        "latency": 3,
         "cpu_util": 24,
         "alloc_avg": 25,
         "alloc_max": 26,
         "gc": 21,
-        "pause": 22,
         "stalls": 23}
-
-def init():
-    global AOAs_perf
-    global AOAs_energy
-    global AOAs_power
-    global AOAs_gc
-    global AOAs_stalls
-    global AOAs_pause
-    global AOAs_cpu
-    global AOAs_alloc_avg
-    global AOAs_alloc_max
-    global array_of_BMs
-
-    AOAs_perf = []
-    AOAs_energy = []
-    AOAs_power = []
-    AOAs_gc = []
-    AOAs_stalls = []
-    AOAs_pause = []
-    AOAs_cpu = []
-    AOAs_alloc_avg = []
-    AOAs_alloc_max = []
-    array_of_BMs = []
-
 
 def fill_in_global_arrays(local_array, what, bm):
     global dict
-    #print(what)
+    print(what)
     if dict[what] > 20:
         if int(len(local_array)) == int(len(basic_configurations)):
             #print("yes")
@@ -135,11 +113,11 @@ def process_files(files, array_global, array_type):
     global basic_configurations
     global dict
     for f in files:
-        #print(f)
+        print(f)
         array_local = []
         data = read_data(f)
         bm = data["BM"][0]
-        #print(bm)
+        print(bm)
         add_BM(bm)
         if "spec" in bm:
             basic_configurations = basic_configurations_for_spec
@@ -160,31 +138,35 @@ def main_bm(BM):
     global AOAs_gc
     global AOAs_stalls
     global AOAs_pause
+    global AOAs_latency
     global AOAs_cpu
     global AOAs_alloc_avg
     global AOAs_alloc_max
     global array_of_BMs
     global basic_configurations
 
-    energy_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + "static.csv") and f.startswith("table_energy_" + BM))])
-    power_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + "static.csv") and f.startswith("table_power_" + BM))])
-    perf_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + "static.csv") and f.startswith("table_perf_" + BM))])
-    gc_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + "static.csv") and f.startswith("table_GC_cycles_" + BM))])
-    stalls_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + "static.csv") and f.startswith("table_stalls_" + BM))])
-    max_pause_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + "static.csv") and f.startswith("table_max_latency_" + BM))])
-    cpu_util_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + "static.csv") and f.startswith("table_cpu_utilization_" + BM))])
-    allocation_rate_avg_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + "static.csv") and f.startswith("table_allocation_rate_avg_" + BM))])
-    allocation_rate_max_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + "static.csv") and f.startswith("table_allocation_rate_max_" + BM))])
+    energy_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_energy_" + BM))])
+    power_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_power_" + BM))])
+    perf_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_perf_" + BM))])
+    gc_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_GC_cycles_" + BM))])
+    stalls_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_stalls_" + BM))])
+    #max_pause_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_pause_" + BM))])
+    latency_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_latency_" + BM))])
+    cpu_util_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_cpu_utilization_" + BM))])
+    allocation_rate_avg_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_allocation_rate_avg_" + BM))])
+    allocation_rate_max_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_allocation_rate_max_" + BM))])
 
     process_files(energy_files, AOAs_energy, "energy")
     process_files(perf_files, AOAs_perf, "perf")
-    process_files(max_pause_files, AOAs_pause, "pause")
+    #process_files(max_pause_files, AOAs_pause, "pause")
+    process_files(latency_files, AOAs_latency, "latency")
     process_files(power_files, AOAs_power, "power")
     process_files(gc_files, AOAs_gc, "gc")
     process_files(stalls_files, AOAs_stalls, "stalls")
     process_files(cpu_util_files, AOAs_cpu, "cpu_util")
     process_files(allocation_rate_avg_files, AOAs_alloc_avg, "alloc_avg")
     process_files(allocation_rate_max_files, AOAs_alloc_max, "alloc_max")
+
 
     #print("gc ", AOAs_pause)
     #print_graphs(BM)
@@ -248,12 +230,8 @@ def main_bm(BM):
 #        print(AOAs_energy[index])
 
 def main():
-<<<<<<< HEAD
-    for bm in [""]:
-=======
     for bm in ["spec", "finagle", "hazelcast"]:
         init()
->>>>>>> 4a9cb1a (Separate stats from noise)
         main_bm(bm)
 
 '''f = open('./all_data/all_data_perf.csv', 'w')
@@ -291,6 +269,23 @@ for index, bm in enumerate(array_of_BMs):
     writer.writerow(row)
 f.close()
 '''
+
+def print_as_is(bm):
+    global AOAs_perf
+    global AOAs_energy
+    global AOAs_power
+    global AOAs_gc
+    global AOAs_stalls
+    global AOAs_pause
+    global AOAs_latency
+    global AOAs_cpu
+    global AOAs_alloc_avg
+    global AOAs_alloc_max
+    global array_of_BMs
+    global basic_configurations
+    name = "Energy_" + bm
+    PlotHeatMap.print_as_is(AOAs_energy, basic_configurations, array_of_BMs, name)
+
 def print_paper_graphs(bm):
     global AOAs_perf
     global AOAs_energy
@@ -298,6 +293,7 @@ def print_paper_graphs(bm):
     global AOAs_gc
     global AOAs_stalls
     global AOAs_pause
+    global AOAs_latency
     global AOAs_cpu
     global AOAs_alloc_avg
     global AOAs_alloc_max
@@ -316,6 +312,7 @@ def print_graphs(bm):
     global AOAs_gc
     global AOAs_stalls
     global AOAs_pause
+    global AOAs_latency
     global AOAs_cpu
     global AOAs_alloc_avg
     global AOAs_alloc_max
@@ -330,13 +327,13 @@ def print_graphs(bm):
     #                 "cpu_utilization", "allocation_rate_avg", "allocation_rate_max", "")
     #PlotBars.prepare(array_of_BMs, AOAs_gc, AOAs_stalls, AOAs_pause, basic_configurations, bm + "_latency_gc",
     #                 "gc_cycles", "stalls", "pause", "norm")
-    name = "Clustering_Perf_" +bm
+    
+    #Energy, Perf, Power
+    '''name = "Clustering_Perf_" +bm
     if len(array_of_BMs) > 1:
         PlotDendrogram.setup_dendrogram(AOAs_perf, array_of_BMs, name)
     name = "HeatMapClust_Perf_" + bm
     PlotHeatMap.get_order(AOAs_perf, array_of_BMs, basic_configurations, name)
-    #name = "HeatMapClust_Energy_full_perf_order"
-    #PlotHeatMap.get_order(AOAs_energy_pack, array_of_BMs, basic_configurations, name)
 
     '''name = "Clustering_Energy_" + bm
     if len(array_of_BMs) > 1:
@@ -349,4 +346,12 @@ def print_graphs(bm):
         PlotDendrogram.setup_dendrogram(AOAs_power, array_of_BMs, name)
     name = "HeatMapClust_Power_" + bm
     PlotHeatMap.get_order(AOAs_power, array_of_BMs, basic_configurations, name)
+    '''
+    #Latency
+    name = "Clustering_Latency_" + bm
+    if len(array_of_BMs) > 1:
+        PlotDendrogram.setup_dendrogram(AOAs_latency, array_of_BMs, name)
+    name = "HeatMapClust_Latency_" + bm
+    PlotHeatMap.get_order(AOAs_latency, array_of_BMs, basic_configurations, name)
+
 main()

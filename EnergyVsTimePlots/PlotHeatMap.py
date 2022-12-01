@@ -66,6 +66,17 @@ def print_paper_heatmap(data1, data2, data3, heapsize, labelsx, labely, name):
     plt.close()
     return
 
+def print_as_is(data, y, x, name):
+    print(data)
+    print(y)
+    print(x)
+    sns_plot = sns.heatmap(data, annot = True, fmt = '.2f', linewidths=.5, cmap="PiYG_r")
+    fig = sns_plot.get_figure()
+    fig.tight_layout()
+    fig.savefig("./pngs/as_is" + name + ".pdf", bbox_inches='tight',dpi=200)
+    plt.close()
+    return
+
 #this is the same metric printed for 4 different heap sizes
 def print_heatmap(data, y,x, name):
     plt.rcParams["ps.useafm"] = True

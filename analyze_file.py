@@ -154,7 +154,7 @@ def analyze_file(input_dir, output_dir, file_num):
         else:
             writer.write("0" + '\n')
 
-    with open(os.path.join(input_dir, "max_latency", file_num + ".txt"), 'r') as reader:
+    with open(os.path.join(input_dir, "latency", file_num + ".txt"), 'r') as reader:
         for line in reader.readlines():
             if "ms" not in line:
                 continue
@@ -170,9 +170,9 @@ def analyze_file(input_dir, output_dir, file_num):
                         pass
 
 
-    with open(os.path.join(output_dir, "max_latency.txt"), "a") as writer:
+    with open(os.path.join(output_dir, "latency.txt"), "a") as writer:
         if (len(pause_time_list) > 0):
-            writer.write(str(max(pause_time_list)) + '\n')
+            writer.write(str(avg(pause_time_list[2:])) + '\n')
 
 def main():
     if len(sys.argv) == 4:

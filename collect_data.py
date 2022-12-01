@@ -17,7 +17,10 @@ CLASSPATH_DACAPO=""
 CLASSPATH_HAZELCAST=""
 JAVA20 = ""
 JAVA20_OLOF = ""
+JAVA20_YinYan = ""
+JAVA20_CRITICAL = ""
 JAVA20_GEN=""
+JAVA20_MARK=""
 
 file = open('../benchmark_run/path_file.txt', 'r')
 for line in file:
@@ -37,8 +40,14 @@ for line in file:
         JAVA20=line.split("=")[1].split("\"")[1]
     if "JAVA20_OLOF"==variable:
         JAVA20_OLOF=line.split("=")[1].split("\"")[1]
+    if "JAVA20_YinYan"==variable:
+        JAVA20_YinYan=line.split("=")[1].split("\"")[1]
+    if "JAVA20_CRITICAL"==variable:
+        JAVA20_CRITICAL=line.split("=")[1].split("\"")[1]
     if "JAVA20_GEN"==variable:
         JAVA20_GEN=line.split("=")[1].split("\"")[1]
+    if "JAVA20_MARK"==variable:
+        JAVA20_MARK=line.split("=")[1].split("\"")[1]
 
 FLAGS_HAZELCAST="--add-modules java.se --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.management/sun.management=ALL-UNNAMED"
 
@@ -47,25 +56,48 @@ JAVA_LOG = " -Xlog:gc* "
 JAVA_LOG_ALLOCATION_RATE = "-Xlog:gc+stats"
 #Specify here which bm+java you want to run
 Which_BM = {
-            #"DaCapo_j20_olof",
-            #"DaCapo_j20_gen_clean",
+            #"DaCapo_j20_olof_static",
+            #"DaCapo_j20_yinyan_static",
+            #"DaCapo_j20_critical_static",
+            #"DaCapo_j20_gen_clean_static",
+            #"DaCapo_j20_olof_static_pids",
+            "DaCapo_j20_gen_clean_static_pids",
+            #"DaCapo_j20_gen_clean_static_perf",
+            #/"DaCapo_j20_olof_static_allocation_rate",
+            #/"DaCapo_j20_gen_clean_static_allocation_rate",
             #"HazelCast_j20_olof",
             #"HazelCast_j20_gen_clean",
             #"HazelCast_j20_olof_static",
+            #"HazelCast_j20_yinyan_static",
+            #"HazelCast_j20_critical_static",
             #"HazelCast_j20_gen_clean_static",
+            #"HazelCast_j20_gen_clean_static_perf",
+            "HazelCast_j20_gen_clean_static_pids",
             #"Renaissance_j20_gen_clean_static",
+            "Renaissance_j20_gen_clean_static_pids",
             #"Renaissance_j20_olof_static",
+            #"Renaissance_j20_yinyan_static",
+            #"Renaissance_j20_critical_static",
             #"Renaissance_j15M1",
             #"specjbb2015_j20_olof",
             #"specjbb2015_j20_gen_clean",
             #"specjbb2015_j20_olof_static",
+            #"specjbb2015_j20_yinyan_static",
+            #"specjbb2015_j20_critical_static",
             #"specjbb2015_j20_gen_clean_static",
-            "specjbb2015_j20_olof_static_allocation_rate",
-            "specjbb2015_j20_gen_clean_static_allocation_rate",
-            #"HazelCast_j20_olof_static_allocation_rate",
+            "specjbb2015_j20_gen_clean_static_pids",
+            #"specjbb2015_j20_gen_clean_static_perf",
+            #"specjbb2015_j20_mark_static",
+            #"specjbb2015_j20_olof_static_allocation_rate",
+            #"specjbb2015_j20_gen_clean_static_allocation_rate",
+            #/"HazelCast_j20_olof_static_allocation_rate",
             #"HazelCast_j20_gen_clean_static_allocation_rate",
             #"Renaissance_j20_gen_clean_static_allocation_rate",
             #"Renaissance_j20_olof_static_allocation_rate",
+}
+GC_threads = {
+        "16" : "-XX:ConcGCThreads=16", 
+        "8"  : "-XX:ConcGCThreads=8"
 }
 
 #Specify GCs for each java version
@@ -74,17 +106,23 @@ GC = {
 }
 #Specify bms
 BM_DaCapo = {
-          #"h2_small_t4":                " h2 -size small -n 50 -t 4 -c ",#50
-          #"h2_large_t4":                " h2 -size large -n 30 -t 4 -c ",#30
-          #"h2_huge_t4":                " h2 -size huge -n 10 -t 4 -c ",
+          #"tomcat_def":                " tomcat -size default -n 1",#20
+          #"tomcat_large":                " tomcat -size large -n 1",#5
+          #"tomcat_small":                " tomcat -size small -n 1",#50
+          "kafka_def":                " kafka -size default -n 1",#20
+          #"kafka_large":                " kafka -size large -n 1",#5
+          #"kafka_small":                " kafka -size small -n 1",#50
+          "h2_large_t4":                " h2 -size large -n 1 -t 4 ",#5
+          #"h2_huge_t4":                " h2 -size huge -n 1 -t 4 ",#5
+          #"tomcat":                " tomcat -size xlong -n 50",#50
           #"tradesoap_huge_n25":        "-cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness tradebeans -size huge -n 1 -t 4 -c " concurrency bug -- skip
           #"tradebeans_huge_t4":        "-cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness tradebeans -size huge -n 25 -t 4 -c ",
-          "avrora_large":               " avrora -size large -n 17 -t 1",
-          "fop_default":                " fop -n 50 ",
+          #"avrora_large":               " avrora -size large -n 17 -t 1",
+          #"fop_default":                " fop -n 50 ",
           #"jython_large":               " jython -size large -n 20 -c ",
-          "luindex_default":            " luindex -n 30 ",
+          #"luindex_default":            " luindex -n 30 ",
           #"lusearch_large":            " lusearch -size large -n 20 -c ",
-          "pmd_large":                  " pmd -size large -n 30 ",
+          #"pmd_large":                  " pmd -size large -n 30 ",
           ##"sunflow_large":              " sunflow -size large -n 20 ",
           ##"xalan_large":                " xalan -size large -n 20 "
 
@@ -93,10 +131,10 @@ BM_DaCapo = {
 
 #Specify bms
 BM_Hazelcast = {
-      "hazelcast_100":             	" org.example.StreamingRound2 [20k, 40k, 60k, 80k, 100k]",
-      "hazelcast_75":             	" org.example.StreamingRound2 [20k, 40k, 60k, 80k]",
-      "hazelcast_50":             	" org.example.StreamingRound2 [20k, 40k, 60k]",
-      "hazelcast_25":             	" org.example.StreamingRound2 [20k, 40k]",
+      #"hazelcast_1500":             " org.example.StreamingRound2 1500000",
+      "hazelcast_800":             	" org.example.StreamingRound2 800000",
+      "hazelcast_100":             	" org.example.StreamingRound2 100000",
+      #"hazelcast_20":             	" org.example.StreamingRound2 20000",
       }
 #BM_specjbb2015 = {
       #"specjbb15":             	" -m COMPOSITE -ikv -p "
@@ -107,9 +145,13 @@ BM_Hazelcast = {
 #      }
 BM_specjbb2015 = {
       "specjbb15_100":             	" -m COMPOSITE -p ../spec/config/specjbb2015100.props",
-      "specjbb15_75":             	" -m COMPOSITE -p ../spec/config/specjbb201575.props",
-      "specjbb15_50":             	" -m COMPOSITE -p ../spec/config/specjbb201550.props",
-      "specjbb15_25":             	" -m COMPOSITE -p ../spec/config/specjbb201525.props ",
+      #"specjbb15_75":             	" -m COMPOSITE -p ../spec/config/specjbb201575.props",
+      #"specjbb15_50":             	" -m COMPOSITE -p ../spec/config/specjbb201550.props",
+      #"specjbb15_25":             	" -m COMPOSITE -p ../spec/config/specjbb201525.props ",
+      #"specjbb15_100":             	" -m COMPOSITE -p ../spec/config/specjbb2015.props",
+      #"specjbb15_75":             	" -m COMPOSITE -p ../spec/config/specjbb2015.props",
+      #"specjbb15_50":             	" -m COMPOSITE -p ../spec/config/specjbb2015.props",
+      #"specjbb15_25":             	" -m COMPOSITE -p ../spec/config/specjbb2015.props ",
       }
 #BM_specjbb2015_j20_olof = {
       #"specjbb15_100":             	" -m COMPOSITE",
@@ -148,8 +190,19 @@ BM_Renaissance = {
 }
 #The maximum heap size for each application is set to 3X of its respective minimum heap size
 HEAP_SIZES = {
-        "hazelcast": "1200m",#1200
+        "tomcat_small": "50m",#40 was 
+        "tomcat_def": "60m",#50 for 8 threads
+        "tomcat_large": "100m",#1200
+        "kafka_large": "400m",#1200
+        "kafka_def": "300m",#1200
+        "kafka_small": "200m",#1200
+        "hazelcast_100": "1400m",#1200
+        "hazelcast_20": "1200m",#1200
+        "hazelcast_800": "1800m",#1200
+        "hazelcast_1500": "2400m",#1200
         "specjbb15": "16000m",#16000
+        "h2_huge_t4": "3500m",#16000
+        "h2_large_t4": "1800m",#16000
         "als":             	"1455m",#apache-spark485min
         "chi-square":      	"1455m",#485min
         "dec-tree":               "1455m",#485min
@@ -171,7 +224,7 @@ HEAP_SIZES = {
         "scala-kmeans":           "105m",#35min
         "scala-stm-bench7":       "930m",#310min
         "finagle-chirper":        "200m",#web 60m min
-        "finagle-http":           "70m",#35min
+        "finagle-http":           "140m",#35min
         "avrora_large": "25m",#15min-45
         "fop_default": "55m",#45min-135
         "jython_large": "55m",#45min-135
@@ -228,10 +281,18 @@ def heap_size_array(BM_tag, HEAP_RUNS):
             print(conf)
             if "hazelcast" not in BM_tag:
                 tag = str(1 + i*0.5)
+                if (i > 7): #if (i > 3):
+                    continue
             else:
+                if (i == 1):
+                    continue
+                if (i == 4):
+                    continue
                 tag = str(1 + round(i/11, 1))
                 print(tag)
         else:
+            if (i > 3):
+                continue
             tag = str(1.0 + i*0.5)
             if i >=3:
                 space = int(start_HS)
@@ -259,22 +320,22 @@ def execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAV
                 os.system("./cache-flush")
                 #end = timer()
                 #minutes = round((end - start) / 60.0, 3)
-                #if "hazelcast" in BM_tag:
-                #    f1_path = os.path.join(result_path, get_current_result_name(result_path))
-                #    f2_path = os.path.join(os.getcwd(), "histo-latency/0")
-                #    # opening first file in append mode and second file in read mode
-                #    f1 = open(f1_path, 'a+')
-                #    f2 = open(f2_path, 'r')
-                #    # appending the contents of the second file to the first file
-                #    f1.write(f2.read())
-                #    os.system("sudo rm -rf " + f2_path)
-            #os.system("mkdir  ../benchmark_run/results_pids/" + BM_tag +"/")
-            #os.system("mkdir  ../benchmark_run/results_pids/" + BM_tag +"/"+ JAVA_tag + GC_tag + HS_tag + "/")
-            #os.system("mv ../benchmark_run/scheduler.txt ../benchmark_run/results_pids/" + BM_tag +"/"+ JAVA_tag + GC_tag + HS_tag + "/")
+                if "hazelcast" in BM_tag:
+                    f1_path = os.path.join(result_path, get_current_result_name(result_path))
+                    f2_path = os.path.join(os.getcwd(), "histo-latency/0")
+                    # opening first file in append mode and second file in read mode
+                    f1 = open(f1_path, 'a+')
+                    f2 = open(f2_path, 'r')
+                    # appending the contents of the second file to the first file
+                    f1.write(f2.read())
+                    os.system("sudo rm -rf " + f2_path)
+            os.system("mkdir  ../benchmark_run/results_pids/" + BM_tag +"/")
+            os.system("mkdir  ../benchmark_run/results_pids/" + BM_tag +"/"+ JAVA_tag + GC_tag + HS_tag + "/")
+            os.system("mv ../pytop/demofile3.txt ../benchmark_run/results_pids/" + BM_tag +"/"+ JAVA_tag + GC_tag + HS_tag + "/GC_pids.txt")
             #os.system("mv ../benchmark_run/GC_pids" + GC_pid_tag + ".txt ../benchmark_run/results_pids/" + BM_tag + "/" + JAVA_tag + GC_tag + HS_tag + "/GC_pids.txt")
 
 def main(argv):
-    PASSES=1
+    PASSES=6
     HEAP_RUNS=1
     try:
         opts, args = getopt.getopt(argv,"hrs:",["runs=","sizes="])
@@ -302,45 +363,53 @@ def main(argv):
     #p = Popen(cmd.split())
     for BM in Which_BM:
         print(BM)
-        COMMAND = "sudo ./../rapl-tools/AppPowerMeter "
-        RES_FOLDER = "../benchmark_run/results"
+        COMMAND = ""
+        JAVA_LOG_local = ""
+        if "_perf" in BM:
+            PASSES=1
+            COMMAND = "perf stat sudo "
+        else:
+            JAVA_LOG_local = JAVA_LOG
+            COMMAND = "sudo ./../rapl-tools/AppPowerMeter "
+        RES_FOLDER = "../benchmark_run/results_pids"
+        #RES_FOLDER = "../benchmark_run/test"
         if "_static" not in BM:
             if BM ==  "HazelCast_j20_olof":
                 GC_pid_tag = "_java20_olof"
                 JAVA_tag = "j20YinYan"
                 for (BM_tag, BM_conf) in BM_Hazelcast.items():
-                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA20_OLOF, JAVA_LOG, "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST, COMMAND, RES_FOLDER)
+                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA20_OLOF, JAVA_LOG_local, "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST, COMMAND, RES_FOLDER)
             elif BM ==  "HazelCast_j20_gen_clean":
                 JAVA_tag = "j20G"
                 GC_pid_tag = "_java20_gen_clean"
                 for (BM_tag, BM_conf) in BM_Hazelcast.items():
-                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA20_GEN, JAVA_LOG, "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST, COMMAND, RES_FOLDER)
+                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA20_GEN, JAVA_LOG_local, "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST, COMMAND, RES_FOLDER)
             elif BM == "DaCapo_j20_gen_clean":
                 JAVA_tag = "j20G"
                 GC_pid_tag = "_java20_gen_clean"
                 for (BM_tag, BM_conf) in BM_DaCapo.items():
-                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA20_GEN, JAVA_LOG, "", " -jar " + CLASSPATH_DACAPO, COMMAND, RES_FOLDER)
+                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA20_GEN, JAVA_LOG_local, "", " -jar " + CLASSPATH_DACAPO, COMMAND, RES_FOLDER)
             elif BM == "DaCapo_j20_olof":
                 JAVA_tag = "j20YinYan"
                 GC_pid_tag = "_java20_olof"
                 for (BM_tag, BM_conf) in BM_DaCapo.items():
-                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA20_OLOF, JAVA_LOG, "", " -jar " + CLASSPATH_DACAPO, COMMAND, RES_FOLDER)
+                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA20_OLOF, JAVA_LOG_local, "", " -jar " + CLASSPATH_DACAPO, COMMAND, RES_FOLDER)
             elif BM ==  "specjbb2015_j20_gen_clean":
                 #print(JAVA20_GEN)
                 JAVA_tag = "j20G"
                 GC_pid_tag = "_java20_gen_clean"
                 os.system("rm -rf ../benchmark_run/GC_pids_java20_gen_clean.txt")
                 for (BM_tag, BM_conf) in BM_specjbb2015_j20_gen.items():
-                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA20_GEN, JAVA_LOG, CONFIG_SPEC, " -jar " + CLASSPATH_SPEC, COMMAND, RES_FOLDER)
+                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA20_GEN, JAVA_LOG_local, CONFIG_SPEC, " -jar " + CLASSPATH_SPEC, COMMAND, RES_FOLDER)
             elif BM ==  "specjbb2015_j20_olof":
                 #print(JAVA20_OLOF)
                 GC_pid_tag = "_java20_olof"
                 JAVA_tag = "j20YinYan"
                 os.system("rm -rf ../benchmark_run/GC_pids_java20_olof.txt")
                 for (BM_tag, BM_conf) in BM_specjbb2015_j20_olof.items():
-                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA20_OLOF, JAVA_LOG, CONFIG_SPEC, " -jar " + CLASSPATH_SPEC, COMMAND, RES_FOLDER)
+                    execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA20_OLOF, JAVA_LOG_local, CONFIG_SPEC, " -jar " + CLASSPATH_SPEC, COMMAND, RES_FOLDER)
         else:#static
-            BM_suffix = "_static"
+            BM_suffix = "_s"
             GC_pid_tag = ""
             JAVA_tag = ""
             JAVA_local = ""
@@ -348,30 +417,60 @@ def main(argv):
                 GC_pid_tag = "_java20_olof"
                 JAVA_tag = "j20YinYan"
                 JAVA_local = JAVA20_OLOF
+            if "_j20_yinyan" in BM:
+                GC_pid_tag = "_java20_yinyan"
+                JAVA_tag = "j20GYinYan"
+                JAVA_local = JAVA20_YinYan
+            if "_j20_critical" in BM:
+                GC_pid_tag = "_java20_critical"
+                JAVA_tag = "j20GCrit"
+                JAVA_local = JAVA20_CRITICAL
             if "_gen_clean" in BM:
                 JAVA_tag = "j20G"
                 GC_pid_tag = "_java20_gen_clean"
                 JAVA_local = JAVA20_GEN
+            if "_j20_mark" in BM:
+                JAVA_tag = "j20MARK"
+                GC_pid_tag = "_java20_mark"
+                JAVA_local = JAVA20_MARK
             if "allocation_rate" not in BM:
-                JAVA_LOG_local = JAVA_LOG
+                if "_perf" in BM:
+                    PASSES = 1
+                    JAVA_LOG_local = ""
+                else: 
+                    PASSES=1#6
+                    JAVA_LOG_local = JAVA_LOG
             else:
+                PASSES=1
                 BM_suffix = BM_suffix + "_allocation_rate"
                 JAVA_LOG_local = JAVA_LOG_ALLOCATION_RATE
+            if "pids" in BM:
+                PASSES=1
 
 
-
-            print(JAVA_local)
+            
+            #print(JAVA_local)
             if "specjbb2015" in BM:
-                #os.system("rm -rf ../benchmark_run/GC_pids_java20_olof.txt")
                 for (BM_tag, BM_conf) in BM_specjbb2015.items():
-                    execute_bm(PASSES, HEAP_RUNS, BM_tag + BM_suffix, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads    -XX:ConcGCThreads=10", CONFIG_SPEC, " -jar " + CLASSPATH_SPEC, COMMAND, RES_FOLDER)
+                    for (GC_thread_tag, GC_thread_conf) in GC_threads.items():
+                        os.system("rm -rf ../pytop/demofile3.txt")
+                        execute_bm(PASSES, HEAP_RUNS, BM_tag + BM_suffix + GC_thread_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, CONFIG_SPEC, " -jar " + CLASSPATH_SPEC, COMMAND, RES_FOLDER)
             elif "Renaissance" in BM:
                 for (BM_tag, BM_conf) in BM_Renaissance.items():
-                    execute_bm(PASSES, HEAP_RUNS, BM_tag + BM_suffix, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads    -XX:ConcGCThreads=8", "", " -jar " + CLASSPATH_RN, COMMAND, RES_FOLDER)
+                    for (GC_thread_tag, GC_thread_conf) in GC_threads.items():
+                        os.system("rm -rf ../pytop/demofile3.txt")
+                        execute_bm(PASSES, HEAP_RUNS, BM_tag + BM_suffix + GC_thread_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, "", " -jar " + CLASSPATH_RN, COMMAND, RES_FOLDER)
             elif "HazelCast" in BM:
                 for (BM_tag, BM_conf) in BM_Hazelcast.items():
-                    execute_bm(PASSES, HEAP_RUNS, BM_tag + BM_suffix, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads    -XX:ConcGCThreads=8", "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST, COMMAND, RES_FOLDER)
+                    for (GC_thread_tag, GC_thread_conf) in GC_threads.items():
+                        os.system("rm -rf ../pytop/demofile3.txt")
+                        execute_bm(PASSES, HEAP_RUNS, BM_tag + BM_suffix + GC_thread_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST, COMMAND, RES_FOLDER)
 
+            elif "DaCapo" in BM:
+                for (BM_tag, BM_conf) in BM_DaCapo.items():
+                    for (GC_thread_tag, GC_thread_conf) in GC_threads.items():
+                        os.system("rm -rf ../pytop/demofile3.txt")
+                        execute_bm(PASSES, HEAP_RUNS, BM_tag + BM_suffix + GC_thread_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, "", " -jar " + CLASSPATH_DACAPO, COMMAND, RES_FOLDER)
 
 if __name__ == "__main__": main(sys.argv[1:])
 
