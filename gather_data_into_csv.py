@@ -190,16 +190,7 @@ def main():
             for (benchmark_name, configurations) in res_content.items():
                 for (conf, conf_runs) in configurations.items():
                     #print("conf = ", conf)
-                    if "P" in conf:
-                        for (numthr, numthr_runs) in conf_runs.items():
-                            #if numthr contains java, then it has already been processed
-                            real_conf = conf + "_" + numthr
-                            all_conf_runs = {}
-                            all_conf_runs[real_conf] = numthr_runs
-                            #print("all_conf_runs = ", all_conf_runs)
-                            append_value(benchmarks_conf, benchmark_name, all_conf_runs)
-                    else:
-                        append_value(benchmarks_conf, benchmark_name, configurations)
+                    append_value(benchmarks_conf, benchmark_name, configurations)
     #So I need to create a list like this
     #fields = [bms, GC1, GC2, GC3, ....]
     #rows = [[bm1, energy1, energy2, energy3, ...],
@@ -220,17 +211,15 @@ def main():
             if isinstance(conf_runs, dict):
                 for conf in conf_runs:
                     print(conf)
-                    if baseline_name == "" and "j20GZ" in conf and str(1.0) in conf:
+                    if baseline_name == "" and "j20Z" in conf:
                         baseline_name = conf
-            elif baseline_name == "" and "j20GZ" in conf_runs and str(1.0) in conf_runs:
+            elif baseline_name == "" and "j20Z" in conf_runs:
                 baseline_name = conf_runs
             append_value(dict_for_benchmark, conf_runs, allconf_runs[conf_runs])
-        print("baseline", baseline_name)
+
         if baseline_name != "":
             #measurement = ["energy_pack", "perf", "max_latency", "mean_latency", "watts_pack", "energy_dram", "energy_cpu", "GC_cycles", "energy_pack_dram"]
-            #measurement = ["energy", "power", "perf", "stalls", "GC_cycles", "max_latency"]
-            #measurement = ["GC_cycles", "stalls"]
-            measurement = ["cpu_utilization", "allocation_rate_avg", "allocation_rate_max"]
+            measurement = ["total_energy", "average_power", "perf", "memory", "max_latency"]
             for m in measurement:
                 print(m)
                 baseline = analyze_baseline(m, dict_for_benchmark[baseline_name], baseline_name, benchmark_name)
@@ -251,6 +240,5 @@ def main():
                 fields.clear()
                 order.clear()
                 fields.append('BMs')
-
 if __name__ == "__main__":
     main()
