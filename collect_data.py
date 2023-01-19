@@ -54,6 +54,13 @@ GC = {
     "j20Z": "-XX:+UseZGC",
 }
 
+NUMA = { 
+    "_8": "numactl -C 0-7 ",
+    "_16": "numactl -C 0-15 ",
+    "_32": " ",
+}
+
+
 CPUO = {"1": "-Xgco1", "2":"-Xgco2", "5":"-Xgco5", "10":"-Xgco10"}
 #CPUO = {"15": "-Xgco15", "20":"-Xgco20", "5":"-Xgco5", "10":"-Xgco10", "45": "-Xgco45"}
 
@@ -149,12 +156,14 @@ def execute_bm(PASSES, BM_tag, BM_conf, JAVA_tag, JAVA, JAVA_LOG, Callback, CLAS
     #print("Benchmarking " + BM_tag)
     for i in range(0, PASSES):
         for (GC_tag, GC_conf) in GC.items():
+            for (NUMA_tag, NUMA_conf) in NUMA.items():
                 result_path = ""
-                result_path = os.path.join(os.getcwd(), RES_FOLDER, BM_tag, GC_tag + JAVA_tag)
+                result_path = os.path.join(os.getcwd(), RES_FOLDER, BM_tag, GC_tag + JAVA_tag + NUMA_tag)
                 os.system("sudo mkdir -p " + result_path)
                 os.system("sudo chmod 777 " + result_path)
                 binary_cache_flush = " ".join("./cache-flush")
-                binary_hot = " ".join(["sudo ../rapl-tools/AppPowerMeter numactl -C 0-7,16-23 ", JAVA, JAVA_LOG, GC_conf, CLASSPATH, BM_conf, Callback])
+                COMMAND = "sudo ../rapl-tools/AppPowerMeter " + NUMA_conf 
+                binary_hot = " ".join([COMMAND, JAVA, JAVA_LOG, GC_conf, CLASSPATH, BM_conf, Callback])
                 print(binary_hot)
                 collect_data(binary_hot, result_path)
                 if "hazelcast" in BM_tag:
