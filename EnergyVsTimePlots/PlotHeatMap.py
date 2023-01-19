@@ -83,9 +83,9 @@ def print_heatmap(data, y,x, name):
     #print("min is", min_v)
     #print("data is ", data)
     #print("len = " + str(len(x)))
-    NUM = int(len(x) / 2)
-    #NUM = int(len(x))
-    fig, axs = plt.subplots(1, NUM, sharey=True, figsize=(len(x)/2,len(y)))
+    #NUM = int(len(x) / 2)
+    NUM = int(len(x))
+    fig, axs = plt.subplots(1, NUM, sharey=True, figsize=(len(x),len(y)))
     divnorm=colors.TwoSlopeNorm(vcenter=1.0, vmax=max_v, vmin=min_v)
     for i in range(0, NUM):
         #print("part data is ", data[:, i*1:i*1 + 1])
@@ -108,8 +108,8 @@ def print_heatmap(data, y,x, name):
         #print(data)
         for j in range(start,1):
             for k in range(0,len(y)):
-                print(str(k) + " j = " + str(j) + " i ="  + str(i))
-                print("single data ", data[k:k + 1, (i*1 + j):(i*1 + j + 1)])
+                #print(str(k) + " j = " + str(j) + " i ="  + str(i))
+                #print("single data ", data[k:k + 1, (i*1 + j):(i*1 + j + 1)])
                 axs[i].text(j + 0.5, k + 0.5, data[k:k + 1, i*1 + j:i*1 + j + 1][0][0], ha="center", va="center", color="black")
         #axs[i].grid(color='grey', linestyle='-', linewidth=1)
         # Rotate the tick labels and set their alignment.
@@ -121,9 +121,9 @@ def print_heatmap(data, y,x, name):
     #sns.heatmap(data, annot=True,  linewidths=.1, vmin=0, vmax=10, cmap="Greens")
     #sns.heatmap(data, linewidths=.1, vmin=0, vmax=2, cmap="PiYG")
     # We want to show all ticks...
-    for ax,l in zip(axs,["1x", "1.5", "2x", "4x"]):
-        ax.set_xticklabels([])
-        ax.set_xlabel(l)
+    #for ax,l in zip(axs,["1x", "1.5", "2x", "4x"]):
+    #    ax.set_xticklabels([])
+    #    ax.set_xlabel(l)
     plt.colorbar(a1)
     #axs.set_xticks(np.arange(len(x)))
     #axs.set_yticks(np.arange(len(y)))

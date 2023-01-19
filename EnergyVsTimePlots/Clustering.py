@@ -24,57 +24,29 @@ import PlotBars
 # In[2]:
 bench = ""
 #TODO: and P_def
-#basic_configurations_for_spec = ["j20GZ1.0", "j20GZ1.5", "j20GZ2.0", "j20GZ4.0",
-#                        "j20YinYanZ1.0", "j20YinYanZ1.5","j20YinYanZ2.0","j20YinYanZ4.0"]
-basic_configurations_for_spec = ["j20GZ1.0", "j20YinYanZ1.0", "j20GZ1.5", "j20YinYanZ1.5","j20GZ2.0", "j20YinYanZ2.0","j20GZ4.0","j20YinYanZ4.0"]
-basic_configurations_for_hazelcast = ["j20GZ1.0", "j20YinYanZ1.0", "j20GZ1.2", "j20YinYanZ1.2","j20GZ1.3", "j20YinYanZ1.3","j20GZ1.5","j20YinYanZ1.5"]
-basic_configurations_for_the_rest = ["j20GZ1.0", "j20YinYanZ1.0", "j20GZ1.5", "j20YinYanZ1.5","j20GZ2.0", "j20YinYanZ2.0","j20GZ2.5","j20YinYanZ2.5"]
-#basic_configurations_for_hazelcast = ["j20GZ1.0", "j20GZ1.2", "j20GZ1.3", "j20GZ1.5",
-#                        "j20YinYanZ1.0", "j20YinYanZ1.2","j20YinYanZ1.3","j20YinYanZ1.5"]
-                        #"j20Z1.0", "j20Z1.5", "j20Z2.0", "j20Z4.0"]
-#basic_configurations_for_the_rest = ["j20GZ1.0", "j20GZ1.5", "j20GZ2.0", "j20GZ2.5",
-#                        "j20YinYanZ1.0", "j20YinYanZ1.5","j20YinYanZ2.0","j20YinYanZ2.5"]
-basic_configurations = []
+#basic_configurations = ["j20Z", "j20Z_CPUO1", "j20Z_CPUO2", "j20Z_CPUO5","j20Z_CPUO10"]
+#basic_configurations = ["j20Z", "j20Z_CPUO1", "j20Z_CPUO2", "j20Z_CPUO5","j20Z_CPUO10", "j20Z_CPUO15", "j20Z_CPUO20", "j20Z_CPUO45"]
+basic_configurations = ["j20Z", "j20Z_CPUO5","j20Z_CPUO10", "j20Z_CPUO15", "j20Z_CPUO20", "j20Z_CPUO45"]
+#basic_configurations = []
 
 AOAs_perf = []
 AOAs_energy = []
 AOAs_power = []
-AOAs_gc = []
-AOAs_stalls = []
+AOAs_memory = []
 AOAs_pause = []
-AOAs_cpu = []
-AOAs_alloc_avg = []
-AOAs_alloc_max = []
+AOAs_gc = []
+AOAs_soft_max = []
 array_of_BMs = []
 
-dict = {"energy": 0,
-        "perf": 1,
-        "power": 2,
-        "cpu_util": 24,
-        "alloc_avg": 25,
-        "alloc_max": 26,
-        "gc": 21,
-        "pause": 22,
-        "stalls": 23}
-
-def fill_in_global_arrays(local_array, what, bm):
+def fill_in_global_arrays( local_array, what, bm):
     global dict
     print(what)
-    if dict[what] > 20:
-        if int(len(local_array)) == int(len(basic_configurations)):
-            #print("yes")
-            return local_array
-        else:
-            print("Not true for " + bm + " " + what + " with lengts " + str(len(local_array)) + "/" + str(len(basic_configurations)))
-            return []
+    if int(len(local_array)) == int(len(basic_configurations)):
+        #print("yes")
+        return local_array
     else:
-        if int(len(local_array)) == int(len(basic_configurations)/2):
-            #print("yes")
-            return local_array
-        else:
-            print("Not true for " + bm + " " + what + " with lengts " + str(len(local_array)) + "/" + str(len(basic_configurations)))
-            return []
-
+        print("Not true for " + bm + " " + what + " with lengts " + str(len(local_array)) + "/" + str(len(basic_configurations)))
+        return []
 
 def fill_in_local_arrays(data):
     global basic_configurations
@@ -114,117 +86,50 @@ def process_files(files, array_global, array_type):
         print(f)
         array_local = []
         data = read_data(f)
-        bm = data["BM"][0]
-        print(bm)
-        add_BM(bm)
-        if "spec" in bm:
-            basic_configurations = basic_configurations_for_spec
-        elif "hazelcast" in bm:
-            basic_configurations = basic_configurations_for_hazelcast
-        else:
-            basic_configurations = basic_configurations_for_the_rest
-        if dict[array_type] < 21:
-            array_local = renormalize(fill_in_local_arrays(data))
-        else:
+        print(data.empty)
+        if not data.empty:
+            print(data)
+            bm = data["BM"][0]
+            add_BM(bm)
+            print(bm)
             array_local = fill_in_local_arrays(data)
-        array_global.append(fill_in_global_arrays(array_local, array_type, bm))
+            array_global.append(fill_in_global_arrays( array_local, array_type, bm))
 
 def main_bm(BM):
     global AOAs_perf
     global AOAs_energy
     global AOAs_power
-    global AOAs_gc
-    global AOAs_stalls
+    global AOAs_memory
     global AOAs_pause
-    global AOAs_cpu
-    global AOAs_alloc_avg
-    global AOAs_alloc_max
+    global AOAs_gc
+    global AOAs_soft_max
     global array_of_BMs
     global basic_configurations
 
-    energy_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + "static.csv") and f.startswith("table_energy_" + BM))])
-    power_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + "static.csv") and f.startswith("table_power_" + BM))])
-    perf_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + "static.csv") and f.startswith("table_perf_" + BM))])
-    gc_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + "static.csv") and f.startswith("table_GC_cycles_" + BM))])
-    stalls_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + "static.csv") and f.startswith("table_stalls_" + BM))])
-    max_pause_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + "static.csv") and f.startswith("table_max_latency_" + BM))])
-    cpu_util_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + "static.csv") and f.startswith("table_cpu_utilization_" + BM))])
-    allocation_rate_avg_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + "static.csv") and f.startswith("table_allocation_rate_avg_" + BM))])
-    allocation_rate_max_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + "static.csv") and f.startswith("table_allocation_rate_max_" + BM))])
-
-    process_files(energy_files, AOAs_energy, "energy")
+    total_energy_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_total_energy_" + BM))])
+    average_power_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_average_power_" + BM))])
+    perf_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_perf_" + BM))])
+    memory_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_memory_" + BM))])
+    latency_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_max_latency_" + BM))])
+    gc_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_gc_" + BM))])
+    soft_max_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_soft_max_capacity_" + BM))])
+    #print(soft_max_files)
+    process_files(total_energy_files, AOAs_energy, "total_energy")
     process_files(perf_files, AOAs_perf, "perf")
-    process_files(max_pause_files, AOAs_pause, "pause")
-    process_files(power_files, AOAs_power, "power")
+    process_files(latency_files, AOAs_pause, "latency")
+    process_files(average_power_files, AOAs_power, "average_power")
+    process_files(memory_files, AOAs_memory, "memory")
     process_files(gc_files, AOAs_gc, "gc")
-    process_files(stalls_files, AOAs_stalls, "stalls")
-    process_files(cpu_util_files, AOAs_cpu, "cpu_util")
-    process_files(allocation_rate_avg_files, AOAs_alloc_avg, "alloc_avg")
-    process_files(allocation_rate_max_files, AOAs_alloc_max, "alloc_max")
+    process_files(soft_max_files, AOAs_soft_max, "soft_max_capacity")
 
-    #print("gc ", AOAs_pause)
-    #print_graphs(BM)
-    print_paper_graphs(BM)
+    #print("gc ", AOAs_energy)
+    print_graphs(BM)
+    #print_paper_graphs(BM)
     #for file1, file2 in zip(energy_files, perf_files):
     #    print(file1 + "  --> " + file2)
-    '''for energy_file, perf_file, power_file , gc_file, stalls_file, pause_file in zip(energy_files, perf_files, power_files, gc_files, stalls_files, max_pause_files):
-        #print(energy_file)
-        #print(perf_file)
-        #print(power_file)
-        #print(gc_file)
-        #print(stalls_file)
-        array_perf = []
-        array_energy = []
-        array_power = []
-        array_gc = []
-        array_stalls = []
-        array_pauses = []
-        data1 = read_data(perf_file)
-        data2 = read_data(energy_file)
-        data3 = read_data(power_file)
-        data4 = read_data(gc_file)
-        data5 = read_data(stalls_file)
-        #print(data1)
-        data6 = read_data(pause_file)
-        bm = data5["BM"][0]
-        array_of_BMs.append(bm)
-        if "spec" in data5["BM"][0]:
-            basic_configurations = basic_configurations_for_spec
-        elif "hazelcast" in data5["BM"][0]:
-            basic_configurations = basic_configurations_for_hazelcast
-        else:
-            basic_configurations = basic_configurations_for_the_rest
-        array_energy = renormalize(fill_in_local_arrays(data2))
-        array_perf = renormalize(fill_in_local_arrays(data1))
-        array_power = renormalize(fill_in_local_arrays(data3))
-        array_gc = fill_in_local_arrays(data4)
-        array_stalls = fill_in_local_arrays(data5)
-        array_pauses = fill_in_local_arrays(data6)
-        AOAs_pause.append(fill_in_global_arrays(array_pauses, "pause", bm))
-        AOAs_energy.append(fill_in_global_arrays(array_energy, "energy", bm))
-        AOAs_power.append(fill_in_global_arrays(array_power, "power", bm))
-        AOAs_perf.append(fill_in_global_arrays(array_perf, "perf", bm))
-        AOAs_gc.append(fill_in_global_arrays(array_gc, "gc", bm))
-        AOAs_stalls.append(fill_in_global_arrays(array_stalls, "stalls", bm))'''
-    #print("gc ", AOAs_alloc_avg)
-    #print("gc ", AOAs_alloc_max)
-    #print("gc ", AOAs_gc)
-    #print("gc ", AOAs_stalls)
-    #print("gc ", AOAs_pause)
-    #print("bms", array_of_BMs)
-    #print("perf", AOAs_perf)
-    #print("energy", AOAs_energy)
-    #print(data2)
-    #print(data3)
-    #print(data4)
-    #print(data4["BM"][0])
-    #print(len(array_energy))
-#for index, bm in enumerate(array_of_BMs):
-#    #if "kmeans" in bm:
-#        print(AOAs_energy[index])
 
 def main():
-    for bm in [""]:
+    for bm in ["hazelcast"]:
         main_bm(bm)
 
 '''f = open('./all_data/all_data_perf.csv', 'w')
@@ -284,41 +189,89 @@ def print_graphs(bm):
     global AOAs_perf
     global AOAs_energy
     global AOAs_power
-    global AOAs_gc
-    global AOAs_stalls
+    global AOAs_memory
     global AOAs_pause
-    global AOAs_cpu
-    global AOAs_alloc_avg
-    global AOAs_alloc_max
+    global AOAs_gc
+    global AOAs_soft_max
     global array_of_BMs
     global basic_configurations
-    #print("bms", array_of_BMs)
-    #print("perf", AOAs_perf)
-    #print("energy", AOAs_energy)
-    #print("stalls ",AOAs_stalls)
-    #print("gc ", AOAs_gc)
-    #PlotBars.prepare(array_of_BMs, AOAs_cpu, AOAs_alloc_avg, AOAs_alloc_max, basic_configurations, bm + "_util_alloc",
-    #                 "cpu_utilization", "allocation_rate_avg", "allocation_rate_max", "")
-    #PlotBars.prepare(array_of_BMs, AOAs_gc, AOAs_stalls, AOAs_pause, basic_configurations, bm + "_latency_gc",
-    #                 "gc_cycles", "stalls", "pause", "norm")
-    name = "Clustering_Perf_" +bm
+    #Soft Max Capacity
+    #-----------------------------
+    bms = []
+    data = []
+    for x, y in zip(array_of_BMs, AOAs_soft_max):
+        if y != []:
+            bms.append(x)
+            data.append(y)
+    print(bms)
+    print(data)
+    PlotBars.prepare(bms, data, basic_configurations, "Soft_Max")
+    #---------------------------
+    #GC
+    bms = []
+    data = []
+    for x, y in zip(array_of_BMs, AOAs_gc):
+        if y != []:
+            bms.append(x)
+            data.append(y)
+    PlotBars.prepare(bms, data, basic_configurations, "GC")
+    #Perf
+    #-----------------------------
+    bms = []
+    data = []
+    for x, y in zip(array_of_BMs, AOAs_perf):
+        if y != []:
+            bms.append(x)
+            data.append(y)
+    #---------------------------
+    name = "Clustering_Perf"
+    #print(array_of_BMs)
     if len(array_of_BMs) > 1:
-        PlotDendrogram.setup_dendrogram(AOAs_perf, array_of_BMs, name)
-    name = "HeatMapClust_Perf_" + bm
-    PlotHeatMap.get_order(AOAs_perf, array_of_BMs, basic_configurations, name)
-    #name = "HeatMapClust_Energy_full_perf_order"
-    #PlotHeatMap.get_order(AOAs_energy_pack, array_of_BMs, basic_configurations, name)
+        PlotDendrogram.setup_dendrogram(data, bms, name)
+    name = "HeatMapClust_Perf"
+    PlotHeatMap.get_order(data, bms, basic_configurations, name)
+    #Energy
+    #-----------------------------
+    bms = []
+    data = []
+    for x, y in zip(array_of_BMs, AOAs_energy):
+        if y != []:
+            bms.append(x)
+            data.append(y)
+    #---------------------------
+    name = "Clustering_Energy"
+    if len(array_of_BMs) > 1:
+        PlotDendrogram.setup_dendrogram(data, bms, name)
+    name = "HeatMapClust_Energy"
+    PlotHeatMap.get_order(data, bms, basic_configurations, name)
+    #Power
+    #-----------------------------
+    bms = []
+    data = []
+    for x, y in zip(array_of_BMs, AOAs_power):
+        if y != []:
+            bms.append(x)
+            data.append(y)
+    #---------------------------
+    name = "Clustering_Power"
+    if len(array_of_BMs) > 1:
+        PlotDendrogram.setup_dendrogram(data, bms, name)
+    name = "HeatMapClust_Power"
+    PlotHeatMap.get_order(data, bms, basic_configurations, name)
+    #Memory
+    #-----------------------------
+    bms = []
+    data = []
+    for x, y in zip(array_of_BMs, AOAs_memory):
+        if y != []:
+            bms.append(x)
+            data.append(y)
+    #---------------------------
+    #print(data)
+    name = "Clustering_Memory"
+    if len(array_of_BMs) > 1:
+        PlotDendrogram.setup_dendrogram(data, bms, name)
+    name = "HeatMapClust_Memory"
+    PlotHeatMap.get_order(data, bms, basic_configurations, name)
 
-    '''name = "Clustering_Energy_" + bm
-    if len(array_of_BMs) > 1:
-        PlotDendrogram.setup_dendrogram(AOAs_energy, array_of_BMs, name)
-    name = "HeatMapClust_Energy_" + bm
-    PlotHeatMap.get_order(AOAs_energy, array_of_BMs, basic_configurations, name)
-
-    name = "Clustering_Power_" + bm
-    if len(array_of_BMs) > 1:
-        PlotDendrogram.setup_dendrogram(AOAs_power, array_of_BMs, name)
-    name = "HeatMapClust_Power_" + bm
-    PlotHeatMap.get_order(AOAs_power, array_of_BMs, basic_configurations, name)
-    '''
 main()

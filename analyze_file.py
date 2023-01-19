@@ -73,47 +73,46 @@ def analyze_file(input_dir, output_dir, file_num):
                 float(last_cycle)
                 memory_list.append(float(line))
             except:
-                do_nothing()
+                pass
     with open(os.path.join(output_dir, "memory.txt"), "a+") as writer:
         if (len(memory_list) > 0):
             writer.write(str(avg(memory_list)) + '\n')
-
-
-    '''with open(os.path.join(input_dir, "stalls", file_num + ".txt"), 'r') as reader:
+    soft_memory_list = []
+    with open(os.path.join(input_dir, "soft_max_capacity", file_num + ".txt"), 'r') as reader:
         for line in reader.readlines():
-            line =line.replace(",", ".")
-            if line.strip() and line  not in ['\n', '\r\n']:
-                line_array = separate_number_chars(line)
-                for subline in line_array:
-                    try:
-                        float(subline)
-                        if float(subline) > 0:
-                            stalls_time_list.append(float(subline))
-                    except:
-                        with open(os.path.join("bug_report.txt"), "a") as writer:
-                            writer.write("Check numbers in (did not convert) : " +  input_dir +" " + file_num + " --> " + subline + '\n')
+            last_cycle = line
+            last_cycle =last_cycle.replace(",", ".")
+            try:
+                float(last_cycle)
+                soft_memory_list.append(float(line))
+            except:
+                pass
+    with open(os.path.join(output_dir, "soft_max_capacity.txt"), "a+") as writer:
+        if (len(soft_memory_list) > 0):
+            writer.write(str(avg(soft_memory_list)) + '\n')
 
+    gc_list = []
+    with open(os.path.join(input_dir, "gc", file_num + ".txt"), 'r') as reader:
+        for line in reader.readlines():
+            last_cycle = line
+            last_cycle =last_cycle.replace(",", ".")
+            try:
+                float(last_cycle)
+                gc_list.append(float(line))
+            except:
+                pass
+    with open(os.path.join(output_dir, "gc.txt"), "a+") as writer:
+        if (len(gc_list) > 0):
+            writer.write(str(gc_list[-1]) + '\n')
 
-    with open(os.path.join(output_dir, "stalls.txt"), "a") as writer:
-        if (len(stalls_time_list) > 0):
-            writer.write(str(sum(stalls_time_list)) + '\n')
-        else:
-            writer.write("0" + '\n')
-    '''
     with open(os.path.join(input_dir, "max_latency", file_num + ".txt"), 'r') as reader:
         for line in reader.readlines():
-            if "ms" not in line:
-                continue
-            line =line.replace(",", ".")
-            if line.strip() and line  not in ['\n', '\r\n']:
-                line_array = separate_number_chars(line)
-                for subline in line_array:
-                    try:
-                        float(subline)
-                        if float(subline) > 0:
-                            pause_time_list.append(float(subline))
-                    except:
-                        pass
+            line =line.replace(",", ".").strip()
+            try:
+                float(line)
+                pause_time_list.append(float(line))
+            except:
+                pass
 
 
     with open(os.path.join(output_dir, "max_latency.txt"), "a") as writer:

@@ -39,7 +39,7 @@ for line in file:
 
 FLAGS_HAZELCAST="--add-modules java.se --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.management/sun.management=ALL-UNNAMED"
 
-JAVA_LOG = " -Xlog:gc "
+JAVA_LOG = " -Xlog:gc* "
 
 #Specify here which bm+java you want to run
 Which_BM = {
@@ -55,12 +55,13 @@ GC = {
 }
 
 CPUO = {"1": "-Xgco1", "2":"-Xgco2", "5":"-Xgco5", "10":"-Xgco10"}
+#CPUO = {"15": "-Xgco15", "20":"-Xgco20", "5":"-Xgco5", "10":"-Xgco10", "45": "-Xgco45"}
 
 #Specify bms
 BM_DaCapo = {
       "h2_small":             	" h2 -size small -n 50",#50
-      "h2_large":             	" h2 -size large -n 30",#30
-      "h2_huge":              	" h2 -size huge -n 10",
+      #"h2_large":             	" h2 -size large -n 30",#30
+      #"h2_huge":              	" h2 -size huge -n 10",
       "lusearch_large":          	" lusearch -size large -n 20",
       "lusearch_large_t8":          	" lusearch -size large -n 20 -t 8",
       "lusearch_large_t6":          	" lusearch -size large -n 20 -t 6",
@@ -153,7 +154,7 @@ def execute_bm(PASSES, BM_tag, BM_conf, JAVA_tag, JAVA, JAVA_LOG, Callback, CLAS
                 os.system("sudo mkdir -p " + result_path)
                 os.system("sudo chmod 777 " + result_path)
                 binary_cache_flush = " ".join("./cache-flush")
-                binary_hot = " ".join(["sudo ../rapl-tools/AppPowerMeter ", JAVA, JAVA_LOG, GC_conf, CLASSPATH, BM_conf, Callback])
+                binary_hot = " ".join(["sudo ../rapl-tools/AppPowerMeter numactl -C 0-7,16-23 ", JAVA, JAVA_LOG, GC_conf, CLASSPATH, BM_conf, Callback])
                 print(binary_hot)
                 collect_data(binary_hot, result_path)
                 if "hazelcast" in BM_tag:

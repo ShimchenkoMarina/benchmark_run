@@ -113,29 +113,15 @@ def normalized_data(sample, df, baseline_name):
     result = []
     b = float(df.loc[df[STR_TYPE] == baseline_name][STR_MEAN].values[0])
     for o in order:
-        if "GC" not in sample and \
-                "stalls" not in sample and \
-                "cpu_utilization" not in sample and \
-                "allocation_rate" not in sample:
+        if "gc" in sample or "soft_max_capacity" in sample:
+            result.append(float(df.loc[df[STR_TYPE] == o][STR_MEAN].values[0]))
+        else:
             if o == baseline_name:
                 result.append(1.0)
                 continue
-            result.append(float(df.loc[df[STR_TYPE] == o][STR_MEAN].values[0])/b)
-        else:
-            result.append(float(df.loc[df[STR_TYPE] == o][STR_MEAN].values[0]))
+            else:
+                result.append(float(df.loc[df[STR_TYPE] == o][STR_MEAN].values[0])/b)
     return result
-
-def find_best_baseline(res):
-    min_value = res[STR_MEAN].values[0]
-    conf_name = ""
-    for index, number in enumerate(res[STR_MEAN]):
-        if number < min_value:
-            min_value = number
-            conf_name = res[STR_TYPE].values[index]
-    if (conf_name == ""):
-        conf_name = res[STR_TYPE].values[0]
-    return conf_name
-
 
 def store_result(sample, result, res_folder, benchmark_name, baseline_name):
     #So I need to create a list like this
@@ -211,15 +197,15 @@ def main():
             if isinstance(conf_runs, dict):
                 for conf in conf_runs:
                     print(conf)
-                    if baseline_name == "" and "j20Z" in conf:
+                    if baseline_name == "" and "j20Z" in conf and "_" not in conf:
                         baseline_name = conf
-            elif baseline_name == "" and "j20Z" in conf_runs:
+            elif baseline_name == "" and "j20Z" in conf_runs and "_" not in conf_runs:
                 baseline_name = conf_runs
             append_value(dict_for_benchmark, conf_runs, allconf_runs[conf_runs])
 
         if baseline_name != "":
             #measurement = ["energy_pack", "perf", "max_latency", "mean_latency", "watts_pack", "energy_dram", "energy_cpu", "GC_cycles", "energy_pack_dram"]
-            measurement = ["total_energy", "average_power", "perf", "memory", "max_latency"]
+            measurement = ["total_energy", "average_power", "perf", "memory", "max_latency", "gc", "soft_max_capacity"]
             for m in measurement:
                 print(m)
                 baseline = analyze_baseline(m, dict_for_benchmark[baseline_name], baseline_name, benchmark_name)
