@@ -3,7 +3,7 @@ How to run, in 3 steps <br />
 2. sudo bash analyze_results.sh <br />
 3. python3 gather_data_into_csv.py <br />
 
-Build plots 
+Build plots <br />
 4. cd EnergyVsTimePlots <br />
 5. python3.8 Clustering.py  - builds heatmaps and puts together all_data_energy and all_data_perf<br /> 
 <br />
