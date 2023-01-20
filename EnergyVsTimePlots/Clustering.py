@@ -24,9 +24,9 @@ import PlotBars
 # In[2]:
 bench = ""
 #TODO: and P_def
-#basic_configurations = ["j20Z", "j20Z_CPUO1", "j20Z_CPUO2", "j20Z_CPUO5","j20Z_CPUO10"]
+basic_configurations = ["j20Z", "j20Z_CPUO1", "j20Z_CPUO2", "j20Z_CPUO5","j20Z_CPUO10"]
 #basic_configurations = ["j20Z", "j20Z_CPUO1", "j20Z_CPUO2", "j20Z_CPUO5","j20Z_CPUO10", "j20Z_CPUO15", "j20Z_CPUO20", "j20Z_CPUO45"]
-basic_configurations = ["j20Z", "j20Z_CPUO5","j20Z_CPUO10", "j20Z_CPUO15", "j20Z_CPUO20", "j20Z_CPUO45"]
+#basic_configurations = ["j20Z", "j20Z_CPUO5","j20Z_CPUO10", "j20Z_CPUO15", "j20Z_CPUO20", "j20Z_CPUO45"]
 #basic_configurations = []
 
 AOAs_perf = []
@@ -124,66 +124,10 @@ def main_bm(BM):
 
     #print("gc ", AOAs_energy)
     print_graphs(BM)
-    #print_paper_graphs(BM)
-    #for file1, file2 in zip(energy_files, perf_files):
-    #    print(file1 + "  --> " + file2)
 
 def main():
-    for bm in ["hazelcast"]:
+    for bm in ["h2_small"]:
         main_bm(bm)
-
-'''f = open('./all_data/all_data_perf.csv', 'w')
-writer = csv.writer(f)
-writer.writerow(basic_configurations)
-for index, bm in enumerate(array_of_BMs):
-    #print(bm)
-    row = AOAs_perf[index]
-    row.insert(0,bm)
-    #print(row)
-    writer.writerow(row)
-f.close()
-
-f = open('./all_data/all_data_energy.csv', 'w')
-writer = csv.writer(f)
-writer.writerow(basic_configurations)
-for index, bm in enumerate(array_of_BMs):
-    row = list(AOAs_energy[index])
-    row.insert(0,bm)
-    #print(row)
-    #row.insert(0,bm)
-    #print(row)
-    writer.writerow(row)
-f.close()
-
-f = open('./all_data/all_data_power.csv', 'w')
-writer = csv.writer(f)
-writer.writerow(basic_configurations)
-for index, bm in enumerate(array_of_BMs):
-    row = list(AOAs_power[index])
-    row.insert(0,bm)
-    #print(row)
-    #row.insert(0,bm)
-    #print(row)
-    writer.writerow(row)
-f.close()
-'''
-def print_paper_graphs(bm):
-    global AOAs_perf
-    global AOAs_energy
-    global AOAs_power
-    global AOAs_gc
-    global AOAs_stalls
-    global AOAs_pause
-    global AOAs_cpu
-    global AOAs_alloc_avg
-    global AOAs_alloc_max
-    global array_of_BMs
-    global basic_configurations
-    print("energy", AOAs_energy)
-    print("power", AOAs_power)
-    print("BMs", array_of_BMs)
-    name = "Energy_Power_Latency_" + bm
-    PlotHeatMap.print_paper_heatmap(AOAs_energy, AOAs_power, AOAs_perf, "enough", basic_configurations, array_of_BMs, name)
 
 def print_graphs(bm):
     global AOAs_perf

@@ -5,6 +5,10 @@ import re
 from functools import reduce
 def do_nothing():
     return
+def separate_number_chars(s):
+    res = re.split('([-+]?\d+\.\d+)|([-+]?\d+)', s.strip())
+    res_f = [r.strip() for r in res if r is not None and r.strip() != '']
+    return res_f
 
 def avg(l):
     return reduce(lambda a, b: a + b, l) / len(l)
