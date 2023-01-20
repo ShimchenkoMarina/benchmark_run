@@ -27,14 +27,15 @@ bench = ""
 #basic_configurations_for_spec = ["j20GZ1.0", "j20GZ1.5", "j20GZ2.0", "j20GZ4.0",
 #                        "j20YinYanZ1.0", "j20YinYanZ1.5","j20YinYanZ2.0","j20YinYanZ4.0"]
 #basic_configurations_for_spec = ["j20GZ1.0", "j20YinYanZ1.0", "j20MARKZ1.0", "j20GZ1.5", "j20YinYanZ1.5", "j20MARKZ1.5","j20GZ2.0", "j20YinYanZ2.0","j20MARKZ2.0", "j20GZ4.0","j20YinYanZ4.0", "j20MARKZ4.0"]
-basic_configurations_for_spec = ["j20GZ1.0", "j20YinYanZ1.0", "j20GZ1.5", "j20YinYanZ1.5","j20GZ2.0", "j20YinYanZ2.0", "j20GZ4.0","j20YinYanZ4.0"]
-basic_configurations_for_hazelcast = ["j20GZ1.0", "j20YinYanZ1.0", "j20GZ1.2", "j20YinYanZ1.2","j20GZ1.3", "j20YinYanZ1.3","j20GZ1.5","j20YinYanZ1.5"]
-basic_configurations_for_the_rest = ["j20GZ1.0", "j20YinYanZ1.0", "j20GZ1.5", "j20YinYanZ1.5","j20GZ2.0", "j20YinYanZ2.0","j20GZ2.5","j20YinYanZ2.5"]
+#basic_configurations_for_spec = ["j20GZ1.0", "j20YinYanZ1.0", "j20GZ1.5", "j20YinYanZ1.5","j20GZ2.0", "j20YinYanZ2.0", "j20GZ4.0","j20YinYanZ4.0"]
+#basic_configurations_for_hazelcast = ["j20GZ1.0", "j20YinYanZ1.0", "j20GZ1.2", "j20YinYanZ1.2","j20GZ1.3", "j20YinYanZ1.3","j20GZ1.5","j20YinYanZ1.5"]
+#basic_configurations_for_the_rest = ["j20GZ1.0", "j20YinYanZ1.0", "j20GZ1.5", "j20YinYanZ1.5","j20GZ2.0", "j20YinYanZ2.0","j20GZ2.5","j20YinYanZ2.5"]
 #basic_configurations_for_hazelcast = ["j20GZ1.0", "j20GZ1.2", "j20GZ1.3", "j20GZ1.5",
 #                        "j20YinYanZ1.0", "j20YinYanZ1.2","j20YinYanZ1.3","j20YinYanZ1.5"]
                         #"j20Z1.0", "j20Z1.5", "j20Z2.0", "j20Z4.0"]
 #basic_configurations_for_the_rest = ["j20GZ1.0", "j20GZ1.5", "j20GZ2.0", "j20GZ2.5",
 #                        "j20YinYanZ1.0", "j20YinYanZ1.5","j20YinYanZ2.0","j20YinYanZ2.5"]
+basic_configurations_for_the_rest = ["GZ1.0_8P", "GZ1.5_8P", "GZ2.0_8P", "GZ1.0_4E4E", "GZ1.5_4E4E", "GZ2.0_4E4E", "YYZ1.0_4E4E", "YYZ1.5_4E4E", "YYZ2.0_4E4E"]
 basic_configurations = []
 
 AOAs_perf = []
@@ -70,7 +71,7 @@ def fill_in_global_arrays(local_array, what, bm):
             print("Not true for " + bm + " " + what + " with lengts " + str(len(local_array)) + "/" + str(len(basic_configurations)))
             return []
     else:
-        if int(len(local_array)) == int(len(basic_configurations)/2):
+        if int(len(local_array)) == int(len(basic_configurations) - 3):
             #print("yes")
             return local_array
         else:
@@ -100,8 +101,14 @@ def read_data(file_name):
     return data
 
 def renormalize(array):
-    empty_array = [0] * int(len(array) /2)
-    empty_array = [round((item2/ item1), 2) for item1, item2 in  zip(array[::2], array[1::2])]
+    empty_array = [0] * int(len(array) - 3)
+    #empty_array = [round((item2/ item1), 2) for item1, item2 in  zip(array[::2], array[1::2])]
+    empty_array[0] = round(array[3]/array[0], 2)
+    empty_array[1] = round(array[4]/array[1], 2)
+    empty_array[2] = round(array[5]/array[2], 2)
+    empty_array[3] = round(array[6]/array[0], 2)
+    empty_array[4] = round(array[7]/array[1], 2)
+    empty_array[5] = round(array[8]/array[2], 2)
     #print(empty_array)
     return empty_array
 
@@ -119,12 +126,12 @@ def process_files(files, array_global, array_type):
         bm = data["BM"][0]
         print(bm)
         add_BM(bm)
-        if "spec" in bm:
-            basic_configurations = basic_configurations_for_spec
-        elif "hazelcast" in bm:
-            basic_configurations = basic_configurations_for_hazelcast
-        else:
-            basic_configurations = basic_configurations_for_the_rest
+        #if "spec" in bm:
+        #    basic_configurations = basic_configurations_for_spec
+        #elif "hazelcast" in bm:
+        #    basic_configurations = basic_configurations_for_hazelcast
+        #else:
+        basic_configurations = basic_configurations_for_the_rest
         if dict[array_type] < 21:
             array_local = renormalize(fill_in_local_arrays(data))
         else:
@@ -148,29 +155,29 @@ def main_bm(BM):
     energy_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_energy_" + BM))])
     power_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_power_" + BM))])
     perf_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_perf_" + BM))])
-    gc_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_GC_cycles_" + BM))])
-    stalls_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_stalls_" + BM))])
+    #gc_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_GC_cycles_" + BM))])
+    #stalls_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_stalls_" + BM))])
     #max_pause_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_pause_" + BM))])
     latency_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_latency_" + BM))])
     cpu_util_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_cpu_utilization_" + BM))])
-    allocation_rate_avg_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_allocation_rate_avg_" + BM))])
-    allocation_rate_max_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_allocation_rate_max_" + BM))])
+    #allocation_rate_avg_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_allocation_rate_avg_" + BM))])
+    #allocation_rate_max_files = sorted([f for f in listdir(os.getcwd() + "/tables/") if (f.endswith(bench + ".csv") and f.startswith("table_allocation_rate_max_" + BM))])
 
     process_files(energy_files, AOAs_energy, "energy")
     process_files(perf_files, AOAs_perf, "perf")
     #process_files(max_pause_files, AOAs_pause, "pause")
     process_files(latency_files, AOAs_latency, "latency")
     process_files(power_files, AOAs_power, "power")
-    process_files(gc_files, AOAs_gc, "gc")
-    process_files(stalls_files, AOAs_stalls, "stalls")
+    #process_files(gc_files, AOAs_gc, "gc")
+    #process_files(stalls_files, AOAs_stalls, "stalls")
     process_files(cpu_util_files, AOAs_cpu, "cpu_util")
-    process_files(allocation_rate_avg_files, AOAs_alloc_avg, "alloc_avg")
-    process_files(allocation_rate_max_files, AOAs_alloc_max, "alloc_max")
+    #process_files(allocation_rate_avg_files, AOAs_alloc_avg, "alloc_avg")
+    #process_files(allocation_rate_max_files, AOAs_alloc_max, "alloc_max")
 
 
     #print("gc ", AOAs_pause)
-    #print_graphs(BM)
-    print_paper_graphs(BM)
+    print_graphs(BM)
+    #print_paper_graphs(BM)
     #for file1, file2 in zip(energy_files, perf_files):
     #    print(file1 + "  --> " + file2)
     '''for energy_file, perf_file, power_file , gc_file, stalls_file, pause_file in zip(energy_files, perf_files, power_files, gc_files, stalls_files, max_pause_files):
@@ -230,8 +237,8 @@ def main_bm(BM):
 #        print(AOAs_energy[index])
 
 def main():
-    for bm in ["spec", "finagle", "hazelcast"]:
-        init()
+    for bm in ["jme"]:
+        #init()
         main_bm(bm)
 
 '''f = open('./all_data/all_data_perf.csv', 'w')
@@ -320,7 +327,7 @@ def print_graphs(bm):
     global basic_configurations
     #print("bms", array_of_BMs)
     #print("perf", AOAs_perf)
-    #print("energy", AOAs_energy)
+    print("energy", AOAs_energy)
     #print("stalls ",AOAs_stalls)
     #print("gc ", AOAs_gc)
     #PlotBars.prepare(array_of_BMs, AOAs_cpu, AOAs_alloc_avg, AOAs_alloc_max, basic_configurations, bm + "_util_alloc",
@@ -329,13 +336,13 @@ def print_graphs(bm):
     #                 "gc_cycles", "stalls", "pause", "norm")
     
     #Energy, Perf, Power
-    '''name = "Clustering_Perf_" +bm
+    name = "Clustering_Perf_" +bm
     if len(array_of_BMs) > 1:
         PlotDendrogram.setup_dendrogram(AOAs_perf, array_of_BMs, name)
     name = "HeatMapClust_Perf_" + bm
     PlotHeatMap.get_order(AOAs_perf, array_of_BMs, basic_configurations, name)
 
-    '''name = "Clustering_Energy_" + bm
+    name = "Clustering_Energy_" + bm
     if len(array_of_BMs) > 1:
         PlotDendrogram.setup_dendrogram(AOAs_energy, array_of_BMs, name)
     name = "HeatMapClust_Energy_" + bm
@@ -346,7 +353,7 @@ def print_graphs(bm):
         PlotDendrogram.setup_dendrogram(AOAs_power, array_of_BMs, name)
     name = "HeatMapClust_Power_" + bm
     PlotHeatMap.get_order(AOAs_power, array_of_BMs, basic_configurations, name)
-    '''
+    
     #Latency
     name = "Clustering_Latency_" + bm
     if len(array_of_BMs) > 1:

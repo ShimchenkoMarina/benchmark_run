@@ -1,4 +1,5 @@
 import pandas as pd
+import glob
 import os
 from utils.UniqueRuns import UniqueRuns
 import pathlib
@@ -184,9 +185,19 @@ def append_value(dict_obj, key, value):
         dict_obj[key] = value
 
 def main():
-    runs = UniqueRuns()
-    #this array should have the following format:{type: [/home/..../file_pack.txt,file_cpu.txt, file_dram.txt],  }
+    runs = glob.glob("./processed_results/test/*/*/*")
     benchmarks_conf = {}
+    for run in runs:
+        res_folder = run.split("/")[2]
+        benchmark_name = run.split("/")[3]
+        gc_conf = run.split("/")[4]
+        #print(res_folder)
+        #print(bm)
+        #print(gc_conf)
+        append_value(benchmarks_conf, benchmark_name, run)
+    print(benchmarks_conf)
+    '''runs = UniqueRuns()
+    #this array should have the following format:{type: [/home/..../file_pack.txt,file_cpu.txt, file_dram.txt],  }
     for res_folder, res_content  in runs.items():
         if "processed" in res_folder:
             #We need to dig deeper one level
@@ -207,6 +218,8 @@ def main():
                             append_value(benchmarks_conf, benchmark_name, all_conf_runs)
                     else:
                         append_value(benchmarks_conf, benchmark_name, configurations)
+    print(benchmarks_conf)
+
     #So I need to create a list like this
     #fields = [bms, GC1, GC2, GC3, ....]
     #rows = [[bm1, energy1, energy2, energy3, ...],
@@ -217,6 +230,7 @@ def main():
     #       rows,
     #       delimiter =", ",
     #       fmt ='% s')
+    '''
     for (benchmark_name, allconf_runs) in benchmarks_conf.items():
         print(benchmark_name)
         #if "spec" not in benchmark_name:
@@ -226,20 +240,24 @@ def main():
         baseline_name = ""
         dict_for_benchmark = {}
         for conf_runs in allconf_runs:
-            if isinstance(conf_runs, dict):
-                for conf in conf_runs:
-                    print(conf)
-                    if baseline_name == "" and "j20GZ" in conf and str(1.0) in conf:
-                        baseline_name = conf
-            elif baseline_name == "" and "j20GZ" in conf_runs and str(1.0) in conf_runs:
-                baseline_name = conf_runs
-            append_value(dict_for_benchmark, conf_runs, allconf_runs[conf_runs])
+            #print(conf_runs)
+            #if isinstance(conf_runs, dict):
+            #    for conf in conf_runs:
+            #        print(conf)
+            #        if baseline_name == "" and "j20GZ" in conf and str(1.0) in conf:
+            #            baseline_name = conf
+            if baseline_name == "" and "GZ1.0_8P" in conf_runs:
+                baseline_name = "GZ1.0_8P"
+            append_value(dict_for_benchmark, conf_runs.split("/")[4], conf_runs)
+        print(dict_for_benchmark)
         print("baseline", baseline_name)
+        
         if baseline_name != "":
             #measurement = ["energy_pack", "perf", "max_latency", "mean_latency", "watts_pack", "energy_dram", "energy_cpu", "GC_cycles", "energy_pack_dram"]
             #measurement = ["energy", "power", "perf", "stalls", "GC_cycles", "max_latency"]
             #measurement = ["GC_cycles", "stalls"]
-            measurement = ["energy", "power", "perf"]
+            measurement = ["energy", "power", "perf", "latency", "cpu_utilization"]
+            #measurement = ["energy"]
             #measurement = ["cpu_utilization", "allocation_rate_avg", "allocation_rate_max"]
             #measurement = ["cpu_utilization"]
             for m in measurement:
@@ -262,6 +280,5 @@ def main():
                 fields.clear()
                 order.clear()
                 fields.append('BMs')
-
 if __name__ == "__main__":
     main()

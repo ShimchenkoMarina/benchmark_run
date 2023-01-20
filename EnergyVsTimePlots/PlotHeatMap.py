@@ -83,6 +83,7 @@ def print_heatmap(data, y,x, name):
     rc('font', **{'family':'sans-serif', 'sans-serif':['FreeSans']})
     plt.rcParams['pdf.fonttype'] = 42 #print(array)
     data = np.asarray(data)
+    print(data)
     min_v = np.min(data)
     max_v = np.max(data)
     if max_v <= 1:
@@ -94,8 +95,9 @@ def print_heatmap(data, y,x, name):
     #print("min is", min_v)
     #print("data is ", data)
     #print("len = " + str(len(x)))
-    NUM = int(len(x) / 2)
+    #NUM = int(len(x) / 3)
     #NUM = int(len(x))
+    NUM = 6
     fig, axs = plt.subplots(1, NUM, sharey=True, figsize=(len(x)/2,len(y)))
     divnorm=colors.TwoSlopeNorm(vcenter=1.0, vmax=max_v, vmin=min_v)
     for i in range(0, NUM):
@@ -132,9 +134,9 @@ def print_heatmap(data, y,x, name):
     #sns.heatmap(data, annot=True,  linewidths=.1, vmin=0, vmax=10, cmap="Greens")
     #sns.heatmap(data, linewidths=.1, vmin=0, vmax=2, cmap="PiYG")
     # We want to show all ticks...
-    for ax,l in zip(axs,["1x", "1.5", "2x", "4x"]):
-        ax.set_xticklabels([])
-        ax.set_xlabel(l)
+    for ax,l in zip(axs,["1x", "1.5x", "2x", "1x_GConE", "1.5x_GConE", "2x_GConE"]):
+        ax.set_xticklabels([], rotation=45, ha="right")
+        ax.set_xlabel(l, rotation=45)
     plt.colorbar(a1)
     #axs.set_xticks(np.arange(len(x)))
     #axs.set_yticks(np.arange(len(y)))
@@ -189,13 +191,14 @@ def get_order(data, bms, confs, name):
                         ordered_bms[int(i) -1 + shift] = bms[index]
                     else:
                         shift = shift + 1
-                        print(ordered_data)
-                        print(int(i) - 1 + shift)
-                        print(data)
-                        print(index)
+                        #print(ordered_data)
+                        #print(int(i) - 1 + shift)
+                        #print(data)
+                        #print(index)
                         ordered_data[int(i) -1 + shift] = data[index]
                         ordered_bms[int(i) -1 + shift] = bms[index]
             count = count + 1
+        #print("data = ", data)
         print_heatmap(data, bms, confs, name)
     elif len(lst) == 1:
         print("data", data)

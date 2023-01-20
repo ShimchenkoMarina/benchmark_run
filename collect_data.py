@@ -1,5 +1,7 @@
 #Olof's project collect data
 import subprocess
+import threading
+import _thread
 from subprocess import Popen
 import os
 import pathlib
@@ -8,6 +10,7 @@ from os import listdir
 import platform
 from timeit import default_timer as timer
 import sys, getopt
+import CPUUtil
 
 #Path variables
 CONFIG_SPEC=""
@@ -18,7 +21,7 @@ CLASSPATH_HAZELCAST=""
 JAVA20 = ""
 JAVA20_OLOF = ""
 JAVA20_YinYan = ""
-JAVA20_CRITICAL = ""
+JAVA20_RESTRICTED = ""
 JAVA20_GEN=""
 JAVA20_MARK=""
 
@@ -42,8 +45,8 @@ for line in file:
         JAVA20_OLOF=line.split("=")[1].split("\"")[1]
     if "JAVA20_YinYan"==variable:
         JAVA20_YinYan=line.split("=")[1].split("\"")[1]
-    if "JAVA20_CRITICAL"==variable:
-        JAVA20_CRITICAL=line.split("=")[1].split("\"")[1]
+    if "JAVA20_RESTRICTED"==variable:
+        JAVA20_RESTRICTED=line.split("=")[1].split("\"")[1]
     if "JAVA20_GEN"==variable:
         JAVA20_GEN=line.split("=")[1].split("\"")[1]
     if "JAVA20_MARK"==variable:
@@ -56,12 +59,15 @@ JAVA_LOG = " -Xlog:gc* "
 JAVA_LOG_ALLOCATION_RATE = "-Xlog:gc+stats"
 #Specify here which bm+java you want to run
 Which_BM = {
-            #"DaCapo_j20_olof_static",
+            "DaCapo_static",
+            "HazelCast_static",
+            "specjbb2015_static",
+            "Renaissance_static",
             #"DaCapo_j20_yinyan_static",
             #"DaCapo_j20_critical_static",
             #"DaCapo_j20_gen_clean_static",
             #"DaCapo_j20_olof_static_pids",
-            "DaCapo_j20_gen_clean_static_pids",
+            #"DaCapo_j20_gen_clean_static_pids",
             #"DaCapo_j20_gen_clean_static_perf",
             #/"DaCapo_j20_olof_static_allocation_rate",
             #/"DaCapo_j20_gen_clean_static_allocation_rate",
@@ -72,9 +78,9 @@ Which_BM = {
             #"HazelCast_j20_critical_static",
             #"HazelCast_j20_gen_clean_static",
             #"HazelCast_j20_gen_clean_static_perf",
-            "HazelCast_j20_gen_clean_static_pids",
+            #"HazelCast_j20_gen_clean_static_pids",
             #"Renaissance_j20_gen_clean_static",
-            "Renaissance_j20_gen_clean_static_pids",
+            #"Renaissance_j20_gen_clean_static_pids",
             #"Renaissance_j20_olof_static",
             #"Renaissance_j20_yinyan_static",
             #"Renaissance_j20_critical_static",
@@ -85,7 +91,7 @@ Which_BM = {
             #"specjbb2015_j20_yinyan_static",
             #"specjbb2015_j20_critical_static",
             #"specjbb2015_j20_gen_clean_static",
-            "specjbb2015_j20_gen_clean_static_pids",
+            #"specjbb2015_j20_gen_clean_static_pids",
             #"specjbb2015_j20_gen_clean_static_perf",
             #"specjbb2015_j20_mark_static",
             #"specjbb2015_j20_olof_static_allocation_rate",
@@ -96,7 +102,7 @@ Which_BM = {
             #"Renaissance_j20_olof_static_allocation_rate",
 }
 GC_threads = {
-        "16" : "-XX:ConcGCThreads=16", 
+        #"4" : "-XX:ConcGCThreads=4", 
         "8"  : "-XX:ConcGCThreads=8"
 }
 
@@ -104,37 +110,60 @@ GC_threads = {
 GC = {
     'Z': '-XX:+UseZGC' ,
 }
+
+HW_conf = {
+        #"8P8E": ""
+        "8P" : "numactl -C 0-15  ", 
+        "4P4E"  : "numactl -C 0-7,16-19"
+}
 #Specify bms
 BM_DaCapo = {
-          #"tomcat_def":                " tomcat -size default -n 1",#20
-          #"tomcat_large":                " tomcat -size large -n 1",#5
-          #"tomcat_small":                " tomcat -size small -n 1",#50
-          "kafka_def":                " kafka -size default -n 1",#20
-          #"kafka_large":                " kafka -size large -n 1",#5
-          #"kafka_small":                " kafka -size small -n 1",#50
-          "h2_large_t4":                " h2 -size large -n 1 -t 4 ",#5
-          #"h2_huge_t4":                " h2 -size huge -n 1 -t 4 ",#5
-          #"tomcat":                " tomcat -size xlong -n 50",#50
-          #"tradesoap_huge_n25":        "-cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness tradebeans -size huge -n 1 -t 4 -c " concurrency bug -- skip
-          #"tradebeans_huge_t4":        "-cp " + CLASSPATH_jRAPL + ":" + CLASSPATH_DACAPO + " Harness tradebeans -size huge -n 25 -t 4 -c ",
-          #"avrora_large":               " avrora -size large -n 17 -t 1",
-          #"fop_default":                " fop -n 50 ",
-          #"jython_large":               " jython -size large -n 20 -c ",
-          #"luindex_default":            " luindex -n 30 ",
-          #"lusearch_large":            " lusearch -size large -n 20 -c ",
-          #"pmd_large":                  " pmd -size large -n 30 ",
-          ##"sunflow_large":              " sunflow -size large -n 20 ",
-          ##"xalan_large":                " xalan -size large -n 20 "
-
-
+          "jme_small":              " Harness jme -size small -n 50 -c MyCallback",#20
+          "jme_def":                " Harness jme -size default -n 20 -c MyCallback",#20
+          "jme_large":              " Harness jme -size large -n 10 -c MyCallback",#20
+          "lusearch_def_t2":        " Harness lusearch -size default -n 20 -t 2 -c MyCallback",#20
+          "lusearch_def_t4":        " Harness lusearch -size default -n 20 -t 4  -c MyCallback ",#20
+          "lusearch_def_t6":        " Harness lusearch -size default -n 20 -t 6  -c MyCallback ",#20
+          "lusearch_def_t8":        " Harness lusearch -size default -n 20 -t 8  -c MyCallback ",#20
+          "lusearch_def":           " Harness lusearch -size default -n 20 -c MyCallback ",#20
+          "lusearch_large_t2":      " Harness lusearch -size large -n 5 -t 2 -c MyCallback ",#5
+          "lusearch_large_t4":      " Harness lusearch -size large -n 5 -t 4  -c MyCallback",#5
+          "lusearch_large_t6":      " Harness lusearch -size large -n 5 -t 6 -c MyCallback ",#5
+          "lusearch_large_t8":      " Harness lusearch -size large -n 5 -t 8 -c MyCallback ",#5
+          "lusearch_large":         " Harness lusearch -size large -n 5 -c MyCallback ",#5
+          "lusearch_huge_t2":       " Harness lusearch -size huge -n 5 -t 2 -c MyCallback ",#5
+          "lusearch_huge_t4":       " Harness lusearch -size huge -n 5 -t 4 -c MyCallback ",#5
+          "lusearch_huge_t6":       " Harness lusearch -size huge -n 5 -t 6 -c MyCallback ",#5
+          "lusearch_huge_t8":       " Harness lusearch -size huge -n 5 -t 8 -c MyCallback ",#5
+          "lusearch_huge":          " Harness lusearch -size huge -n 5 -c MyCallback ",#5
+          "lusearch_small":         " Harness lusearch -size small -n 50  -c MyCallback",#50
+          "spring_small_t2":        " Harness spring -size small -n 50 -c MyCallback",#50
+          "spring_def_t2":          " Harness spring -size default -n 20 -t 2 -c MyCallback",#20
+          "spring_large_t2":        " Harness spring -size large -n 5 -t 2 -c MyCallback",#5
+          ##"spring_large":           " Harness spring -size large -n 5 -c MyCallback",#5
+          "tomcat_small_t8":        " Harness tomcat -size small -n 50 -c MyCallback ",#50
+          "tomcat_def_t2":          " Harness tomcat -size default -n 20 -t 2 -c MyCallback ",#20
+          "tomcat_def_t4":          " Harness tomcat -size default -n 20 -t 4 -c MyCallback ",#20
+          "tomcat_def_t6":          " Harness tomcat -size default -n 20 -t 6 -c MyCallback ",#20
+          "tomcat_def_t8":          " Harness tomcat -size default -n 20 -t 8 -c MyCallback ",#20
+          "tomcat_def":             " Harness tomcat -size default -n 20 -c MyCallback ",#20
+          "tomcat_large_t2":        " Harness tomcat -size large -n 5 -t 2  -c MyCallback",#5
+          "tomcat_large_t4":        " Harness tomcat -size large -n 5 -t 4 -c MyCallback ",#5
+          "tomcat_large_t6":        " Harness tomcat -size large -n 5 -t 6 -c MyCallback ",#5
+          "tomcat_large_t8":        " Harness tomcat -size large -n 5 -t 8 -c MyCallback ",#5
+          "tomcat_large":           " Harness tomcat -size large -n 5 -c MyCallback ",#5
+          "kafka_def":              " Harness kafka -size default -n 20 -c MyCallback ",#20
+          "kafka_small":            " Harness kafka -size small -n 50 -c MyCallback ",#50
+          "h2_large_t2":            " Harness h2 -size large -n 5 -t 2 -c MyCallback ",#5
+          "h2_large":               " Harness h2 -size large -n 5  -c MyCallback",#5
 }
 
 #Specify bms
 BM_Hazelcast = {
-      #"hazelcast_1500":             " org.example.StreamingRound2 1500000",
-      "hazelcast_800":             	" org.example.StreamingRound2 800000",
+      "hazelcast_400":              " org.example.StreamingRound2 400000",
+      "hazelcast_250":             	" org.example.StreamingRound2 250000",
       "hazelcast_100":             	" org.example.StreamingRound2 100000",
-      #"hazelcast_20":             	" org.example.StreamingRound2 20000",
+      "hazelcast_20":             	" org.example.StreamingRound2 20000",
       }
 #BM_specjbb2015 = {
       #"specjbb15":             	" -m COMPOSITE -ikv -p "
@@ -144,95 +173,69 @@ BM_Hazelcast = {
       #"specjbb15_25":             	" -m COMPOSITE",#IR=5250
 #      }
 BM_specjbb2015 = {
-      "specjbb15_100":             	" -m COMPOSITE -p ../spec/config/specjbb2015100.props",
-      #"specjbb15_75":             	" -m COMPOSITE -p ../spec/config/specjbb201575.props",
-      #"specjbb15_50":             	" -m COMPOSITE -p ../spec/config/specjbb201550.props",
-      #"specjbb15_25":             	" -m COMPOSITE -p ../spec/config/specjbb201525.props ",
+      "specjbb15_100":             	" -m COMPOSITE -p ../spec/config/specjbb2015100.props -ikv",
+      "specjbb15_75":             	" -m COMPOSITE -p ../spec/config/specjbb201575.props -ikv",
+      "specjbb15_50":             	" -m COMPOSITE -p ../spec/config/specjbb201550.props -ikv",
+      #"specjbb15_25":             	" -m COMPOSITE -p ../spec/config/specjbb201525.props -ikv",
       #"specjbb15_100":             	" -m COMPOSITE -p ../spec/config/specjbb2015.props",
       #"specjbb15_75":             	" -m COMPOSITE -p ../spec/config/specjbb2015.props",
       #"specjbb15_50":             	" -m COMPOSITE -p ../spec/config/specjbb2015.props",
       #"specjbb15_25":             	" -m COMPOSITE -p ../spec/config/specjbb2015.props ",
       }
-#BM_specjbb2015_j20_olof = {
-      #"specjbb15_100":             	" -m COMPOSITE",
-      #"specjbb15_75":             	" -m COMPOSITE",
-      #"specjbb15_50":             	" -m COMPOSITE",
-      #"specjbb15_25":             	" -m COMPOSITE",
-      #}
 BM_Renaissance = {
-      #"als":             	"als --plugin ",#apache-spark
-      #"chi-square":      	"chi-square --plugin ",
-      #"dec-tree":               "dec-tree --plugin ",
-      #"gauss-mix":              "gauss-mix --plugin ",
-      #"log-regression":         "log-regression --plugin ",
-      #"movie-lens":             "movie-lens --plugin ",
-      #"naive-bayes":            "naive-bayes --plugin ",
-      #"page-rank":              "page-rank --plugin ",
-      #"akka-uct":               "akka-uct --plugin ",#concurrency
-      #"fj-kmeans":              "fj-kmeans --plugin ",
-      #"reactors":               "reactors --plugin ",
-      #"db-shootout":            "db-shootout --plugin ",#database java version <= 11
-      #"neo4j-analytics":        "neo4j-analytics --plugin ", #java version <=15 supported only
-      #"future-genetic":         "future-genetic --plugin ",#functional
-      #"mnemonics":              "mnemonics --plugin ",
-      #"par-mnemonics":          "par-mnemonics --plugin ",
-      #"rx-scrabble":            "rx-scrabble --plugin ",
-      #"scrabble":               "scrabble --plugin ",
-      #"dotty":                  "dotty --plugin ",#scala
-      #"philosophers":           "philosophers --plugin ",
-      #"scala-doku":             "scala-doku --plugin ",
-      #"scala-kmeans":           "scala-kmeans --plugin ",
-      #"scala-stm-bench7":       "scala-stm-bench7 --plugin ",
-      #"finagle-chirper":        "finagle-chirper --plugin ",#web
-      #"finagle-http":           "finagle-http --plugin ",
       "finagle-chirper":        "finagle-chirper ",#web
       "finagle-http":           "finagle-http",
 }
-#The maximum heap size for each application is set to 3X of its respective minimum heap size
+#In this table, we have 1x heap size. 
+#It is the first heap size which allows an application to run without 
+#allocation stalls (+ 1x*0.2 because there is fluctuation)
 HEAP_SIZES = {
-        "tomcat_small": "50m",#40 was 
-        "tomcat_def": "60m",#50 for 8 threads
-        "tomcat_large": "100m",#1200
-        "kafka_large": "400m",#1200
-        "kafka_def": "300m",#1200
-        "kafka_small": "200m",#1200
-        "hazelcast_100": "1400m",#1200
-        "hazelcast_20": "1200m",#1200
-        "hazelcast_800": "1800m",#1200
-        "hazelcast_1500": "2400m",#1200
-        "specjbb15": "16000m",#16000
-        "h2_huge_t4": "3500m",#16000
-        "h2_large_t4": "1800m",#16000
-        "als":             	"1455m",#apache-spark485min
-        "chi-square":      	"1455m",#485min
-        "dec-tree":               "1455m",#485min
-        "gauss-mix":              "1455m",#485min
-        "log-regression":         "1455m",#485min
-        "movie-lens":             "1455m",#485min
-        "naive-bayes":            "3825m",#1275min(1600m1)
-        "page-rank":              "1875m",#625min(835m1)
-        "akka-uct":               "705m",#concurrency235min
-        "fj-kmeans":              "285m",#95min(150m1)
-        "reactors":               "1500m",#500 min(900m1)
-        "future-genetic":         "30m",#functional 10min
-        "mnemonics":              "180m",#60min
-        "par-mnemonics":          "180m",#60min
-        "scrabble":               "330m",#110min
-        "dotty":                  "180m",#scala 60min
-        "philosophers":           "30m",#10min
-        "scala-doku":             "105m",#35min
-        "scala-kmeans":           "105m",#35min
-        "scala-stm-bench7":       "930m",#310min
-        "finagle-chirper":        "200m",#web 60m min
-        "finagle-http":           "140m",#35min
-        "avrora_large": "25m",#15min-45
-        "fop_default": "55m",#45min-135
-        "jython_large": "55m",#45min-135
-        "luindex_default": "17m",#7min-21
-        "lusearch_large": "17m", #7min-40
-        "pmd_large": "70m",#150(3x)
-        "sunflow_large": "30m",#60(3x)
-        "xalan_large": "20m",#35(3x)
+        "h2_large_t2":      "5000m", #"5000m",
+        "h2_large":         "7250m",#"8000m",
+        "tomcat_small_t8":  "165m", 
+        "tomcat_def_t2":    "175m",
+        "tomcat_def_t4":    "175m",
+        "tomcat_def_t6":    "175m",
+        "tomcat_def_t8":    "175m",
+        "tomcat_def":       "175m",
+        "tomcat_large_t2":  "175m",
+        "tomcat_large_t4":  "175m",
+        "tomcat_large_t6":  "175m",
+        "tomcat_large_t8":  "175m",
+        "tomcat_large":     "260m",
+        "kafka_def":        "600m", #"830m",
+        "kafka_small":      "230m", #"290m",
+        "finagle-chirper":  "2400m",
+        "finagle-http":     "620m",
+        "hazelcast_100":    "2000m",
+        "hazelcast_20":     "2100m",
+        "hazelcast_250":    "2900m",
+        "hazelcast_400":    "3500m",
+        "specjbb15_50":     "16000m", #"86000m",
+        "specjbb15_75":     "23000m", #"80000m",
+        "specjbb15_100":    "23000m", #"72000m",
+        "lusearch_def_t2":  "240m",
+        "lusearch_def_t4":  "350m",
+        "lusearch_def_t6":  "700m",
+        "lusearch_def_t8":  "860m",
+        "lusearch_def":     "3500m",
+        "lusearch_large_t2":"360m",
+        "lusearch_large_t4":"430m",
+        "lusearch_large_t6":"620m",
+        "lusearch_large_t8":"1300m",
+        "lusearch_large":   "3200m",
+        "lusearch_small":   "150m", #"175m",
+        "lusearch_huge_t2": "360m",
+        "lusearch_huge_t4": "360m",
+        "lusearch_huge_t6": "360m",
+        "lusearch_huge_t8": "430m",
+        "lusearch_huge":    "2060m",
+        "jme_def":          "86m",
+        "jme_small":        "86m",
+        "jme_large":        "100m",
+        "spring_small_t2":  "250m",
+        "spring_large_t2":  "2900m",
+        "spring_def_t2":    "520m",
 }
 
 def get_next_result_name(path):
@@ -270,13 +273,12 @@ def heap_size_array(BM_tag, HEAP_RUNS):
         #print (HS_conf)
         if HS_tag in BM_tag:
             start_HS = int(''.join(filter(str.isdigit, HS_conf)))
-    if "hazelcast" not in BM_tag:
-        space = int(start_HS * 0.5)
-    else:
-        space = 100
+    space = int(start_HS * 0.5)
     tag = ""
     for i in range (0, HEAP_RUNS):
-        if "spec" not in BM_tag:
+        conf = param_max + str(start_HS + space*i) + start_Value + param_min + str(start_HS+ space*i) + start_Value
+        tag = str(1 + i*0.5)
+        '''if "spec" not in BM_tag:
             conf = param_max + str(start_HS + space*i) + start_Value + param_min + str(start_HS+ space*i) + start_Value
             print(conf)
             if "hazelcast" not in BM_tag:
@@ -297,29 +299,46 @@ def heap_size_array(BM_tag, HEAP_RUNS):
             if i >=3:
                 space = int(start_HS)
                 tag = str(1.0 + i)
-            conf = param_max + str(start_HS + space*i) + start_Value
+            conf = param_max + str(start_HS + space*i) + start_Value'''
         HS[tag] = conf
     return HS
 
-#TODO: add GROUP_TAG into the path when run for features collecting.
-def execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA, JAVA_LOG, Callback, CLASSPATH, COMMAND, RES_FOLDER):
-    #print("Benchmarking " + BM_tag)
+def pipe_fopen(command, background=True):
+
+        p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+
+        def background_command_waiter(command, p):
+            p.wait()
+            #print(p.returncode)
+            #if p.returncode != -9:
+            #    warnings.warn("Command \"{0}\" exited with status {1}".format(
+            #        command, p.returncode))
+            #    _thread.interrupt_main()
+
+        if background:
+                thread = threading.Thread(target=background_command_waiter,args=(command, p))
+                # exits abnormally if main thread is terminated .
+                thread.daemon = True
+                thread.start()
+        else:
+                background_command_waiter(command, p)
+        return p
+
+def execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, HW_tag, HW, GC, JAVA_tag, JAVA, JAVA_LOG, Callback, CLASSPATH, COMMAND, RES_FOLDER):
     for (GC_tag, GC_conf) in GC.items():
         HS = heap_size_array(BM_tag, HEAP_RUNS)
         for (HS_tag, HS_conf) in HS.items():
             for i in range(0, PASSES):
-                #start = timer()
-                result_path = os.path.join(os.getcwd(), RES_FOLDER, BM_tag, JAVA_tag + GC_tag + HS_tag)
+                result_path = os.path.join(os.getcwd(), RES_FOLDER, BM_tag, JAVA_tag + GC_tag + HS_tag + "_" + HW_tag)
                 os.system("sudo mkdir -p " + result_path)
                 os.system("sudo chmod 777 " + result_path)
-                #os.system("echo "  + BM_tag + " " + JAVA_tag + GC_tag + HS_tag + " >> output.txt")
-                binary_hot = " ".join([COMMAND, JAVA, JAVA_LOG, HS_conf, GC_conf, CLASSPATH, BM_conf, Callback])
+                cmd = "vmstat 1 >> output.txt"
+                vmstat = pipe_fopen(cmd)
+                binary_hot = " ".join([HW, COMMAND, JAVA, JAVA_LOG, HS_conf, GC_conf, CLASSPATH, BM_conf, Callback])
                 print(binary_hot)
                 collect_data(binary_hot, result_path)
-                #os.system("echo 777 >> output.txt")
+                vmstat.kill()
                 os.system("./cache-flush")
-                #end = timer()
-                #minutes = round((end - start) / 60.0, 3)
                 if "hazelcast" in BM_tag:
                     f1_path = os.path.join(result_path, get_current_result_name(result_path))
                     f2_path = os.path.join(os.getcwd(), "histo-latency/0")
@@ -329,13 +348,15 @@ def execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAV
                     # appending the contents of the second file to the first file
                     f1.write(f2.read())
                     os.system("sudo rm -rf " + f2_path)
-            os.system("mkdir  ../benchmark_run/results_pids/" + BM_tag +"/")
-            os.system("mkdir  ../benchmark_run/results_pids/" + BM_tag +"/"+ JAVA_tag + GC_tag + HS_tag + "/")
-            os.system("mv ../pytop/demofile3.txt ../benchmark_run/results_pids/" + BM_tag +"/"+ JAVA_tag + GC_tag + HS_tag + "/GC_pids.txt")
+                CPUUtil.parse_CPU_Util(result_path, get_current_result_name(result_path))
+                os.system("rm -rf output.txt")
+            #os.system("mkdir  ../benchmark_run/results_pids/" + BM_tag +"/")
+            #os.system("mkdir  ../benchmark_run/results_pids/" + BM_tag +"/"+ JAVA_tag + GC_tag + HS_tag + "/")
+            #os.system("mv ../pytop/demofile3.txt ../benchmark_run/results_pids/" + BM_tag +"/"+ JAVA_tag + GC_tag + HS_tag + "/GC_pids.txt")
             #os.system("mv ../benchmark_run/GC_pids" + GC_pid_tag + ".txt ../benchmark_run/results_pids/" + BM_tag + "/" + JAVA_tag + GC_tag + HS_tag + "/GC_pids.txt")
 
 def main(argv):
-    PASSES=6
+    PASSES=10
     HEAP_RUNS=1
     try:
         opts, args = getopt.getopt(argv,"hrs:",["runs=","sizes="])
@@ -365,14 +386,13 @@ def main(argv):
         print(BM)
         COMMAND = ""
         JAVA_LOG_local = ""
-        if "_perf" in BM:
-            PASSES=1
-            COMMAND = "perf stat sudo "
-        else:
-            JAVA_LOG_local = JAVA_LOG
-            COMMAND = "sudo ./../rapl-tools/AppPowerMeter "
-        RES_FOLDER = "../benchmark_run/results_pids"
-        #RES_FOLDER = "../benchmark_run/test"
+        JAVA_LOG_local = JAVA_LOG
+        #COMMAND = "sudo ./../rapl-tools/AppPowerMeter "
+        COMMAND = "sudo  "
+
+        #RES_FOLDER = "../benchmark_run/results_test"
+        RES_FOLDER = "../benchmark_run/results"
+
         if "_static" not in BM:
             if BM ==  "HazelCast_j20_olof":
                 GC_pid_tag = "_java20_olof"
@@ -410,7 +430,6 @@ def main(argv):
                     execute_bm(PASSES, HEAP_RUNS, BM_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA20_OLOF, JAVA_LOG_local, CONFIG_SPEC, " -jar " + CLASSPATH_SPEC, COMMAND, RES_FOLDER)
         else:#static
             BM_suffix = "_s"
-            GC_pid_tag = ""
             JAVA_tag = ""
             JAVA_local = ""
             if "_j20_olof" in BM:
@@ -438,7 +457,7 @@ def main(argv):
                     PASSES = 1
                     JAVA_LOG_local = ""
                 else: 
-                    PASSES=1#6
+                    PASSES=10#there
                     JAVA_LOG_local = JAVA_LOG
             else:
                 PASSES=1
@@ -451,26 +470,122 @@ def main(argv):
             
             #print(JAVA_local)
             if "specjbb2015" in BM:
+                COMMAND = "sudo ./../rapl-tools/AppPowerMeter "
                 for (BM_tag, BM_conf) in BM_specjbb2015.items():
                     for (GC_thread_tag, GC_thread_conf) in GC_threads.items():
-                        os.system("rm -rf ../pytop/demofile3.txt")
-                        execute_bm(PASSES, HEAP_RUNS, BM_tag + BM_suffix + GC_thread_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, CONFIG_SPEC, " -jar " + CLASSPATH_SPEC, COMMAND, RES_FOLDER)
+                        GC_thread_full_tag = "_T" + str(GC_thread_tag)
+                        for (HW_conf_tag, HW) in HW_conf.items():
+                            if "8P" in HW_conf_tag:
+                                JAVA_local = JAVA20_GEN
+                                JAVA_tag = "G"
+                                os.system("rm -rf output.txt")
+                                execute_bm(PASSES, HEAP_RUNS, BM_tag + BM_suffix + GC_thread_full_tag, BM_conf, HW_conf_tag, HW, GC, JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, CONFIG_SPEC, " -jar " + CLASSPATH_SPEC, COMMAND, RES_FOLDER)
+                            
+                                JAVA_local = JAVA20_RESTRICTED
+                                JAVA_tag = "G"
+                                os.system("rm -rf output.txt")
+                                execute_bm(PASSES, HEAP_RUNS, BM_tag + BM_suffix + GC_thread_full_tag, BM_conf, "4P4P", HW, GC, JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, CONFIG_SPEC, " -jar " + CLASSPATH_SPEC, COMMAND, RES_FOLDER)
+
+                            else:
+                                JAVA_local = JAVA20_GEN
+                                JAVA_tag = "G"
+                                os.system("rm -rf output.txt")
+                                execute_bm(PASSES, HEAP_RUNS, BM_tag + BM_suffix + GC_thread_full_tag, BM_conf, HW_conf_tag, HW, GC, JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, CONFIG_SPEC, " -jar " + CLASSPATH_SPEC, COMMAND, RES_FOLDER)
+                                
+
+                                JAVA_local = JAVA20_YinYan
+                                JAVA_tag = "YY"
+                                os.system("rm -rf output.txt")
+                                execute_bm(PASSES, HEAP_RUNS, BM_tag + BM_suffix + GC_thread_full_tag, BM_conf, HW_conf_tag, HW, GC, JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, CONFIG_SPEC, " -jar " + CLASSPATH_SPEC, COMMAND, RES_FOLDER)
+            
+
             elif "Renaissance" in BM:
+                COMMAND = "sudo ./../rapl-tools/AppPowerMeter "
                 for (BM_tag, BM_conf) in BM_Renaissance.items():
                     for (GC_thread_tag, GC_thread_conf) in GC_threads.items():
-                        os.system("rm -rf ../pytop/demofile3.txt")
-                        execute_bm(PASSES, HEAP_RUNS, BM_tag + BM_suffix + GC_thread_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, "", " -jar " + CLASSPATH_RN, COMMAND, RES_FOLDER)
+                        GC_thread_full_tag = "_T" + str(GC_thread_tag)
+                        for (HW_conf_tag, HW) in HW_conf.items():
+                            if "8P" in HW_conf_tag:
+                                JAVA_local = JAVA20_GEN
+                                JAVA_tag = "G"
+                                os.system("rm -rf output.txt")
+                                execute_bm(PASSES, HEAP_RUNS,  BM_tag + BM_suffix + GC_thread_full_tag, BM_conf, HW_conf_tag, HW, GC,JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, "", " -jar " + CLASSPATH_RN, COMMAND, RES_FOLDER)
+            
+                                JAVA_local = JAVA20_RESTRICTED
+                                JAVA_tag = "G"
+                                os.system("rm -rf output.txt")
+                                execute_bm(PASSES, HEAP_RUNS,  BM_tag + BM_suffix + GC_thread_full_tag, BM_conf, "4P4P", HW, GC,JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, "", " -jar " + CLASSPATH_RN, COMMAND, RES_FOLDER)
+                            
+                            else:
+                                JAVA_local = JAVA20_GEN
+                                JAVA_tag = "G"
+                                os.system("rm -rf output.txt")
+                                execute_bm(PASSES, HEAP_RUNS,  BM_tag + BM_suffix + GC_thread_full_tag, BM_conf, HW_conf_tag, HW, GC,JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, "", " -jar " + CLASSPATH_RN, COMMAND, RES_FOLDER)
+                                
+
+                                JAVA_local = JAVA20_YinYan
+                                JAVA_tag = "YY"
+                                os.system("rm -rf output.txt")
+                                execute_bm(PASSES, HEAP_RUNS,  BM_tag + BM_suffix + GC_thread_full_tag, BM_conf, HW_conf_tag, HW, GC,JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, "", " -jar " + CLASSPATH_RN, COMMAND, RES_FOLDER)
+
             elif "HazelCast" in BM:
+                COMMAND = "sudo ./../rapl-tools/AppPowerMeter "
                 for (BM_tag, BM_conf) in BM_Hazelcast.items():
                     for (GC_thread_tag, GC_thread_conf) in GC_threads.items():
-                        os.system("rm -rf ../pytop/demofile3.txt")
-                        execute_bm(PASSES, HEAP_RUNS, BM_tag + BM_suffix + GC_thread_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST, COMMAND, RES_FOLDER)
+                        GC_thread_full_tag = "_T" + str(GC_thread_tag)
+                        for (HW_conf_tag, HW) in HW_conf.items():
+                            if "8P" in HW_conf_tag:
+                                JAVA_local = JAVA20_GEN
+                                JAVA_tag = "G"
+                                os.system("rm -rf output.txt")
+                                execute_bm(PASSES, HEAP_RUNS, BM_tag + GC_thread_full_tag, BM_conf, HW_conf_tag, HW, GC, JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST, COMMAND, RES_FOLDER)
+                            
+                                JAVA_local = JAVA20_RESTRICTED
+                                JAVA_tag = "G"
+                                os.system("rm -rf output.txt")
+                                execute_bm(PASSES, HEAP_RUNS, BM_tag + GC_thread_full_tag, BM_conf, "4P4P", HW, GC, JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST, COMMAND, RES_FOLDER)
+
+                            else:
+                                JAVA_local = JAVA20_GEN
+                                JAVA_tag = "G"
+                                os.system("rm -rf output.txt")
+                                execute_bm(PASSES, HEAP_RUNS, BM_tag + GC_thread_full_tag, BM_conf, HW_conf_tag, HW, GC, JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST, COMMAND, RES_FOLDER)
+                                
+
+                                JAVA_local = JAVA20_YinYan
+                                JAVA_tag = "YY"
+                                os.system("rm -rf output.txt")
+                                execute_bm(PASSES, HEAP_RUNS, BM_tag + GC_thread_full_tag, BM_conf, HW_conf_tag, HW, GC, JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, "", " " + FLAGS_HAZELCAST + " -cp " + CLASSPATH_HAZELCAST, COMMAND, RES_FOLDER)
 
             elif "DaCapo" in BM:
+                COMMAND = "sudo "
                 for (BM_tag, BM_conf) in BM_DaCapo.items():
                     for (GC_thread_tag, GC_thread_conf) in GC_threads.items():
-                        os.system("rm -rf ../pytop/demofile3.txt")
-                        execute_bm(PASSES, HEAP_RUNS, BM_tag + BM_suffix + GC_thread_tag, BM_conf, GC, GC_pid_tag, JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, "", " -jar " + CLASSPATH_DACAPO, COMMAND, RES_FOLDER)
+                        GC_thread_full_tag = "_T" + str(GC_thread_tag)
+                        for (HW_conf_tag, HW) in HW_conf.items():
+                            if "8P" in HW_conf_tag:
+                                JAVA_local = JAVA20_GEN
+                                JAVA_tag = "G"
+                                os.system("rm -rf output.txt")
+                                execute_bm(PASSES, HEAP_RUNS, BM_tag + BM_suffix + GC_thread_full_tag, BM_conf, HW_conf_tag, HW, GC, JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, "", " -cp " + CLASSPATH_DACAPO, COMMAND, RES_FOLDER)
+
+                                JAVA_local = JAVA20_RESTRICTED
+                                JAVA_tag = "G"
+                                os.system("rm -rf output.txt")
+                                execute_bm(PASSES, HEAP_RUNS, BM_tag + BM_suffix + GC_thread_full_tag, BM_conf, "4P4P", HW, GC, JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, "", " -cp " + CLASSPATH_DACAPO, COMMAND, RES_FOLDER)
+                            
+                            else:
+                                JAVA_local = JAVA20_GEN
+                                JAVA_tag = "G"
+                                os.system("rm -rf output.txt")
+                                execute_bm(PASSES, HEAP_RUNS, BM_tag + BM_suffix + GC_thread_full_tag, BM_conf, HW_conf_tag, HW, GC, JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, "", " -cp " + CLASSPATH_DACAPO, COMMAND, RES_FOLDER)
+                                
+
+                                JAVA_local = JAVA20_YinYan
+                                JAVA_tag = "YY"
+                                os.system("rm -rf output.txt")
+                                execute_bm(PASSES, HEAP_RUNS, BM_tag + BM_suffix + GC_thread_full_tag, BM_conf, HW_conf_tag, HW, GC, JAVA_tag, JAVA_local, JAVA_LOG_local + " -XX:-UseDynamicNumberOfGCThreads " + GC_thread_conf, "", " -cp " + CLASSPATH_DACAPO, COMMAND, RES_FOLDER)
+
 
 if __name__ == "__main__": main(sys.argv[1:])
 

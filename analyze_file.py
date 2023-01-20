@@ -3,7 +3,7 @@ import sys
 import os
 import re
 from functools import reduce
-
+import numpy as np
 GC_cycles_convert = {
                     "zxing": 25,
                     "tradesoap": 15,
@@ -59,6 +59,12 @@ def avg(l):
 
 def sum(l):
     return reduce(lambda a, b: a + b, l)
+
+def reject_outliers(data, m = 2.):
+        d = np.abs(data - np.median(data))
+        mdev = np.median(d)
+        s = d/mdev if mdev else 0.
+        return data[s<m]
 
 def analyze_file(input_dir, output_dir, file_num):
     energy_list = list()
@@ -133,7 +139,7 @@ def analyze_file(input_dir, output_dir, file_num):
             with open(os.path.join("bug_report.txt"), "a") as writer:
                 writer.write("Check numbers in (did not convert) : " +  input_dir +" " + file_num + " --> " + last_cycle + '\n')
 
-    with open(os.path.join(input_dir, "stalls", file_num + ".txt"), 'r') as reader:
+    with open(os.path.join(input_dir, "cpu_utilization", file_num + ".txt"), 'r') as reader:
         for line in reader.readlines():
             line =line.replace(",", ".")
             if line.strip() and line  not in ['\n', '\r\n']:
@@ -148,16 +154,14 @@ def analyze_file(input_dir, output_dir, file_num):
                             writer.write("Check numbers in (did not convert) : " +  input_dir +" " + file_num + " --> " + subline + '\n')
 
 
-    with open(os.path.join(output_dir, "stalls.txt"), "a") as writer:
+    with open(os.path.join(output_dir, "cpu_utilization.txt"), "a") as writer:
         if (len(stalls_time_list) > 0):
-            writer.write(str(sum(stalls_time_list)) + '\n')
-        else:
-            writer.write("0" + '\n')
+            writer.write(str(avg(stalls_time_list)) + '\n')
+        #else:
+        #    writer.write("0" + '\n')
 
     with open(os.path.join(input_dir, "latency", file_num + ".txt"), 'r') as reader:
         for line in reader.readlines():
-            if "ms" not in line:
-                continue
             line =line.replace(",", ".")
             if line.strip() and line  not in ['\n', '\r\n']:
                 line_array = separate_number_chars(line)
@@ -172,7 +176,11 @@ def analyze_file(input_dir, output_dir, file_num):
 
     with open(os.path.join(output_dir, "latency.txt"), "a") as writer:
         if (len(pause_time_list) > 0):
-            writer.write(str(avg(pause_time_list[2:])) + '\n')
+            arr = np.array(pause_time_list[int(len(pause_time_list)*0.2):])
+            #print(str(int(len(pause_time_list))))
+            #print(str(avg(reject_outliers(arr))))
+            #print(str(avg(pause_time_list)))
+            writer.write(str(avg(reject_outliers(arr))) + '\n')
 
 def main():
     if len(sys.argv) == 4:
