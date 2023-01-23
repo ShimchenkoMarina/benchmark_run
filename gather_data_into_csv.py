@@ -19,6 +19,15 @@ STR_STD_MEAN = "Relative Standard Deviation"
 STR_STD = "Standard Deviation"
 STR_PERF = "Performance"
 
+def reject_outliers(data, m = 2.):
+    d = np.abs(data - np.median(data))
+    mdev = np.median(d)
+    if mdev:
+        s = d/mdev
+    else:
+        return data
+    return data[s<=m]
+
 def bootstrapped_ci(df_input):
     columns = [STR_CI_LOWER, STR_CI_UPPER]
     df_result_sep = pd.DataFrame(columns=columns)
@@ -47,6 +56,8 @@ def read_data(sample, data, configuration_name, benchmark_name):
         if sample in file:
             try:
                 curr_df = pd.read_csv(file, header=None)
+                curr_df = reject_outliers(curr_df)
+                curr_df = curr_df.dropna().reset_index(drop=True)
             except pd.errors.EmptyDataError:
                 curr_df = pd.DataFrame()
             if not curr_df.empty:
@@ -202,7 +213,6 @@ def main():
             elif baseline_name == "" and "j20Z" in conf_runs and "_" not in conf_runs:
                 baseline_name = conf_runs
             append_value(dict_for_benchmark, conf_runs, allconf_runs[conf_runs])
-
         if baseline_name != "":
             #measurement = ["energy_pack", "perf", "max_latency", "mean_latency", "watts_pack", "energy_dram", "energy_cpu", "GC_cycles", "energy_pack_dram"]
             measurement = ["total_energy", "average_power", "perf", "memory", "max_latency", "gc", "soft_max_capacity"]
@@ -226,5 +236,6 @@ def main():
                 fields.clear()
                 order.clear()
                 fields.append('BMs')
+                
 if __name__ == "__main__":
     main()

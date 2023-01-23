@@ -3,6 +3,7 @@ import sys
 import os
 import re
 from functools import reduce
+import numpy as np
 def do_nothing():
     return
 def separate_number_chars(s):
@@ -12,6 +13,15 @@ def separate_number_chars(s):
 
 def avg(l):
     return reduce(lambda a, b: a + b, l) / len(l)
+
+def reject_outliers(data, m = 2.):
+    d = np.abs(data - np.median(data))
+    mdev = np.median(d)
+    if mdev:
+        s = d/mdev
+    else:
+        return data
+    return data[s<=m]
 
 def sum(l):
     return reduce(lambda a, b: a + b, l)
@@ -38,6 +48,7 @@ def analyze_file(input_dir, output_dir, file_num):
         if (len(energy_list) > 0):
             writer.write(str(avg(energy_list)) + '\n')
 
+
     #for i in range(1, int(file_num)):
     with open(os.path.join(input_dir, "average_power", str(file_num) + ".txt"), 'r') as reader:
             for line in reader.readlines():
@@ -63,8 +74,11 @@ def analyze_file(input_dir, output_dir, file_num):
                     with open(os.path.join("bug_report.txt"), "a") as writer:
                         writer.write("Check numbers in (did not convert) : " +  input_dir + file_num + '\n')
     with open(os.path.join(output_dir, "perf.txt"), "a+") as writer:
-        if (len(perf_list) > 0):
-            writer.write(str(avg(perf_list)) + '\n')
+        if (len(perf_list) != 0):
+            if (len(perf_list) == 1):
+                writer.write(str(avg(perf_list)) + '\n')
+            if (len(perf_list) > 1):
+                writer.write(str(avg(reject_outliers(np.array(perf_list)))) + '\n')
 
     last_cycle = ''
     run = 1
@@ -81,6 +95,7 @@ def analyze_file(input_dir, output_dir, file_num):
     with open(os.path.join(output_dir, "memory.txt"), "a+") as writer:
         if (len(memory_list) > 0):
             writer.write(str(avg(memory_list)) + '\n')
+
     soft_memory_list = []
     with open(os.path.join(input_dir, "soft_max_capacity", file_num + ".txt"), 'r') as reader:
         for line in reader.readlines():
@@ -109,6 +124,8 @@ def analyze_file(input_dir, output_dir, file_num):
         if (len(gc_list) > 0):
             writer.write(str(gc_list[-1]) + '\n')
 
+    
+    
     with open(os.path.join(input_dir, "max_latency", file_num + ".txt"), 'r') as reader:
         for line in reader.readlines():
             line =line.replace(",", ".").strip()
@@ -118,10 +135,12 @@ def analyze_file(input_dir, output_dir, file_num):
             except:
                 pass
 
-
     with open(os.path.join(output_dir, "max_latency.txt"), "a") as writer:
-        if (len(pause_time_list) > 0):
-            writer.write(str(max(pause_time_list)) + '\n')
+        if (len(pause_time_list) != 0):
+            if (len(pause_time_list) == 1):
+                writer.write(str(pause_time_list) + '\n')
+            if (len(pause_time_list) > 1):
+                writer.write(str(avg(reject_outliers(np.array(pause_time_list)))) + '\n')
 
 def main():
     if len(sys.argv) == 4:
