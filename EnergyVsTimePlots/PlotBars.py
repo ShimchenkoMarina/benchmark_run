@@ -26,6 +26,27 @@ def prepare(bms, array1, array2, array3, labels, name_suffix, array1_label, arra
         #print(array2)
         #print(array3)
         plot(bms, array1, array2, array3, labels, suffix, array1_label, array2_label, array3_label)
+def plot_single_array(bms, array, cpu_util, label):
+    plt.rcParams["ps.useafm"] = True
+    rc('font', **{'family':'sans-serif', 'sans-serif':['FreeSans']})
+    plt.rcParams['pdf.fonttype'] = 42 #print(array)
+    width = 0.5  # the width of the bars
+    fig, ax = plt.subplots(1, 1,figsize= (10, 3))
+    array_above = []
+    array_below = []
+    for i in range(len(bms)):
+        array_below.append(array[i][2] - 1)
+
+    ax2 = ax.twinx() # Create another axes that shares the same x-axis as ax.
+    ax.bar(bms, array_below, width,  color="black", label="Slowdown")
+    ax2.plot(bms, cpu_util, color="red", label="CPU")
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    lines, labels = ax.get_legend_handles_labels()
+    ax.legend(lines + lines2, labels + labels2, loc="upper left", ncol=1, fontsize=7)
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+            rotation_mode="anchor")
+    fig.tight_layout()
+    plt.savefig("./pngs/" + "Oblivious.pdf", bbox_inches='tight',dpi=100)
 
 def plot(bms, array1, array2, array3, labels, suffix, array1_label, array2_label, array3_label):
     #print(array1)

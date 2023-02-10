@@ -19,6 +19,15 @@ STR_MEAN = "Mean"
 STR_STD_MEAN = "Relative Standard Deviation"
 STR_STD = "Standard Deviation"
 STR_PERF = "Performance"
+def reject_outliers(data, m = 2.):
+    print(data)
+    d = np.abs(data - np.median(data))
+    mdev = np.median(d)
+    if mdev:
+        s = d/mdev
+    else:
+        return data
+    return data[s<=m]
 
 def bootstrapped_ci(df_input):
     columns = [STR_CI_LOWER, STR_CI_UPPER]
@@ -41,11 +50,16 @@ def bootstrapped_ci(df_input):
     #print(df_result_sep[STR_CI_UPPER])
     df_result = pd.to_numeric(df_result["yerr"], errors="raise", downcast="float")
 def read_data(sample, data, configuration_name, benchmark_name):
+    print(sample)
+    print(benchmark_name)
+    print(configuration_name)
     df = pd.DataFrame(columns=[configuration_name])
     for file in data:
         if sample in file:
             try:
                 curr_df = pd.read_csv(file, header=None)
+                curr_df = reject_outliers(curr_df)
+                curr_df = curr_df.dropna().reset_index(drop=True)
             except pd.errors.EmptyDataError:
                 curr_df = pd.DataFrame()
             if not curr_df.empty:
@@ -185,7 +199,7 @@ def append_value(dict_obj, key, value):
         dict_obj[key] = value
 
 def main():
-    runs = glob.glob("./processed_results/test/*/*/*")
+    runs = glob.glob("./processed_results/*/*/*/*")
     benchmarks_conf = {}
     for run in runs:
         res_folder = run.split("/")[2]
@@ -233,7 +247,7 @@ def main():
     '''
     for (benchmark_name, allconf_runs) in benchmarks_conf.items():
         print(benchmark_name)
-        #if "spec" not in benchmark_name:
+        #if "tomcat_def_s" not in benchmark_name:
         #    continue
         #if "static" not in benchmark_name:
         #    continue
@@ -249,17 +263,17 @@ def main():
             if baseline_name == "" and "GZ1.0_8P" in conf_runs:
                 baseline_name = "GZ1.0_8P"
             append_value(dict_for_benchmark, conf_runs.split("/")[4], conf_runs)
-        print(dict_for_benchmark)
+        #print(dict_for_benchmark)
         print("baseline", baseline_name)
         
         if baseline_name != "":
             #measurement = ["energy_pack", "perf", "max_latency", "mean_latency", "watts_pack", "energy_dram", "energy_cpu", "GC_cycles", "energy_pack_dram"]
             #measurement = ["energy", "power", "perf", "stalls", "GC_cycles", "max_latency"]
             #measurement = ["GC_cycles", "stalls"]
-            measurement = ["energy", "power", "perf", "latency", "cpu_utilization"]
+            #measurement = ["energy", "perf", "latency"]
             #measurement = ["energy"]
             #measurement = ["cpu_utilization", "allocation_rate_avg", "allocation_rate_max"]
-            #measurement = ["cpu_utilization"]
+            measurement = ["cpu_utilization"]
             for m in measurement:
                 print(m)
                 baseline = analyze_baseline(m, dict_for_benchmark[baseline_name], baseline_name, benchmark_name)

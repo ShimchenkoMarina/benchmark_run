@@ -89,7 +89,7 @@ def analyze_file(input_dir, output_dir, file_num):
             writer.write(str(avg(energy_list)) + '\n')
 
     #for i in range(1, int(file_num)):
-    with open(os.path.join(input_dir, "power", str(file_num) + ".txt"), 'r') as reader:
+    '''with open(os.path.join(input_dir, "power", str(file_num) + ".txt"), 'r') as reader:
             for line in reader.readlines():
                 line =line.replace(",", ".").strip()
                 try:
@@ -101,7 +101,7 @@ def analyze_file(input_dir, output_dir, file_num):
     with open(os.path.join(output_dir, "power.txt"), "a+") as writer:
         if (len(power_list) > 0):
             writer.write(str(avg(power_list)) + '\n')
-
+    '''
     #for i in range(1, int(file_num)):
     with open(os.path.join(input_dir, "perf", str(file_num) + ".txt"), 'r') as reader:
             for line in reader.readlines():
@@ -113,8 +113,10 @@ def analyze_file(input_dir, output_dir, file_num):
                     with open(os.path.join("bug_report.txt"), "a") as writer:
                         writer.write("Check numbers in (did not convert) : " +  input_dir + file_num + '\n')
     with open(os.path.join(output_dir, "perf.txt"), "a+") as writer:
-        if (len(perf_list) > 0):
+        if (len(perf_list) == 1):
             writer.write(str(avg(perf_list)) + '\n')
+        elif (len(perf_list) > 1):
+            writer.write(str(avg(reject_outliers(np.array(perf_list)))) + '\n')
 
     last_cycle = ''
     run = 1
@@ -173,14 +175,18 @@ def analyze_file(input_dir, output_dir, file_num):
                     except:
                         pass
 
-
+    #print(pause_time_list)
+    #print(np.std(pause_time_list))
+    #print(np.std(pause_time_list/np.mean(pause_time_list)))
+    #print(reject_outliers(np.array(pause_time_list)))
+    #print(np.std(reject_outliers(np.array(pause_time_list))))
+    #print(np.std(reject_outliers(np.array(pause_time_list)))/np.mean(reject_outliers(np.array(pause_time_list))))
     with open(os.path.join(output_dir, "latency.txt"), "a") as writer:
-        if (len(pause_time_list) > 0):
-            arr = np.array(pause_time_list[int(len(pause_time_list)*0.2):])
-            #print(str(int(len(pause_time_list))))
-            #print(str(avg(reject_outliers(arr))))
-            #print(str(avg(pause_time_list)))
-            writer.write(str(avg(reject_outliers(arr))) + '\n')
+        if (len(pause_time_list) > 1):
+            if np.std(reject_outliers(np.array(pause_time_list)))/np.mean(reject_outliers(np.array(pause_time_list))) < 0.2:
+                writer.write(str(avg(reject_outliers(np.array(pause_time_list)))) + '\n')
+        if (len(pause_time_list) == 1):
+            writer.write(str(avg(np.array(pause_time_list))) + "\n")
 
 def main():
     if len(sys.argv) == 4:

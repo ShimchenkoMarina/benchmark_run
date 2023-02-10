@@ -78,7 +78,7 @@ def print_as_is(data, y, x, name):
     return
 
 #this is the same metric printed for 4 different heap sizes
-def print_heatmap(data, y,x, name):
+def print_heatmap(data, y,x, name, num):
     plt.rcParams["ps.useafm"] = True
     rc('font', **{'family':'sans-serif', 'sans-serif':['FreeSans']})
     plt.rcParams['pdf.fonttype'] = 42 #print(array)
@@ -86,18 +86,18 @@ def print_heatmap(data, y,x, name):
     print(data)
     min_v = np.min(data)
     max_v = np.max(data)
-    if max_v <= 1:
+    '''if max_v <= 1:
         max_v = 1.01
     if min_v >= 1:
-        min_v = 0.99
-    #print(name)
+        min_v = 0.99'''
+    #print("name: ", name)
     #print("max is", max_v)
     #print("min is", min_v)
     #print("data is ", data)
     #print("len = " + str(len(x)))
     #NUM = int(len(x) / 3)
     #NUM = int(len(x))
-    NUM = 6
+    NUM = num
     fig, axs = plt.subplots(1, NUM, sharey=True, figsize=(len(x)/2,len(y)))
     divnorm=colors.TwoSlopeNorm(vcenter=1.0, vmax=max_v, vmin=min_v)
     for i in range(0, NUM):
@@ -121,8 +121,8 @@ def print_heatmap(data, y,x, name):
         #print(data)
         for j in range(start,1):
             for k in range(0,len(y)):
-                print(str(k) + " j = " + str(j) + " i ="  + str(i))
-                print("single data ", data[k:k + 1, (i*1 + j):(i*1 + j + 1)])
+                #print(str(k) + " j = " + str(j) + " i ="  + str(i))
+                #print("single data ", data[k:k + 1, (i*1 + j):(i*1 + j + 1)])
                 axs[i].text(j + 0.5, k + 0.5, data[k:k + 1, i*1 + j:i*1 + j + 1][0][0], ha="center", va="center", color="black")
         #axs[i].grid(color='grey', linestyle='-', linewidth=1)
         # Rotate the tick labels and set their alignment.
@@ -134,7 +134,8 @@ def print_heatmap(data, y,x, name):
     #sns.heatmap(data, annot=True,  linewidths=.1, vmin=0, vmax=10, cmap="Greens")
     #sns.heatmap(data, linewidths=.1, vmin=0, vmax=2, cmap="PiYG")
     # We want to show all ticks...
-    for ax,l in zip(axs,["1x", "1.5x", "2x", "1x_GConE", "1.5x_GConE", "2x_GConE"]):
+    #for ax,l in zip(axs,["1x", "1.5x", "2x", "1x_GConE", "1.5x_GConE", "2x_GConE"]):
+    for ax,l in zip(axs,["1x", "1.5x", "2x"]):
         ax.set_xticklabels([], rotation=45, ha="right")
         ax.set_xlabel(l, rotation=45)
     plt.colorbar(a1)
@@ -154,7 +155,7 @@ def get_order(data, bms, confs, name):
     if len(bms) > 1:
         with open("bridge_for_clustering.txt", 'r') as reader:
             for line in reader.readlines():
-                temp_line = ' '.join(line.split())
+                temp_line = ' '.join(line.split(","))
                 print(temp_line)
                 if "[" in temp_line and "]" in temp_line:
                     lst.append(temp_line.split("[")[1].split("]")[0].split(" "))
@@ -175,7 +176,13 @@ def get_order(data, bms, confs, name):
     ordered_data = []
     ordered_bms = []
     print("lst = ", lst)
-    if len(lst) > 1:
+    for i in range(len(bms)):
+        ordered_data.append([])
+        ordered_bms.append([])
+    for i, count in enumerate(lst):
+        ordered_data[i] = data[count]
+        ordered_bms[i] = bms[count]
+    '''if len(lst) > 1:
         for i in range(len(bms)):
             ordered_data.append([])
             ordered_bms.append([])
@@ -198,18 +205,21 @@ def get_order(data, bms, confs, name):
                         ordered_data[int(i) -1 + shift] = data[index]
                         ordered_bms[int(i) -1 + shift] = bms[index]
             count = count + 1
-        #print("data = ", data)
-        print_heatmap(data, bms, confs, name)
+    '''
+    print("data = ", len(data))
+    print(ordered_data)
+    print_heatmap(ordered_data, ordered_bms, confs, name, 3)
+    '''
     elif len(lst) == 1:
-        print("data", data)
+        #print("data", data)
         ordered_bms = bms
         #ordered_confs, ordered_data_0 = zip(*sorted(zip(confs, data[0])))
         #ordered_data = []
         #ordered_data.append(ordered_data_0)
         #print("ordered data", ordered_data)
         #print("ordered data", ordered_confs)
-        print_heatmap(data, bms, confs, name)
-
+        print_heatmap(data, bms, confs, name, 3)
+'''
 if __name__ == '__main__':
     order = get_order()
     data = sys.arg[1]

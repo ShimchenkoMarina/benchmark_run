@@ -7,7 +7,7 @@ from sklearn.datasets import load_iris
 from sklearn.cluster import AgglomerativeClustering
 
 
-def plot_dendrogram(num_cl, model, **kwargs):
+def plot_dendrogram(num_cl, model, bms, **kwargs):
     # Create linkage matrix and then plot the dendrogram
 
     # create the counts of samples under each node
@@ -26,19 +26,21 @@ def plot_dendrogram(num_cl, model, **kwargs):
     ).astype(float)
     # Plot the corresponding dendrogram
     fl = fcluster(linkage_matrix,num_cl, criterion='maxclust')
+    for i in fl: 
+        print(bms[i])
     with open("bridge_for_clustering.txt", 'w') as writer:
         writer.write(str(fl))
     dendrogram(linkage_matrix, **kwargs)
 
 
 def setup_dendrogram(data, bms, name):
-    print(data)
+    print(bms)
     # setting distance_threshold=0 ensures we compute the full tree.
     model = AgglomerativeClustering(distance_threshold=None, n_clusters=len(data), compute_distances=True)
     model = model.fit(data)
     plt.title("Hierarchical Clustering Dendrogram")
     # plot the top three levels of the dendrogram
-    plot_dendrogram(len(bms), model, truncate_mode="level", orientation="right", labels=list(bms), leaf_font_size=4)
+    plot_dendrogram(len(bms), model, bms, truncate_mode="level", orientation="right", labels=list(bms), leaf_font_size=4)
     plt.savefig("./pngs/" + name, bbox_inches='tight', dpi=200)
     plt.close()
 

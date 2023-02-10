@@ -1,6 +1,6 @@
 #!/bin/bash
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-declare -a arr=("test")
+declare -a arr=("results")
 for i in "${arr[@]}"
 do
 COMMIT=$i
